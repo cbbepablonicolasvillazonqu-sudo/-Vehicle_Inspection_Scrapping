@@ -8,7 +8,7 @@
  *    caché primero con actualización en segundo plano.
  *  - Nunca intercepta /livewire (peticiones dinámicas y subidas).
  */
-const CACHE = 'forte-towing-v1';
+const CACHE = 'forte-towing-v2';
 
 const PRECACHE = [
     '/offline',

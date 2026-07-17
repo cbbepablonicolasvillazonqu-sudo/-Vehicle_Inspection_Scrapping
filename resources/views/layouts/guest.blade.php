@@ -9,33 +9,39 @@
 
         <!-- PWA: instalable en la pantalla de inicio del celular -->
         <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-        <meta name="theme-color" content="#1e40af">
+        <meta name="theme-color" content="#0f172a">
         <link rel="icon" type="image/png" href="{{ asset('iconos/icono-192.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('iconos/apple-touch-icon.png') }}">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Forte Towing">
 
         <!-- Scripts y estilos compilados -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-10 sm:pt-0 bg-gray-100 px-4">
-            <div class="flex flex-col items-center">
-                <a href="/" class="flex items-center gap-3">
-                    <x-application-logo class="w-14 h-14 fill-current text-blue-800" />
-                </a>
-                <h1 class="mt-3 text-2xl font-bold text-gray-800">Forte Towing</h1>
-                <p class="text-sm text-gray-500">Inventario de vehículos</p>
-            </div>
+    <body class="font-sans text-slate-800 antialiased">
+        {{-- Fondo oscuro con degradado y un halo azul para dar profundidad --}}
+        <div class="relative min-h-screen flex flex-col justify-center items-center px-4 py-10 overflow-hidden
+                    bg-gradient-to-b from-slate-900 via-slate-900 to-blue-950">
+            <div class="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[36rem] h-[36rem] rounded-full bg-blue-600/20 blur-3xl"></div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-6 bg-white shadow-md overflow-hidden rounded-xl">
-                {{ $slot }}
-            </div>
+            <div class="relative w-full sm:max-w-md">
+                <div class="flex flex-col items-center mb-6">
+                    <span class="grid place-items-center w-16 h-16 rounded-2xl bg-blue-700 text-white shadow-lg shadow-blue-900/50">
+                        <x-application-logo class="w-9 h-9" />
+                    </span>
+                    <h1 class="mt-4 text-2xl font-extrabold text-white tracking-tight">Forte Towing</h1>
+                    <p class="text-sm text-slate-400">{{ __('Inventario de vehículos') }}</p>
+                </div>
 
-            <div class="mt-6">
-                <x-selector-idioma />
+                <div class="bg-white px-6 py-7 shadow-2xl rounded-2xl">
+                    {{ $slot }}
+                </div>
+
+                <div class="mt-6 flex justify-center">
+                    <x-selector-idioma class="!bg-white/10 !text-slate-300" />
+                </div>
             </div>
         </div>
 
