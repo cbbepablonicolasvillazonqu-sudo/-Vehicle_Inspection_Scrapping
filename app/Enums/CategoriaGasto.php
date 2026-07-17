@@ -12,13 +12,13 @@ enum CategoriaGasto: string
 
     public function etiqueta(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Reparacion => 'Reparación',
             self::Piezas => 'Piezas',
             self::GruaTransporte => 'Grúa / transporte',
             self::TituloTramites => 'Título / trámites',
             self::Otro => 'Otro',
-        };
+        });
     }
 
     /** @return array<string, string> */

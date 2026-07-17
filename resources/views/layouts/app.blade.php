@@ -53,7 +53,7 @@
 
         <!-- Notificaciones flotantes disparadas por Livewire ($this->dispatch('notificar', mensaje: '...')) -->
         <div x-data="{ mostrar: false, mensaje: '' }"
-             x-on:notificar.window="mensaje = $event.detail.mensaje ?? 'Listo'; mostrar = true; clearTimeout(window._toastTimer); window._toastTimer = setTimeout(() => mostrar = false, 2600)"
+             x-on:notificar.window="mensaje = $event.detail.mensaje ?? '{{ __('Listo') }}'; mostrar = true; clearTimeout(window._toastTimer); window._toastTimer = setTimeout(() => mostrar = false, 2600)"
              x-show="mostrar" x-transition
              class="fixed bottom-4 inset-x-0 flex justify-center z-50 px-4" style="display: none;">
             <div class="bg-gray-900 text-white text-base font-medium px-5 py-3 rounded-xl shadow-lg" x-text="mensaje"></div>

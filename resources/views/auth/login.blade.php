@@ -7,7 +7,7 @@
 
         <!-- Correo electrónico -->
         <div>
-            <x-input-label for="email" value="Correo electrónico" />
+            <x-input-label for="email" :value="__('Correo electrónico')" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email"
                           x-model="email"
                           required autofocus autocomplete="username"
@@ -17,7 +17,7 @@
 
         <!-- Contraseña -->
         <div class="mt-4">
-            <x-input-label for="password" value="Contraseña" />
+            <x-input-label for="password" :value="__('Contraseña')" />
 
             <x-text-input id="password" class="block mt-1 w-full"
                             type="password"
@@ -32,19 +32,19 @@
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
                 <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">Recordarme</span>
+                <span class="ms-2 text-sm text-gray-600">{{ __('Recordarme') }}</span>
             </label>
         </div>
 
         <div class="flex items-center justify-between mt-6">
             @if (Route::has('password.request'))
                 <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" href="{{ route('password.request') }}">
-                    ¿Olvidaste tu contraseña?
+                    {{ __('¿Olvidaste tu contraseña?') }}
                 </a>
             @endif
 
             <x-primary-button class="ms-3">
-                Iniciar sesión
+                {{ __('Iniciar sesión') }}
             </x-primary-button>
         </div>
 
@@ -53,7 +53,7 @@
         @if (app()->environment('local'))
             <div class="mt-6 pt-5 border-t border-gray-200">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                    Cuentas de demostración (toca una)
+                    {{ __('Cuentas de demostración (toca una)') }}
                 </p>
                 <div class="grid grid-cols-2 gap-2">
                     @foreach ([
@@ -65,12 +65,12 @@
                         <button type="button"
                                 @click="email = '{{ $correo }}'; password = 'password'"
                                 class="px-3 py-2.5 bg-gray-100 hover:bg-blue-100 text-gray-700 text-sm font-medium rounded-lg text-left">
-                            {{ $rol }}
+                            {{ __($rol) }}
                             <span class="block text-[11px] text-gray-400 truncate">{{ $correo }}</span>
                         </button>
                     @endforeach
                 </div>
-                <p class="text-[11px] text-gray-400 mt-2">Contraseña de todas: <span class="font-mono">password</span></p>
+                <p class="text-[11px] text-gray-400 mt-2">{{ __('Contraseña de todas:') }} <span class="font-mono">password</span></p>
             </div>
         @endif
     </form>

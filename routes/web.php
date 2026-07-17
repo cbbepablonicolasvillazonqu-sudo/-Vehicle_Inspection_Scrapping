@@ -16,6 +16,10 @@ Route::redirect('/', '/panel');
 // Página de respaldo del service worker cuando no hay conexión (PWA).
 Route::view('/offline', 'offline')->name('offline');
 
+// Cambio de idioma (es/en). Accesible con o sin sesión (también en el login).
+Route::get('/idioma/{locale}', [\App\Http\Controllers\IdiomaController::class, 'cambiar'])
+    ->name('idioma.cambiar');
+
 Route::middleware('auth')->group(function () {
     // Panel principal (se conserva el nombre "dashboard" que usa Breeze
     // para las redirecciones posteriores al inicio de sesión).
