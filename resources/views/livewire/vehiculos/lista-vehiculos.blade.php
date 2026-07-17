@@ -4,12 +4,25 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="font-semibold text-xl text-gray-800">Vehículos</h2>
 
-            @can('crear vehiculos')
-                <a href="{{ route('vehiculos.crear') }}"
-                   class="inline-flex items-center px-4 py-3 bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold rounded-xl shadow">
-                    + Nuevo vehículo
-                </a>
-            @endcan
+            <div class="flex flex-wrap items-center gap-2">
+                @can('exportar datos')
+                    <a href="{{ route('exportar.vehiculos', ['formato' => 'xlsx', 'buscar' => $busqueda, 'estado' => $filtroEstado]) }}"
+                       class="px-3.5 py-2.5 bg-green-700 hover:bg-green-800 text-white text-sm font-semibold rounded-xl shadow">
+                        ⬇ Excel
+                    </a>
+                    <a href="{{ route('exportar.vehiculos', ['formato' => 'csv', 'buscar' => $busqueda, 'estado' => $filtroEstado]) }}"
+                       class="px-3.5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-xl">
+                        ⬇ CSV
+                    </a>
+                @endcan
+
+                @can('crear vehiculos')
+                    <a href="{{ route('vehiculos.crear') }}"
+                       class="inline-flex items-center px-4 py-3 bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold rounded-xl shadow">
+                        + Nuevo vehículo
+                    </a>
+                @endcan
+            </div>
         </div>
 
         {{-- Búsqueda y filtro --}}
