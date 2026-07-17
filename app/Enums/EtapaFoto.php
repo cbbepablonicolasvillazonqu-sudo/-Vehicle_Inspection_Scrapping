@@ -14,11 +14,11 @@ enum EtapaFoto: string
 
     public function etiqueta(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Compra => 'Compra',
             self::Reparacion => 'Reparación',
             self::Venta => 'Venta',
-        };
+        });
     }
 
     /** @return array<string, string> */

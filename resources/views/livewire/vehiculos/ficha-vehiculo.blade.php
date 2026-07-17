@@ -5,9 +5,9 @@
         <div class="bg-white shadow rounded-xl p-4 sm:p-6">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="min-w-0">
-                    <a href="{{ route('vehiculos.index') }}" class="text-sm text-blue-700 hover:underline">← Volver a vehículos</a>
+                    <a href="{{ route('vehiculos.index') }}" class="text-sm text-blue-700 hover:underline">{{ __('← Volver a vehículos') }}</a>
                     <h2 class="font-bold text-2xl text-gray-900 mt-1">{{ $vehiculo->nombreCompleto() }}</h2>
-                    <div class="text-sm text-gray-500 font-mono mt-1">VIN: {{ $vehiculo->vin }}</div>
+                    <div class="text-sm text-gray-500 font-mono mt-1">{{ __('VIN:') }} {{ $vehiculo->vin }}</div>
                 </div>
 
                 <span class="px-4 py-2 rounded-xl text-sm font-bold {{ $vehiculo->estado->colorBadge() }}">
@@ -18,48 +18,48 @@
             {{-- Datos generales --}}
             <dl class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-3 text-sm">
                 <div>
-                    <dt class="text-gray-500">Millas</dt>
-                    <dd class="font-semibold text-gray-900">{{ number_format($vehiculo->millas) }} mi</dd>
+                    <dt class="text-gray-500">{{ __('Millas') }}</dt>
+                    <dd class="font-semibold text-gray-900">{{ number_format($vehiculo->millas) }} {{ __('mi') }}</dd>
                 </div>
 
                 @can('ver precios compra')
                     <div>
-                        <dt class="text-gray-500">Precio de compra</dt>
+                        <dt class="text-gray-500">{{ __('Precio de compra') }}</dt>
                         <dd class="font-semibold text-gray-900">{{ dinero($vehiculo->precio_compra) }}</dd>
                     </div>
                 @endcan
 
                 <div>
-                    <dt class="text-gray-500">Fecha de compra</dt>
+                    <dt class="text-gray-500">{{ __('Fecha de compra') }}</dt>
                     <dd class="font-semibold text-gray-900">{{ $vehiculo->fecha_compra->format('d/m/Y') }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Lugar de compra</dt>
+                    <dt class="text-gray-500">{{ __('Lugar de compra') }}</dt>
                     <dd class="font-semibold text-gray-900">{{ $vehiculo->lugar_compra->etiqueta() }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Título</dt>
+                    <dt class="text-gray-500">{{ __('Título') }}</dt>
                     <dd><span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $vehiculo->estado_titulo->colorBadge() }}">{{ $vehiculo->estado_titulo->etiqueta() }}</span></dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Registrado por</dt>
+                    <dt class="text-gray-500">{{ __('Registrado por') }}</dt>
                     <dd class="font-semibold text-gray-900">{{ $vehiculo->creador?->name ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-gray-500">Registrado el</dt>
+                    <dt class="text-gray-500">{{ __('Registrado el') }}</dt>
                     <dd class="font-semibold text-gray-900">{{ $vehiculo->created_at->format('d/m/Y') }}</dd>
                 </div>
 
                 @can('registrar gastos')
                     <div>
-                        <dt class="text-gray-500">Gastos totales</dt>
+                        <dt class="text-gray-500">{{ __('Gastos totales') }}</dt>
                         <dd class="font-semibold text-gray-900">{{ dinero($vehiculo->totalGastos()) }}</dd>
                     </div>
                 @endcan
 
                 @can('ver precios compra')
                     <div>
-                        <dt class="text-gray-500">Inversión total</dt>
+                        <dt class="text-gray-500">{{ __('Inversión total') }}</dt>
                         <dd class="font-semibold text-gray-900">{{ dinero($vehiculo->inversionTotal()) }}</dd>
                     </div>
                 @endcan
@@ -67,7 +67,7 @@
                 @can('ver ganancias')
                     @if (! is_null($vehiculo->ganancia()))
                         <div>
-                            <dt class="text-gray-500">Ganancia</dt>
+                            <dt class="text-gray-500">{{ __('Ganancia') }}</dt>
                             <dd class="font-bold {{ $vehiculo->ganancia() >= 0 ? 'text-green-700' : 'text-red-700' }}">
                                 {{ dinero($vehiculo->ganancia()) }}
                             </dd>
@@ -86,23 +86,27 @@
                     @hasanyrole('admin|comprador')
                         <a href="{{ route('vehiculos.editar', $vehiculo) }}"
                            class="px-4 py-3 bg-white border border-gray-300 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-50">
-                            ✏️ Editar datos
+                            {{ __('✏️ Editar datos') }}
                         </a>
                     @endhasanyrole
                 @endcan
 
                 @can('delete', $vehiculo)
                     <button wire:click="eliminar"
-                            wire:confirm="¿Eliminar este vehículo y todo su historial? Esta acción solo la puede hacer el Admin."
+                            wire:confirm="{{ __('¿Eliminar este vehículo y todo su historial? Esta acción solo la puede hacer el Admin.') }}"
                             class="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-base font-medium text-red-700 hover:bg-red-100">
-                        🗑️ Eliminar
+                            {{ __('🗑️ Eliminar') }}
                     </button>
                 @endcan
             </div>
 
             @if ($vehiculo->estaBloqueado() && ! auth()->user()->hasRole('admin'))
                 <p class="mt-3 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3">
-                    🔒 Este vehículo está {{ $vehiculo->estado->etiquetaCorta() === 'Vendido' ? 'vendido' : 'en desguace' }} y el registro quedó bloqueado. Solo el Administrador puede modificarlo.
+                    @if ($vehiculo->estado === \App\Enums\EstadoVehiculo::Vendido)
+                        🔒 {{ __('Este vehículo está vendido y el registro quedó bloqueado. Solo el Administrador puede modificarlo.') }}
+                    @else
+                        🔒 {{ __('Este vehículo está en desguace y el registro quedó bloqueado. Solo el Administrador puede modificarlo.') }}
+                    @endif
                 </p>
             @endif
         </div>
@@ -128,7 +132,7 @@
         @role('admin')
             <div class="bg-white shadow rounded-xl p-4 sm:p-6" x-data="{ abierto: false }">
                 <button type="button" @click="abierto = !abierto" class="w-full flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-800">Auditoría del vehículo</h3>
+                    <h3 class="text-lg font-semibold text-gray-800">{{ __('Auditoría del vehículo') }}</h3>
                     <span class="text-gray-400" x-text="abierto ? '▲' : '▼'"></span>
                 </button>
 
@@ -137,7 +141,7 @@
                         <div class="py-2.5 text-sm">
                             <div class="flex flex-wrap items-center gap-x-2">
                                 <span class="font-semibold text-gray-800">{{ $registro->etiquetaAccion() }}</span>
-                                <span class="text-gray-500">· {{ $registro->usuario?->name ?? 'Sistema' }}</span>
+                                <span class="text-gray-500">· {{ $registro->usuario?->name ?? __('Sistema') }}</span>
                                 <span class="text-gray-400">· {{ $registro->created_at->format('d/m/Y H:i') }}</span>
                             </div>
                             @if ($registro->detalles)
@@ -153,7 +157,7 @@
                             @endif
                         </div>
                     @empty
-                        <p class="py-3 text-sm text-gray-500">Sin registros de auditoría.</p>
+                        <p class="py-3 text-sm text-gray-500">{{ __('Sin registros de auditoría.') }}</p>
                     @endforelse
                 </div>
             </div>

@@ -10,11 +10,11 @@ enum LugarCompra: string
 
     public function etiqueta(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Subasta => 'Subasta',
             self::Particular => 'Particular',
             self::Otro => 'Otro',
-        };
+        });
     }
 
     /** @return array<string, string> */

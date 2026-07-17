@@ -19,26 +19,26 @@ enum EstadoVehiculo: string
 
     public function etiqueta(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Comprado => 'Comprado / pendiente de revisión',
             self::EnReparacion => 'En reparación',
             self::Listo => 'Listo para la venta',
             self::Publicado => 'Publicado / en venta',
             self::Vendido => 'Vendido',
             self::Desguace => 'Desguace',
-        };
+        });
     }
 
     public function etiquetaCorta(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Comprado => 'Comprado',
             self::EnReparacion => 'En reparación',
             self::Listo => 'Listo',
             self::Publicado => 'Publicado',
             self::Vendido => 'Vendido',
             self::Desguace => 'Desguace',
-        };
+        });
     }
 
     /** Clases Tailwind para la insignia del estado. */

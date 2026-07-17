@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
 
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="font-semibold text-xl text-gray-800">Vehículos</h2>
+            <h2 class="font-semibold text-xl text-gray-800">{{ __('Vehículos') }}</h2>
 
             <div class="flex flex-wrap items-center gap-2">
                 @can('exportar datos')
@@ -19,7 +19,7 @@
                 @can('crear vehiculos')
                     <a href="{{ route('vehiculos.crear') }}"
                        class="inline-flex items-center px-4 py-3 bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold rounded-xl shadow">
-                        + Nuevo vehículo
+                        {{ __('+ Nuevo vehículo') }}
                     </a>
                 @endcan
             </div>
@@ -30,13 +30,13 @@
             <div class="sm:col-span-2">
                 <input type="search"
                        wire:model.live.debounce.400ms="busqueda"
-                       placeholder="Buscar por marca, modelo o VIN…"
+                       placeholder="{{ __('Buscar por marca, modelo o VIN…') }}"
                        class="w-full border-gray-300 rounded-xl text-base py-3 focus:border-blue-500 focus:ring-blue-500">
             </div>
             <div>
                 <select wire:model.live="filtroEstado"
                         class="w-full border-gray-300 rounded-xl text-base py-3 focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Todos los estados</option>
+                    <option value="">{{ __('Todos los estados') }}</option>
                     @foreach ($estados as $estado)
                         <option value="{{ $estado->value }}">{{ $estado->etiqueta() }}</option>
                     @endforeach
@@ -64,7 +64,7 @@
                         <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ $vehiculo->estado->colorBadge() }}">
                             {{ $vehiculo->estado->etiquetaCorta() }}
                         </span>
-                        <span>{{ number_format($vehiculo->millas) }} mi</span>
+                        <span>{{ number_format($vehiculo->millas) }} {{ __('mi') }}</span>
                         <span>·</span>
                         <span>{{ $vehiculo->fecha_compra->format('d/m/Y') }}</span>
                         @if ($vehiculo->fotos_count)
@@ -75,13 +75,13 @@
 
                     @can('ver precios compra')
                         <div class="mt-2 text-sm text-gray-500">
-                            Compra: <span class="font-semibold text-gray-700">{{ dinero($vehiculo->precio_compra) }}</span>
+                            {{ __('Compra:') }} <span class="font-semibold text-gray-700">{{ dinero($vehiculo->precio_compra) }}</span>
                         </div>
                     @endcan
                 </a>
             @empty
                 <div class="col-span-full bg-white shadow rounded-xl p-8 text-center text-gray-500">
-                    No hay vehículos que coincidan con la búsqueda.
+                    {{ __('No hay vehículos que coincidan con la búsqueda.') }}
                 </div>
             @endforelse
         </div>

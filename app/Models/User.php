@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'locale',
     ];
 
     /**
@@ -51,12 +52,12 @@ class User extends Authenticatable
      */
     public function nombreRol(): string
     {
-        return match ($this->getRoleNames()->first()) {
+        return __(match ($this->getRoleNames()->first()) {
             'admin' => 'Administrador',
             'comprador' => 'Comprador',
             'mecanico' => 'Mecánico',
             'vendedor' => 'Vendedor',
             default => 'Sin rol',
-        };
+        });
     }
 }

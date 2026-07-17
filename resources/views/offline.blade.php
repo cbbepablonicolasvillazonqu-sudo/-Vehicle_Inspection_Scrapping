@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sin conexión · Forte Towing</title>
+    <title>{{ __('Sin conexión') }} · Forte Towing</title>
     {{-- Estilos en línea: esta página debe funcionar sin ningún asset externo --}}
     <style>
         body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -22,9 +22,9 @@
 <body>
     <div class="tarjeta">
         <div class="icono">📡</div>
-        <h1>Sin conexión</h1>
-        <p>No pudimos conectar con el servidor de Forte Towing. Revisa tu señal o tus datos móviles e inténtalo de nuevo.</p>
-        <button onclick="location.reload()">Reintentar</button>
+        <h1>{{ __('Sin conexión') }}</h1>
+        <p>{{ __('No pudimos conectar con el servidor de Forte Towing. Revisa tu señal o tus datos móviles e inténtalo de nuevo.') }}</p>
+        <button onclick="location.reload()">{{ __('Reintentar') }}</button>
     </div>
 </body>
 </html>

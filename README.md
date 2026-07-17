@@ -15,8 +15,17 @@ Aplicación web (con soporte **PWA**, instalable en el celular) para gestionar e
 | Fotos | Storage local (`storage/app/public`, organizado por vehículo y etapa) |
 | Exportaciones | **Maatwebsite/Excel** (XLSX y CSV) |
 | PWA | `manifest.webmanifest` + service worker + página offline |
+| Idiomas | **Español (predeterminado)** e **Inglés**, con selector en la barra superior |
 
-Interfaz 100 % en español.
+Interfaz bilingüe español/inglés. El español es el idioma por defecto; cada usuario elige el suyo con el selector **ES / EN** (en la barra de navegación y en el login) y su preferencia se guarda en el perfil, persistiendo entre dispositivos.
+
+### Añadir o ampliar traducciones
+
+El texto en español actúa como clave; las traducciones al inglés viven en `lang/en.json` (interfaz) y `lang/en/*.php` (validación). Para comprobar que no falte ninguna clave por traducir:
+
+```bash
+php scripts/verificar-traducciones.php
+```
 
 ---
 

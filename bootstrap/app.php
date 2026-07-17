@@ -11,6 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Fija el idioma (es/en) en cada petición web según la preferencia
+        // del usuario o de la sesión.
+        $middleware->web(append: [
+            \App\Http\Middleware\EstablecerIdioma::class,
+        ]);
+
         // Middleware de roles y permisos (Spatie Laravel-Permission).
         // Protegen rutas y componentes Livewire de página completa.
         $middleware->alias([

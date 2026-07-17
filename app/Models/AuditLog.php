@@ -33,7 +33,7 @@ class AuditLog extends Model
 
     public function etiquetaAccion(): string
     {
-        return match ($this->accion) {
+        return __(match ($this->accion) {
             'vehiculo_creado' => 'Vehículo registrado',
             'vehiculo_editado' => 'Datos editados',
             'vehiculo_eliminado' => 'Vehículo eliminado',
@@ -50,6 +50,6 @@ class AuditLog extends Model
             'desguace_editado' => 'Desguace editado',
             'desguace_eliminado' => 'Desguace eliminado',
             default => ucfirst(str_replace('_', ' ', $this->accion)),
-        };
+        });
     }
 }

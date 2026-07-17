@@ -33,6 +33,10 @@
             <div class="w-full sm:max-w-md mt-6 px-6 py-6 bg-white shadow-md overflow-hidden rounded-xl">
                 {{ $slot }}
             </div>
+
+            <div class="mt-6">
+                <x-selector-idioma />
+            </div>
         </div>
 
         <!-- Registro del service worker (PWA) -->

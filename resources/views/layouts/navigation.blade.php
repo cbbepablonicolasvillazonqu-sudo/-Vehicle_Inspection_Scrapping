@@ -14,13 +14,13 @@
                 <!-- Enlaces de navegación (escritorio) -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        Panel
+                        {{ __('Panel') }}
                     </x-nav-link>
 
                     @if (Route::has('vehiculos.index'))
                         @can('ver vehiculos')
                             <x-nav-link :href="route('vehiculos.index')" :active="request()->routeIs('vehiculos.*')">
-                                Vehículos
+                                {{ __('Vehículos') }}
                             </x-nav-link>
                         @endcan
                     @endif
@@ -28,7 +28,7 @@
                     @if (Route::has('reportes.ganancias'))
                         @can('ver ganancias')
                             <x-nav-link :href="route('reportes.ganancias')" :active="request()->routeIs('reportes.*')">
-                                Reportes
+                                {{ __('Reportes') }}
                             </x-nav-link>
                         @endcan
                     @endif
@@ -36,15 +36,17 @@
                     @if (Route::has('usuarios.index'))
                         @can('gestionar usuarios')
                             <x-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
-                                Usuarios
+                                {{ __('Usuarios') }}
                             </x-nav-link>
                         @endcan
                     @endif
                 </div>
             </div>
 
-            <!-- Menú de usuario (escritorio) -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <!-- Idioma + menú de usuario (escritorio) -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-3">
+                <x-selector-idioma />
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -63,7 +65,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            Mi perfil
+                            {{ __('Mi perfil') }}
                         </x-dropdown-link>
 
                         <!-- Cerrar sesión -->
@@ -73,7 +75,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                Cerrar sesión
+                                {{ __('Cerrar sesión') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -96,13 +98,13 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                Panel
+                {{ __('Panel') }}
             </x-responsive-nav-link>
 
             @if (Route::has('vehiculos.index'))
                 @can('ver vehiculos')
                     <x-responsive-nav-link :href="route('vehiculos.index')" :active="request()->routeIs('vehiculos.*')">
-                        Vehículos
+                        {{ __('Vehículos') }}
                     </x-responsive-nav-link>
                 @endcan
             @endif
@@ -110,7 +112,7 @@
             @if (Route::has('reportes.ganancias'))
                 @can('ver ganancias')
                     <x-responsive-nav-link :href="route('reportes.ganancias')" :active="request()->routeIs('reportes.*')">
-                        Reportes
+                        {{ __('Reportes') }}
                     </x-responsive-nav-link>
                 @endcan
             @endif
@@ -118,7 +120,7 @@
             @if (Route::has('usuarios.index'))
                 @can('gestionar usuarios')
                     <x-responsive-nav-link :href="route('usuarios.index')" :active="request()->routeIs('usuarios.*')">
-                        Usuarios
+                        {{ __('Usuarios') }}
                     </x-responsive-nav-link>
                 @endcan
             @endif
@@ -131,9 +133,14 @@
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->nombreRol() }} · {{ Auth::user()->email }}</div>
             </div>
 
+            <div class="mt-3 px-4">
+                <span class="text-sm text-gray-500">{{ __('Idioma') }}:</span>
+                <x-selector-idioma class="ms-2 align-middle" />
+            </div>
+
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    Mi perfil
+                    {{ __('Mi perfil') }}
                 </x-responsive-nav-link>
 
                 <!-- Cerrar sesión -->
@@ -143,7 +150,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        Cerrar sesión
+                        {{ __('Cerrar sesión') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

@@ -13,14 +13,14 @@ enum MetodoPago: string
 
     public function etiqueta(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Efectivo => 'Efectivo',
             self::Transferencia => 'Transferencia',
             self::Cheque => 'Cheque',
             self::Tarjeta => 'Tarjeta',
             self::Financiado => 'Financiado',
             self::Otro => 'Otro',
-        };
+        });
     }
 
     /** @return array<string, string> */

@@ -10,11 +10,11 @@ enum EstadoTitulo: string
 
     public function etiqueta(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::EnMano => 'En mano',
             self::Pendiente => 'Pendiente',
             self::Salvage => 'Salvage',
-        };
+        });
     }
 
     public function colorBadge(): string

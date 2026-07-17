@@ -1,5 +1,5 @@
 <div class="bg-white shadow rounded-xl p-4 sm:p-6">
-    <h3 class="text-lg font-semibold text-gray-800">Fotos</h3>
+    <h3 class="text-lg font-semibold text-gray-800">{{ __('Fotos') }}</h3>
 
     {{-- Pestañas por etapa --}}
     <div class="mt-3 flex gap-2">
@@ -26,11 +26,11 @@
             <button type="submit"
                     class="px-5 py-3 bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold rounded-xl shadow disabled:opacity-50"
                     wire:loading.attr="disabled" wire:target="fotos,subir">
-                <span wire:loading.remove wire:target="subir">Subir a «{{ \App\Enums\EtapaFoto::from($etapa)->etiqueta() }}»</span>
-                <span wire:loading wire:target="subir">Subiendo…</span>
+                <span wire:loading.remove wire:target="subir">{{ __('Subir a «:etapa»', ['etapa' => \App\Enums\EtapaFoto::from($etapa)->etiqueta()]) }}</span>
+                <span wire:loading wire:target="subir">{{ __('Subiendo…') }}</span>
             </button>
 
-            <span class="text-sm text-gray-400" wire:loading wire:target="fotos">Cargando archivos…</span>
+            <span class="text-sm text-gray-400" wire:loading wire:target="fotos">{{ __('Cargando archivos…') }}</span>
         </form>
         <x-input-error :messages="$errors->get('fotos')" class="mt-2" />
         <x-input-error :messages="$errors->get('fotos.*')" class="mt-2" />
@@ -43,13 +43,13 @@
         @forelse ($fotosEtapa as $foto)
             <div class="relative group rounded-xl overflow-hidden bg-gray-100 aspect-square" wire:key="foto-{{ $foto->id }}">
                 <a href="{{ $foto->url() }}" target="_blank" rel="noopener">
-                    <img src="{{ $foto->url() }}" alt="{{ $foto->nombre_original ?? 'Foto del vehículo' }}"
+                    <img src="{{ $foto->url() }}" alt="{{ $foto->nombre_original ?? __('Foto del vehículo') }}"
                          loading="lazy" class="w-full h-full object-cover">
                 </a>
 
                 @if (auth()->user()->hasRole('admin') || ($foto->user_id === auth()->id() && $this->puedeGestionar()))
                     <button wire:click="eliminarFoto({{ $foto->id }})"
-                            wire:confirm="¿Eliminar esta foto?"
+                            wire:confirm="{{ __('¿Eliminar esta foto?') }}"
                             class="absolute top-1.5 right-1.5 bg-black/60 hover:bg-red-600 text-white rounded-full w-8 h-8 text-sm font-bold">
                         ✕
                     </button>
@@ -60,7 +60,7 @@
                 </div>
             </div>
         @empty
-            <p class="col-span-full text-sm text-gray-500 py-3">Sin fotos en la etapa «{{ \App\Enums\EtapaFoto::from($etapa)->etiqueta() }}».</p>
+            <p class="col-span-full text-sm text-gray-500 py-3">{{ __('Sin fotos en la etapa «:etapa».', ['etapa' => \App\Enums\EtapaFoto::from($etapa)->etiqueta()]) }}</p>
         @endforelse
     </div>
 </div>
