@@ -7,6 +7,16 @@
 
         <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name', 'Forte Towing') }}</title>
 
+        <!-- PWA: instalable en la pantalla de inicio del celular -->
+        <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+        <meta name="theme-color" content="#1e40af">
+        <link rel="icon" type="image/png" href="{{ asset('iconos/icono-192.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('iconos/apple-touch-icon.png') }}">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-title" content="Forte Towing">
+
         <!-- Scripts y estilos compilados -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
@@ -50,5 +60,14 @@
         </div>
 
         @livewireScripts
+
+        <!-- Registro del service worker (PWA) -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function () {
+                    navigator.serviceWorker.register('/sw.js');
+                });
+            }
+        </script>
     </body>
 </html>

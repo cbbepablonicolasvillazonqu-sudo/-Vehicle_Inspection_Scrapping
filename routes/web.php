@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 // La raíz siempre lleva al panel (o al login si no hay sesión).
 Route::redirect('/', '/panel');
 
+// Página de respaldo del service worker cuando no hay conexión (PWA).
+Route::view('/offline', 'offline')->name('offline');
+
 Route::middleware('auth')->group(function () {
     // Panel principal (se conserva el nombre "dashboard" que usa Breeze
     // para las redirecciones posteriores al inicio de sesión).
