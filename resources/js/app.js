@@ -1,7 +1,5 @@
 import './bootstrap';
 
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
-Alpine.start();
+// Alpine.js NO se importa aquí: Livewire 3 ya incluye y arranca Alpine
+// automáticamente (@livewireScripts). Importarlo dos veces rompe los
+// componentes interactivos.

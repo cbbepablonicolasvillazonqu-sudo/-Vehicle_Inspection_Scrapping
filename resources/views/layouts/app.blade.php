@@ -2,35 +2,53 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name', 'Forte Towing') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
+        <!-- Scripts y estilos compilados -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-gray-100 pb-10">
             @include('layouts.navigation')
 
-            <!-- Page Heading -->
+            <!-- Encabezado de página -->
             @isset($header)
                 <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-7xl mx-auto py-4 px-4 sm:py-6 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
-            <!-- Page Content -->
+            <!-- Mensajes flash (tras redirecciones) -->
+            @if (session('ok'))
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4"
+                     x-data="{ visible: true }" x-show="visible" x-transition.opacity>
+                    <div class="rounded-lg bg-green-100 border border-green-300 text-green-800 px-4 py-3 flex items-center justify-between">
+                        <span class="font-medium">{{ session('ok') }}</span>
+                        <button type="button" class="text-green-700 font-bold px-2" @click="visible = false">✕</button>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Contenido -->
             <main>
                 {{ $slot }}
             </main>
         </div>
+
+        <!-- Notificaciones flotantes disparadas por Livewire ($this->dispatch('notificar', mensaje: '...')) -->
+        <div x-data="{ mostrar: false, mensaje: '' }"
+             x-on:notificar.window="mensaje = $event.detail.mensaje ?? 'Listo'; mostrar = true; clearTimeout(window._toastTimer); window._toastTimer = setTimeout(() => mostrar = false, 2600)"
+             x-show="mostrar" x-transition
+             class="fixed bottom-4 inset-x-0 flex justify-center z-50 px-4" style="display: none;">
+            <div class="bg-gray-900 text-white text-base font-medium px-5 py-3 rounded-xl shadow-lg" x-text="mensaje"></div>
+        </div>
+
+        @livewireScripts
     </body>
 </html>

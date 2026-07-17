@@ -2,22 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Siembra la base de datos de Forte Towing.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RolesYPermisosSeeder::class,
+            UsuariosSeeder::class,
         ]);
+
+        // Vehículos de demostración solo si SEED_DEMO_DATA=true (entorno local).
+        if (env('SEED_DEMO_DATA', false) && class_exists(DemoVehiculosSeeder::class)) {
+            $this->call(DemoVehiculosSeeder::class);
+        }
     }
 }
