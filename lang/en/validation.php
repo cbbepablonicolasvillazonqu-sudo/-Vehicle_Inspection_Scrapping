@@ -171,6 +171,7 @@ return [
         'vin' => 'VIN',
         'millas' => 'miles',
         'precio_compra' => 'purchase price',
+        'precio_sugerido' => 'suggested sale price',
         'fecha_compra' => 'purchase date',
         'lugar_compra' => 'purchase location',
         'estado_titulo' => 'title status',

@@ -24,6 +24,7 @@ class Vehicle extends Model
         'vin',
         'millas',
         'precio_compra',
+        'precio_sugerido',
         'fecha_compra',
         'lugar_compra',
         'estado_titulo',
@@ -38,6 +39,7 @@ class Vehicle extends Model
             'anio' => 'integer',
             'millas' => 'integer',
             'precio_compra' => 'decimal:2',
+            'precio_sugerido' => 'decimal:2',
             'fecha_compra' => 'date',
             'lugar_compra' => LugarCompra::class,
             'estado_titulo' => EstadoTitulo::class,
@@ -86,13 +88,17 @@ class Vehicle extends Model
 
     /**
      * Restringe la consulta a los vehículos que el rol del usuario puede ver:
-     * mecánico → solo en reparación; vendedor → listos/publicados/vendidos;
-     * admin y comprador → todos.
+     * mecánico → pendientes de revisión, en reparación y listos;
+     * vendedor → listos/publicados/vendidos; admin y comprador → todos.
      */
     public function scopeVisiblePara(Builder $query, User $usuario): Builder
     {
         if ($usuario->hasRole('mecanico')) {
-            return $query->where('estado', EstadoVehiculo::EnReparacion);
+            return $query->whereIn('estado', [
+                EstadoVehiculo::Comprado,
+                EstadoVehiculo::EnReparacion,
+                EstadoVehiculo::Listo,
+            ]);
         }
 
         if ($usuario->hasRole('vendedor')) {
@@ -178,7 +184,11 @@ class Vehicle extends Model
     public function esVisiblePara(User $usuario): bool
     {
         if ($usuario->hasRole('mecanico')) {
-            return $this->estado === EstadoVehiculo::EnReparacion;
+            return in_array($this->estado, [
+                EstadoVehiculo::Comprado,
+                EstadoVehiculo::EnReparacion,
+                EstadoVehiculo::Listo,
+            ], true);
         }
 
         if ($usuario->hasRole('vendedor')) {

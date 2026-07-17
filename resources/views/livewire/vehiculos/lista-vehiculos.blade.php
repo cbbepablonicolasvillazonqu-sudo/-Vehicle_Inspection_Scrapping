@@ -78,6 +78,12 @@
                             {{ __('Compra:') }} <span class="font-semibold text-gray-700">{{ dinero($vehiculo->precio_compra) }}</span>
                         </div>
                     @endcan
+
+                    @if ($vehiculo->precio_sugerido !== null && ! $vehiculo->estado->esFinal())
+                        <div class="mt-1 text-sm text-gray-500">
+                            {{ __('Sugerido:') }} <span class="font-semibold text-blue-800">{{ dinero($vehiculo->precio_sugerido) }}</span>
+                        </div>
+                    @endif
                 </a>
             @empty
                 <div class="col-span-full bg-white shadow rounded-xl p-8 text-center text-gray-500">

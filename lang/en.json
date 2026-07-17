@@ -229,6 +229,17 @@
     "Desguace registrado": "Scrap registered",
     "Desguace editado": "Scrap edited",
     "Desguace eliminado": "Scrap deleted",
+    "Precio sugerido actualizado": "Suggested price updated",
+
+    "Precio de venta sugerido": "Suggested sale price",
+    "Precio de venta sugerido (USD)": "Suggested sale price (USD)",
+    "Sin definir": "Not set",
+    "Guardar precio": "Save price",
+    "Referencia visible para el Vendedor al negociar. Dejar vacío para quitarlo.": "Reference visible to the Seller when negotiating. Leave empty to remove it.",
+    "Precio sugerido:": "Suggested price:",
+    "Sugerido:": "Suggested:",
+    "Precio sugerido guardado": "Suggested price saved",
+    "precio de venta sugerido": "suggested sale price",
 
     "Total: :monto": "Total: :monto",
     "¿Cambiar el estado a «:estado»?": "Change status to \":estado\"?",
