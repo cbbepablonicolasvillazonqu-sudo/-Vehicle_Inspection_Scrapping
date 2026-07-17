@@ -85,7 +85,7 @@ Abrir <http://localhost:8000>. Para servir por Apache de XAMPP, apunta el Docume
 
 - **Admin** — acceso total: usuarios, reportes de ganancias, exportaciones, eliminar registros, editar ventas cerradas, desguace, revertir estados finales.
 - **Comprador** — registra vehículos, edita sus datos, sube fotos, registra gastos, pasa a "En reparación". Ve precios de compra.
-- **Mecánico** — ve **solo** vehículos en reparación; registra reparaciones (gastos) y fotos; marca "Listo para la venta". **No ve** precios de compra ni ganancias.
+- **Mecánico** — ve los vehículos **pendientes de revisión, en reparación y listos**; puede iniciar la revisión él mismo (Comprado → En reparación), registra reparaciones (gastos) y fotos, marca "Listo para la venta" y puede revertirlo si detecta un problema. **No ve** precios de compra ni ganancias.
 - **Vendedor** — ve listos/publicados/vendidos; publica y registra la venta (fecha, precio, comprador, teléfono, método de pago). Al vender, el registro queda **bloqueado** para todos excepto Admin.
 
 Cada ruta está protegida con middleware `role:`/`permission:` de Spatie **y** cada componente Livewire vuelve a validar en `mount()`/acciones (defensa en profundidad).

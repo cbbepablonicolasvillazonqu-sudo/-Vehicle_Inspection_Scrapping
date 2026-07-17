@@ -91,21 +91,56 @@ class FlujoVehiculoTest extends TestCase
         $this->actingAs($this->usuarioConRol('mecanico'))->get('/vehiculos/crear')->assertForbidden();
     }
 
-    public function test_mecanico_solo_ve_vehiculos_en_reparacion(): void
+    public function test_mecanico_ve_pendientes_en_reparacion_y_listos(): void
     {
-        $enReparacion = Vehicle::factory()->enEstado(EstadoVehiculo::EnReparacion)->create(['marca' => 'Honda', 'modelo' => 'Civic']);
         $comprado = Vehicle::factory()->enEstado(EstadoVehiculo::Comprado)->create(['marca' => 'Nissan', 'modelo' => 'Sentra']);
+        $enReparacion = Vehicle::factory()->enEstado(EstadoVehiculo::EnReparacion)->create(['marca' => 'Honda', 'modelo' => 'Civic']);
+        $listo = Vehicle::factory()->enEstado(EstadoVehiculo::Listo)->create(['marca' => 'Toyota', 'modelo' => 'Camry']);
+        $publicado = Vehicle::factory()->enEstado(EstadoVehiculo::Publicado)->create(['marca' => 'Ford', 'modelo' => 'F-150']);
 
         $mecanico = $this->usuarioConRol('mecanico');
 
+        // Ve los pendientes de revisión, los del taller y los listos…
         Livewire::actingAs($mecanico)
             ->test(ListaVehiculos::class)
+            ->assertSee('Sentra')
             ->assertSee('Civic')
-            ->assertDontSee('Sentra');
+            ->assertSee('Camry')
+            ->assertDontSee('F-150'); // …pero no los publicados/vendidos.
 
-        // Y tampoco puede abrir la ficha de uno que no está en reparación.
-        $this->actingAs($mecanico)->get("/vehiculos/{$comprado->id}")->assertForbidden();
-        $this->actingAs($mecanico)->get("/vehiculos/{$enReparacion->id}")->assertOk();
+        $this->actingAs($mecanico)->get("/vehiculos/{$comprado->id}")->assertOk();
+        $this->actingAs($mecanico)->get("/vehiculos/{$listo->id}")->assertOk();
+        $this->actingAs($mecanico)->get("/vehiculos/{$publicado->id}")->assertForbidden();
+    }
+
+    public function test_mecanico_inicia_la_revision_y_puede_revertir_un_listo(): void
+    {
+        $servicio = app(ServicioEstadoVehiculo::class);
+        $mecanico = $this->usuarioConRol('mecanico');
+        $vehiculo = Vehicle::factory()->create(); // comprado / pendiente de revisión
+
+        // Puede iniciar la revisión él mismo (Comprado → En reparación).
+        $servicio->cambiar($mecanico, $vehiculo, EstadoVehiculo::EnReparacion, 'ingresa al taller');
+        $this->assertSame(EstadoVehiculo::EnReparacion, $vehiculo->fresh()->estado);
+
+        // Termina el trabajo y lo marca listo.
+        $servicio->cambiar($mecanico, $vehiculo->fresh(), EstadoVehiculo::Listo);
+
+        // La ficha del "Listo" sigue siendo visible para él (antes daba 403,
+        // dejando muerto el retroceso Listo → En reparación de la matriz)…
+        $this->actingAs($mecanico)->get("/vehiculos/{$vehiculo->id}")->assertOk();
+
+        // …así que puede revertirlo si detecta un problema.
+        $servicio->cambiar($mecanico, $vehiculo->fresh(), EstadoVehiculo::EnReparacion, 'se detectó una fuga');
+        $this->assertSame(EstadoVehiculo::EnReparacion, $vehiculo->fresh()->estado);
+
+        $this->assertDatabaseHas('vehicle_status_histories', [
+            'vehicle_id' => $vehiculo->id,
+            'estado_anterior' => 'comprado',
+            'estado_nuevo' => 'en_reparacion',
+            'user_id' => $mecanico->id,
+            'nota' => 'ingresa al taller',
+        ]);
     }
 
     public function test_transiciones_de_estado_por_rol(): void
