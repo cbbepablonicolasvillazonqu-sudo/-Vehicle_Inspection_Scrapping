@@ -49,6 +49,31 @@
                     <dt class="text-gray-500">Registrado el</dt>
                     <dd class="font-semibold text-gray-900">{{ $vehiculo->created_at->format('d/m/Y') }}</dd>
                 </div>
+
+                @can('registrar gastos')
+                    <div>
+                        <dt class="text-gray-500">Gastos totales</dt>
+                        <dd class="font-semibold text-gray-900">{{ dinero($vehiculo->totalGastos()) }}</dd>
+                    </div>
+                @endcan
+
+                @can('ver precios compra')
+                    <div>
+                        <dt class="text-gray-500">Inversión total</dt>
+                        <dd class="font-semibold text-gray-900">{{ dinero($vehiculo->inversionTotal()) }}</dd>
+                    </div>
+                @endcan
+
+                @can('ver ganancias')
+                    @if (! is_null($vehiculo->ganancia()))
+                        <div>
+                            <dt class="text-gray-500">Ganancia</dt>
+                            <dd class="font-bold {{ $vehiculo->ganancia() >= 0 ? 'text-green-700' : 'text-red-700' }}">
+                                {{ dinero($vehiculo->ganancia()) }}
+                            </dd>
+                        </div>
+                    @endif
+                @endcan
             </dl>
 
             @if ($vehiculo->notas)
@@ -84,6 +109,17 @@
 
         {{-- Estado y transiciones --}}
         <livewire:vehiculos.gestor-estado :vehiculo="$vehiculo" :key="'estado-'.$vehiculo->id" />
+
+        {{-- Venta (formulario para Vendedor/Admin; tarjeta si ya se vendió) --}}
+        <livewire:vehiculos.gestor-venta :vehiculo="$vehiculo" :key="'venta-'.$vehiculo->id" />
+
+        {{-- Desguace (solo Admin registra; tarjeta si ya se desguazó) --}}
+        <livewire:vehiculos.gestor-desguace :vehiculo="$vehiculo" :key="'desguace-'.$vehiculo->id" />
+
+        {{-- Gastos (Admin, Comprador y Mecánico) --}}
+        @can('registrar gastos')
+            <livewire:vehiculos.gestor-gastos :vehiculo="$vehiculo" :key="'gastos-'.$vehiculo->id" />
+        @endcan
 
         {{-- Fotos por etapa --}}
         <livewire:vehiculos.gestor-fotos :vehiculo="$vehiculo" :key="'fotos-'.$vehiculo->id" />
