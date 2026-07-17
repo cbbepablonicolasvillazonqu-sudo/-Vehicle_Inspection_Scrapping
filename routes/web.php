@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Admin\GestionUsuarios;
+use App\Livewire\Admin\ReporteGanancias;
+use App\Livewire\Dashboard;
 use App\Livewire\Vehiculos\FichaVehiculo;
 use App\Livewire\Vehiculos\FormularioVehiculo;
 use App\Livewire\Vehiculos\ListaVehiculos;
@@ -13,9 +16,7 @@ Route::redirect('/', '/panel');
 Route::middleware('auth')->group(function () {
     // Panel principal (se conserva el nombre "dashboard" que usa Breeze
     // para las redirecciones posteriores al inicio de sesión).
-    Route::get('/panel', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/panel', Dashboard::class)->name('dashboard');
 
     // Perfil propio (cualquier usuario autenticado).
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -23,9 +24,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Gestión de usuarios: exclusiva del Administrador.
+// Gestión de usuarios y reportes: exclusivos del Administrador.
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/usuarios', GestionUsuarios::class)->name('usuarios.index');
+    Route::get('/reportes/ganancias', ReporteGanancias::class)->name('reportes.ganancias');
+    Route::get('/exportar/ganancias', [ExportController::class, 'ganancias'])->name('exportar.ganancias');
+});
+
+// Exportación de vehículos (XLSX/CSV) según permisos del rol.
+Route::middleware(['auth', 'permission:exportar datos'])->group(function () {
+    Route::get('/exportar/vehiculos/{formato}', [ExportController::class, 'vehiculos'])
+        ->whereIn('formato', ['xlsx', 'csv'])
+        ->name('exportar.vehiculos');
 });
 
 // Vehículos: todas las rutas exigen sesión + permiso "ver vehiculos";
