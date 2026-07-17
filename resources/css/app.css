@@ -1,3 +1,72 @@
+/* Fuente Inter variable, empaquetada localmente (sin CDN — funciona offline en la PWA). */
+@import '@fontsource-variable/inter';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        /* Fondo con un sutil degradado para dar profundidad sin distraer. */
+        @apply bg-slate-100 text-slate-800 antialiased;
+    }
+
+    /* Tipografía con números tabulares: montos y millas alineados en columnas. */
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+@layer components {
+    /* Tarjeta base: borde suave + sombra ligera, consistente en toda la app. */
+    .tarjeta {
+        @apply bg-white rounded-2xl border border-slate-200/70 shadow-sm;
+    }
+
+    .tarjeta-interactiva {
+        @apply tarjeta transition duration-150 hover:shadow-md hover:border-blue-300 active:scale-[0.99];
+    }
+
+    /* Insignia / chip de estado. El color lo aporta cada enum. */
+    .chip {
+        @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap;
+    }
+
+    /* Botones — grandes y táctiles para uso con una mano en el lote. */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-base font-semibold
+               transition duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2
+               disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98];
+    }
+
+    .btn-primario {
+        @apply btn bg-blue-700 text-white shadow-sm shadow-blue-700/20 hover:bg-blue-800 focus:ring-blue-500;
+    }
+
+    .btn-secundario {
+        @apply btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-slate-400;
+    }
+
+    .btn-peligro {
+        @apply btn bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 focus:ring-red-400;
+    }
+
+    .btn-sm {
+        @apply px-3.5 py-2 text-sm rounded-lg;
+    }
+
+    /* Campos de formulario coherentes. */
+    .campo {
+        @apply block w-full rounded-xl border-slate-300 text-base shadow-sm
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30;
+    }
+
+    /* Etiqueta de sección (encabezados pequeños en mayúsculas). */
+    .etiqueta-seccion {
+        @apply text-xs font-semibold text-slate-500 uppercase tracking-wide;
+    }
+}

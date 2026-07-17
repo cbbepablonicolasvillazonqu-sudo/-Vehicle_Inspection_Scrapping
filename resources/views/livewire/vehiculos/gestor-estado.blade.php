@@ -1,15 +1,17 @@
-<div class="bg-white shadow rounded-xl p-4 sm:p-6">
-    <h3 class="text-lg font-semibold text-gray-800">{{ __('Estado del vehículo') }}</h3>
+<div class="tarjeta p-4 sm:p-6">
+    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <x-icono nombre="engranaje" clase="w-5 h-5 text-slate-400" /> {{ __('Estado del vehículo') }}
+    </h3>
 
     @if (count($transiciones))
-        <p class="mt-1 text-sm text-gray-500">{{ __('Mover a:') }}</p>
+        <p class="mt-2 text-sm text-slate-500">{{ __('Mover a:') }}</p>
 
         <div class="mt-3 flex flex-wrap gap-3">
             @foreach ($transiciones as $destino)
                 <button wire:click="cambiarEstado('{{ $destino->value }}')"
                         wire:confirm="{{ __('¿Cambiar el estado a «:estado»?', ['estado' => $destino->etiqueta()]) }}"
                         wire:loading.attr="disabled"
-                        class="px-5 py-3 rounded-xl text-white text-base font-semibold shadow {{ $destino->colorBoton() }}">
+                        class="btn text-white shadow-sm px-5 py-3 {{ $destino->colorBoton() }}">
                     {{ $destino->etiqueta() }}
                 </button>
             @endforeach
@@ -18,11 +20,11 @@
         <div class="mt-3">
             <input type="text" wire:model="nota" maxlength="255"
                    placeholder="{{ __('Nota opcional del cambio (ej. «falta frenos»)…') }}"
-                   class="w-full border-gray-300 rounded-xl text-base py-3 focus:border-blue-500 focus:ring-blue-500">
+                   class="campo">
             <x-input-error :messages="$errors->get('estado')" class="mt-2" />
         </div>
     @else
-        <p class="mt-1 text-sm text-gray-500">
+        <p class="mt-2 text-sm text-slate-500">
             @if ($vehiculo->estado->esFinal())
                 {{ __('Estado final.') }} @role('admin') {{ __('Para revertirlo, elimina la venta o el desguace en su sección.') }} @endrole
             @else
@@ -31,30 +33,33 @@
         </p>
     @endif
 
-    {{-- Historial de estados: quién y cuándo --}}
-    <div class="mt-5">
-        <h4 class="text-sm font-semibold text-gray-600 uppercase tracking-wide">{{ __('Historial de estados') }}</h4>
-        <ol class="mt-2 space-y-2">
+    {{-- Historial de estados: línea de tiempo vertical --}}
+    <div class="mt-6">
+        <h4 class="etiqueta-seccion mb-3">{{ __('Historial de estados') }}</h4>
+
+        <ol class="relative border-s-2 border-slate-100 ms-2 space-y-4">
             @forelse ($historial as $cambio)
-                <li class="flex items-start gap-3 text-sm" wire:key="hist-{{ $cambio->id }}">
-                    <span class="w-2.5 h-2.5 mt-1.5 rounded-full shrink-0 {{ $cambio->estado_nuevo->colorPunto() }}"></span>
-                    <div>
-                        <span class="font-medium text-gray-800">
+                <li class="ms-5" wire:key="hist-{{ $cambio->id }}">
+                    {{-- Punto en la línea --}}
+                    <span class="absolute -start-[7px] mt-1 w-3 h-3 rounded-full ring-4 ring-white {{ $cambio->estado_nuevo->colorPunto() }}"></span>
+                    <div class="text-sm">
+                        <span class="font-semibold text-slate-800">
                             @if ($cambio->estado_anterior)
                                 {{ $cambio->estado_anterior->etiquetaCorta() }} → {{ $cambio->estado_nuevo->etiquetaCorta() }}
                             @else
                                 {{ $cambio->estado_nuevo->etiqueta() }}
                             @endif
                         </span>
-                        <span class="text-gray-500">· {{ $cambio->usuario?->name ?? __('Sistema') }}</span>
-                        <span class="text-gray-400">· {{ $cambio->created_at->format('d/m/Y H:i') }}</span>
+                        <div class="text-xs text-slate-400 mt-0.5">
+                            {{ $cambio->usuario?->name ?? __('Sistema') }} · {{ $cambio->created_at->format('d/m/Y H:i') }}
+                        </div>
                         @if ($cambio->nota)
-                            <div class="text-gray-500 italic">«{{ $cambio->nota }}»</div>
+                            <div class="text-slate-500 italic mt-0.5">«{{ $cambio->nota }}»</div>
                         @endif
                     </div>
                 </li>
             @empty
-                <li class="text-sm text-gray-500">{{ __('Sin cambios registrados.') }}</li>
+                <li class="ms-5 text-sm text-slate-500">{{ __('Sin cambios registrados.') }}</li>
             @endforelse
         </ol>
     </div>

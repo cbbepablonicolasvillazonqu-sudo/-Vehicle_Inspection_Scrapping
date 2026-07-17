@@ -27,6 +27,9 @@ class ListaVehiculos extends Component
     #[Url(as: 'estado', except: '')]
     public string $filtroEstado = '';
 
+    /** true cuando se incrusta dentro del panel (evita duplicar el padding). */
+    public bool $embebido = false;
+
     public function mount(): void
     {
         $this->authorize('viewAny', Vehicle::class);
@@ -49,6 +52,7 @@ class ListaVehiculos extends Component
             ->buscar($this->busqueda)
             ->when($this->filtroEstado !== '', fn ($q) => $q->where('estado', $this->filtroEstado))
             ->withCount('fotos')
+            ->with('fotoPortada')
             ->latest()
             ->paginate(12);
 

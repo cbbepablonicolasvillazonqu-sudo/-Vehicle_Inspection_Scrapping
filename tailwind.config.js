@@ -15,7 +15,11 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: [...defaultTheme.fontFamily.sans],
+                sans: ['Inter Variable', ...defaultTheme.fontFamily.sans],
+            },
+            boxShadow: {
+                // Sombra suave y elevada para barras flotantes (nav inferior).
+                'elevada': '0 -1px 3px 0 rgb(0 0 0 / 0.06), 0 -1px 2px -1px rgb(0 0 0 / 0.04)',
             },
         },
     },

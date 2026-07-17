@@ -59,6 +59,12 @@ class Vehicle extends Model
         return $this->hasMany(VehiclePhoto::class);
     }
 
+    /** Foto de portada (la más reciente) para miniaturas en listas y encabezados. */
+    public function fotoPortada(): HasOne
+    {
+        return $this->hasOne(VehiclePhoto::class)->latestOfMany();
+    }
+
     public function historialEstados(): HasMany
     {
         return $this->hasMany(VehicleStatusHistory::class);
