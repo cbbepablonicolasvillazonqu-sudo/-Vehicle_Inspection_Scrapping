@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vehicle extends Model
@@ -66,6 +67,21 @@ class Vehicle extends Model
         return $this->hasMany(AuditLog::class);
     }
 
+    public function gastos(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    public function venta(): HasOne
+    {
+        return $this->hasOne(Sale::class);
+    }
+
+    public function desguace(): HasOne
+    {
+        return $this->hasOne(ScrapRecord::class);
+    }
+
     /* ------------------------------- Scopes ------------------------------- */
 
     /**
@@ -117,6 +133,45 @@ class Vehicle extends Model
     public function estaBloqueado(): bool
     {
         return $this->estado->esFinal();
+    }
+
+    /* ---------------------------- Rentabilidad ---------------------------- */
+
+    /** Suma de todos los gastos registrados. */
+    public function totalGastos(): float
+    {
+        return (float) $this->gastos()->sum('monto');
+    }
+
+    /** Inversión total = precio de compra + gastos. */
+    public function inversionTotal(): float
+    {
+        return round((float) $this->precio_compra + $this->totalGastos(), 2);
+    }
+
+    /** Precio de venta o monto de desguace, según cómo salió del inventario. */
+    public function montoRecuperado(): ?float
+    {
+        if ($this->estado === EstadoVehiculo::Vendido && $this->venta) {
+            return (float) $this->venta->precio_venta;
+        }
+
+        if ($this->estado === EstadoVehiculo::Desguace && $this->desguace) {
+            return (float) $this->desguace->monto_recibido;
+        }
+
+        return null;
+    }
+
+    /**
+     * Ganancia = (precio de venta o monto de desguace) − precio de compra − gastos.
+     * Null mientras el vehículo siga en inventario. Visible solo para Admin.
+     */
+    public function ganancia(): ?float
+    {
+        $recuperado = $this->montoRecuperado();
+
+        return $recuperado === null ? null : round($recuperado - $this->inversionTotal(), 2);
     }
 
     /** Versión por-modelo del scope visiblePara (para policies). */
