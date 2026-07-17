@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\EtapaFoto;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
+
+class VehiclePhoto extends Model
+{
+    protected $fillable = [
+        'vehicle_id',
+        'etapa',
+        'ruta',
+        'nombre_original',
+        'user_id',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'etapa' => EtapaFoto::class,
+        ];
+    }
+
+    public function vehiculo(): BelongsTo
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
+    }
+
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** URL pública de la imagen (requiere `php artisan storage:link`). */
+    public function url(): string
+    {
+        return Storage::disk('public')->url($this->ruta);
+    }
+}
