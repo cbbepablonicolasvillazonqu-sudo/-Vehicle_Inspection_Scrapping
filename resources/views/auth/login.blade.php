@@ -2,13 +2,16 @@
     <!-- Estado de la sesión -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" x-data="{ email: '{{ old('email') }}', password: '' }">
         @csrf
 
         <!-- Correo electrónico -->
         <div>
             <x-input-label for="email" value="Correo electrónico" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email"
+                          x-model="email"
+                          required autofocus autocomplete="username"
+                          autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
@@ -19,6 +22,7 @@
             <x-text-input id="password" class="block mt-1 w-full"
                             type="password"
                             name="password"
+                            x-model="password"
                             required autocomplete="current-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
@@ -43,5 +47,31 @@
                 Iniciar sesión
             </x-primary-button>
         </div>
+
+        {{-- Acceso rápido de demostración: SOLO en entorno local (no aparece en producción).
+             Rellena el formulario con un toque para evitar errores de tipeo en el celular. --}}
+        @if (app()->environment('local'))
+            <div class="mt-6 pt-5 border-t border-gray-200">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                    Cuentas de demostración (toca una)
+                </p>
+                <div class="grid grid-cols-2 gap-2">
+                    @foreach ([
+                        ['Admin', 'admin@fortetowing.com'],
+                        ['Comprador', 'compras@fortetowing.com'],
+                        ['Mecánico', 'taller@fortetowing.com'],
+                        ['Vendedor', 'ventas@fortetowing.com'],
+                    ] as [$rol, $correo])
+                        <button type="button"
+                                @click="email = '{{ $correo }}'; password = 'password'"
+                                class="px-3 py-2.5 bg-gray-100 hover:bg-blue-100 text-gray-700 text-sm font-medium rounded-lg text-left">
+                            {{ $rol }}
+                            <span class="block text-[11px] text-gray-400 truncate">{{ $correo }}</span>
+                        </button>
+                    @endforeach
+                </div>
+                <p class="text-[11px] text-gray-400 mt-2">Contraseña de todas: <span class="font-mono">password</span></p>
+            </div>
+        @endif
     </form>
 </x-guest-layout>
