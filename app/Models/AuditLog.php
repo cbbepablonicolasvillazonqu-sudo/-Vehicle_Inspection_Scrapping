@@ -49,6 +49,7 @@ class AuditLog extends Model
             'desguace_registrado' => 'Desguace registrado',
             'desguace_editado' => 'Desguace editado',
             'desguace_eliminado' => 'Desguace eliminado',
+            'precio_sugerido_actualizado' => 'Precio sugerido actualizado',
             default => ucfirst(str_replace('_', ' ', $this->accion)),
         });
     }

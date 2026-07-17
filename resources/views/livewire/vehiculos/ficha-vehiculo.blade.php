@@ -50,6 +50,13 @@
                     <dd class="font-semibold text-gray-900">{{ $vehiculo->created_at->format('d/m/Y') }}</dd>
                 </div>
 
+                <div>
+                    <dt class="text-gray-500">{{ __('Precio de venta sugerido') }}</dt>
+                    <dd class="font-semibold {{ $vehiculo->precio_sugerido !== null ? 'text-blue-800' : 'text-gray-400' }}">
+                        {{ $vehiculo->precio_sugerido !== null ? dinero($vehiculo->precio_sugerido) : __('Sin definir') }}
+                    </dd>
+                </div>
+
                 @can('registrar gastos')
                     <div>
                         <dt class="text-gray-500">{{ __('Gastos totales') }}</dt>
@@ -75,6 +82,25 @@
                     @endif
                 @endcan
             </dl>
+
+            {{-- Fijar precio de venta sugerido (solo Admin) --}}
+            @can('fijar precio venta')
+                <form wire:submit="guardarPrecioSugerido"
+                      class="mt-4 flex flex-wrap items-end gap-3 bg-blue-50/60 border border-blue-200 rounded-xl p-3">
+                    <div>
+                        <x-input-label for="precioSugerido" :value="__('Precio de venta sugerido (USD)')" />
+                        <x-text-input id="precioSugerido" type="number" step="0.01" inputmode="decimal"
+                                      class="mt-1 block w-44" wire:model="precioSugerido" placeholder="4500.00" />
+                    </div>
+                    <button type="submit"
+                            class="px-4 py-3 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow"
+                            wire:loading.attr="disabled" wire:target="guardarPrecioSugerido">
+                        {{ __('Guardar precio') }}
+                    </button>
+                    <x-input-error :messages="$errors->get('precioSugerido')" class="w-full" />
+                    <p class="w-full text-xs text-gray-500 m-0">{{ __('Referencia visible para el Vendedor al negociar. Dejar vacío para quitarlo.') }}</p>
+                </form>
+            @endcan
 
             @if ($vehiculo->notas)
                 <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-line">{{ $vehiculo->notas }}</div>

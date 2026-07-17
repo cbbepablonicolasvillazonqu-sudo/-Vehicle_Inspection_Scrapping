@@ -102,6 +102,13 @@ class DemoVehiculosSeeder extends Seeder
 
             $vehiculo->forceFill(['estado' => $config['estado']])->save();
 
+            // Precio de venta sugerido (lo fija el Admin) para los que están a la venta.
+            if (in_array($config['estado'], [EstadoVehiculo::Listo, EstadoVehiculo::Publicado], true)) {
+                $vehiculo->forceFill([
+                    'precio_sugerido' => number_format(round(((float) $vehiculo->precio_compra * 1.7) / 50) * 50, 2, '.', ''),
+                ])->save();
+            }
+
             // Gastos.
             foreach ($config['gastos'] ?? [] as [$categoria, $descripcion, $monto]) {
                 $vehiculo->gastos()->create([

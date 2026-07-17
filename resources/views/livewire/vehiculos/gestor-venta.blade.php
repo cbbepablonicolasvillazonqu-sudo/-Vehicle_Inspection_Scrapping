@@ -93,6 +93,12 @@
                 {!! __('Al guardar, el vehículo pasará a <span class="font-semibold text-blue-700">Vendido</span> y el registro quedará bloqueado (solo Admin podrá editarlo).') !!}
             </p>
 
+            @if ($vehiculo->precio_sugerido !== null)
+                <p class="mt-2 text-sm bg-blue-50 border border-blue-200 text-blue-800 rounded-lg px-3 py-2 inline-block">
+                    💡 {{ __('Precio sugerido:') }} <span class="font-bold">{{ dinero($vehiculo->precio_sugerido) }}</span>
+                </p>
+            @endif
+
             <form wire:submit="registrar" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 @include('livewire.vehiculos.partials.campos-venta')
 

@@ -29,6 +29,7 @@ class RolesYPermisosSeeder extends Seeder
             'registrar ventas',
             'editar ventas cerradas',
             'registrar desguace',
+            'fijar precio venta',
             'ver precios compra',
             'ver ganancias',
             'gestionar usuarios',

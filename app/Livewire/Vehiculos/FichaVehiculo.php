@@ -20,16 +20,52 @@ class FichaVehiculo extends Component
 
     public Vehicle $vehiculo;
 
+    /** Editor inline del precio de venta sugerido (solo Admin). */
+    public string $precioSugerido = '';
+
     public function mount(Vehicle $vehiculo): void
     {
         $this->authorize('view', $vehiculo);
         $this->vehiculo = $vehiculo;
+        $this->precioSugerido = $vehiculo->precio_sugerido !== null
+            ? (string) $vehiculo->precio_sugerido
+            : '';
     }
 
     #[On('vehiculo-actualizado')]
     public function refrescar(): void
     {
         $this->vehiculo->refresh();
+    }
+
+    /**
+     * Fija (o quita, si se deja vacío) el precio de venta sugerido.
+     * Referencia del Vendedor al negociar; solo Admin puede fijarlo.
+     */
+    public function guardarPrecioSugerido(): void
+    {
+        abort_unless(auth()->user()->can('fijar precio venta'), 403);
+
+        $datos = $this->validate(
+            ['precioSugerido' => ['nullable', 'numeric', 'min:0', 'max:9999999']],
+            [],
+            ['precioSugerido' => __('precio de venta sugerido')],
+        );
+
+        $anterior = $this->vehiculo->precio_sugerido;
+        $nuevo = filled($datos['precioSugerido'])
+            ? number_format(round((float) $datos['precioSugerido'], 2), 2, '.', '')
+            : null;
+
+        $this->vehiculo->forceFill(['precio_sugerido' => $nuevo])->save();
+
+        app(ServicioAuditoria::class)->registrar($this->vehiculo, 'precio_sugerido_actualizado', [
+            'antes' => $anterior !== null ? (string) $anterior : null,
+            'despues' => $nuevo,
+        ]);
+
+        $this->dispatch('vehiculo-actualizado');
+        $this->dispatch('notificar', mensaje: __('Precio sugerido guardado'));
     }
 
     public function eliminar(): mixed
