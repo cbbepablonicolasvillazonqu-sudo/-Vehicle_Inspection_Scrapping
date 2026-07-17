@@ -1,66 +1,149 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Forte Towing — Inventario de Vehículos
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web (con soporte **PWA**, instalable en el celular) para gestionar el inventario de vehículos de **Forte Towing**: compra de autos usados, reparación, venta o desguace, con control de gastos, rentabilidad y auditoría completa.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Capa | Tecnología |
+|---|---|
+| Framework | **Laravel 11** (monolito) |
+| Interactividad | **Livewire 3** + **Alpine.js** (incluido por Livewire) |
+| Vistas | Blade + **Tailwind CSS** (mobile-first) |
+| Base de datos | **MariaDB** (driver `mysql`) |
+| Autenticación | **Laravel Breeze** (sin registro público) |
+| Roles/permisos | **Spatie Laravel-Permission** |
+| Fotos | Storage local (`storage/app/public`, organizado por vehículo y etapa) |
+| Exportaciones | **Maatwebsite/Excel** (XLSX y CSV) |
+| PWA | `manifest.webmanifest` + service worker + página offline |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Interfaz 100 % en español.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Requisitos
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP **8.2+** (probado con 8.4) con extensiones: `pdo_mysql`, `mbstring`, `zip`, `gd`, `fileinfo`, `xml`
+- Composer 2
+- MariaDB / MySQL (XAMPP sirve tal cual)
+- Node 18+ **solo si vas a recompilar assets** — `public/build` ya viene compilado y versionado, así que ni XAMPP ni Hostinger necesitan Node.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Instalación local (XAMPP)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+# 1. Clonar dentro de htdocs (o donde prefieras)
+cd C:\xampp\htdocs
+git clone https://github.com/cbbepablonicolasvillazonqu-sudo/-Vehicle_Inspection_Scrapping.git forte-towing
+cd forte-towing
 
-## Laravel Sponsors
+# 2. Dependencias PHP
+composer install
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 3. Configuración
+copy .env.example .env
+php artisan key:generate
 
-### Premium Partners
+# 4. Crear la base de datos (phpMyAdmin o consola):
+#    CREATE DATABASE forte_towing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+# 5. Migrar y sembrar (roles + usuarios + vehículos de demostración)
+php artisan migrate --seed
 
-## Contributing
+# 6. Enlace público para las fotos
+php artisan storage:link
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 7. Arrancar
+php artisan serve
+```
 
-## Code of Conduct
+Abrir <http://localhost:8000>. Para servir por Apache de XAMPP, apunta el DocumentRoot (o un VirtualHost) a la carpeta `public/`.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+> **Importante (MariaDB):** el `.env.example` ya trae `DB_COLLATION=utf8mb4_unicode_ci`. No lo quites: la colación por defecto de Laravel 11 solo existe en MySQL 8 y MariaDB fallaría.
 
-## Security Vulnerabilities
+> Los vehículos de demostración se cargan solo si `SEED_DEMO_DATA=true` (ya viene así en `.env.example`). En producción ponlo en `false`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Usuarios sembrados
 
-## License
+| Rol | Correo | Contraseña |
+|---|---|---|
+| **Admin** | `admin@fortetowing.com` | `password` |
+| **Comprador** | `compras@fortetowing.com` | `password` |
+| **Mecánico** | `taller@fortetowing.com` | `password` |
+| **Vendedor** | `ventas@fortetowing.com` | `password` |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+⚠️ Cambia las contraseñas en el primer uso (Perfil, o Admin → Usuarios). No hay registro público: las cuentas las crea el Admin.
+
+## Roles y permisos (resumen)
+
+- **Admin** — acceso total: usuarios, reportes de ganancias, exportaciones, eliminar registros, editar ventas cerradas, desguace, revertir estados finales.
+- **Comprador** — registra vehículos, edita sus datos, sube fotos, registra gastos, pasa a "En reparación". Ve precios de compra.
+- **Mecánico** — ve **solo** vehículos en reparación; registra reparaciones (gastos) y fotos; marca "Listo para la venta". **No ve** precios de compra ni ganancias.
+- **Vendedor** — ve listos/publicados/vendidos; publica y registra la venta (fecha, precio, comprador, teléfono, método de pago). Al vender, el registro queda **bloqueado** para todos excepto Admin.
+
+Cada ruta está protegida con middleware `role:`/`permission:` de Spatie **y** cada componente Livewire vuelve a validar en `mount()`/acciones (defensa en profundidad).
+
+## Estados del vehículo
+
+`Comprado / pendiente de revisión` → `En reparación` → `Listo para la venta` → `Publicado / en venta` → `Vendido` — o `Desguace` en cualquier punto (Admin).
+
+- Colores: 🟠 comprado · 🟡 reparación · 🟢 listo · 🔵 publicado/vendido · ⚪ desguace.
+- Se permiten **retrocesos** (ej. Listo → En reparación) según el rol; **todo** cambio queda en el historial con usuario, fecha y nota opcional.
+- `Vendido`/`Desguace` se revierten únicamente eliminando la venta/el desguace (solo Admin); el estado vuelve al anterior según el historial.
+
+## Rentabilidad (solo Admin)
+
+`Ganancia = (precio de venta o monto de desguace) − precio de compra − total de gastos`
+
+- Panel: total invertido en inventario activo, ganancia del mes y acumulada.
+- Reportes → Ganancias: detalle por vehículo con selector de mes y exportación a Excel.
+
+## PWA (instalar en el celular)
+
+1. Abre la app en Chrome/Safari del teléfono (en local funciona por `http://localhost`; en producción requiere **HTTPS** — Hostinger lo da gratis).
+2. Menú del navegador → **"Agregar a pantalla de inicio"** / **"Instalar app"**.
+3. Sin conexión, la app muestra una página de aviso y conserva iconos/estilos cacheados. Las páginas con datos nunca se cachean (privacidad).
+
+Los iconos se regeneran con: `php scripts/generar-iconos.php`.
+
+## Despliegue en Hostinger
+
+1. **BD:** crea la base y el usuario MariaDB en hPanel y pon sus credenciales en `.env` (mantén `DB_COLLATION=utf8mb4_unicode_ci`).
+2. **Código:** clona el repo (Git de hPanel o SSH). `composer install --no-dev --optimize-autoloader`.
+3. **.env de producción:** `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://tudominio.com`, `SEED_DEMO_DATA=false`, y `php artisan key:generate`.
+4. **Document root** apuntando a `public/` (en planes Cloud/Business se cambia desde hPanel; en VPS, config del vhost).
+5. `php artisan migrate --seed --force` (siembra solo roles y usuarios).
+6. `php artisan storage:link` (por SSH). Si el plan no permite symlinks, mueve `storage/app/public` vía panel o usa un cron con el comando.
+7. `php artisan config:cache && php artisan route:cache && php artisan view:cache`.
+8. Activa el **SSL gratuito** (necesario para la PWA).
+
+No hace falta Node en el servidor: `public/build` está versionado.
+
+## Pruebas
+
+```bash
+php artisan test
+```
+
+45 pruebas (autenticación, accesos por rol, flujo de vehículos, ventas/bloqueo, desguace, rentabilidad y PWA) contra una base MariaDB de testing (`forte_towing_testing`, ver `phpunit.xml`).
+
+## Estructura del código (lo importante)
+
+```
+app/
+├── Enums/                  # EstadoVehiculo (colores), CategoriaGasto, MetodoPago…
+├── Exports/                # VehiculosExport, GananciasExport (Excel/CSV)
+├── Http/Controllers/       # ExportController + auth de Breeze
+├── Livewire/
+│   ├── Dashboard.php       # Panel con tarjetas y finanzas
+│   ├── Admin/              # GestionUsuarios, ReporteGanancias
+│   └── Vehiculos/          # Lista, Formulario, Ficha, GestorEstado,
+│                           # GestorFotos, GestorGastos, GestorVenta, GestorDesguace
+├── Models/                 # Vehicle, Expense, Sale, ScrapRecord, VehiclePhoto,
+│                           # VehicleStatusHistory, AuditLog, User
+├── Policies/VehiclePolicy  # Bloqueo de vendidos/desguace salvo Admin
+└── Services/               # ServicioEstadoVehiculo (matriz de transiciones),
+                            # ServicioAuditoria, ServicioRentabilidad
+```
+
+## Nota de seguridad
+
+El proyecto usa **Laravel 11** por requerimiento del stack. Laravel 11 dejó de recibir parches de seguridad en **marzo de 2026** (por eso `composer.json` desactiva `audit.block-insecure`). Recomendación: planificar la migración a **Laravel 12** antes de exponer la app a internet en producción; el código usa APIs estándar y la migración es directa.
