@@ -50,6 +50,21 @@ class GestorFotos extends Component
         return $usuario->hasRole('admin') || ! $this->vehiculo->estaBloqueado();
     }
 
+    /** Quita una foto de la selección previa (antes de confirmar la subida). */
+    public function quitarSeleccion(int $indice): void
+    {
+        unset($this->fotos[$indice]);
+        $this->fotos = array_values($this->fotos);
+        $this->resetValidation();
+    }
+
+    /** Descarta toda la selección previa. */
+    public function limpiarSeleccion(): void
+    {
+        $this->reset('fotos');
+        $this->resetValidation();
+    }
+
     public function subir(): void
     {
         abort_unless($this->puedeGestionar(), 403);

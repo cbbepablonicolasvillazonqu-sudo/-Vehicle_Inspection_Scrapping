@@ -119,6 +119,12 @@
     "Fotos": "Photos",
     "Subiendo…": "Uploading…",
     "Cargando archivos…": "Loading files…",
+    "Elegir fotos": "Choose photos",
+    "Toca para elegir fotos o arrástralas aquí": "Tap to choose photos or drag them here",
+    "Se subirán a la etapa «:etapa» · máx. 10 fotos, 5 MB c/u": "They will be uploaded to the \":etapa\" stage · max 10 photos, 5 MB each",
+    "Previsualización (:n)": "Preview (:n)",
+    "Quitar": "Remove",
+    "Subir :n a «:etapa»": "Upload :n to \":etapa\"",
     "Foto del vehículo": "Vehicle photo",
     "¿Eliminar esta foto?": "Delete this photo?",
 

@@ -19,23 +19,65 @@
         @endforeach
     </div>
 
-    {{-- Subida --}}
+    {{-- Apartado de subida con previsualización --}}
     @if ($this->puedeGestionar())
-        <form wire:submit="subir" class="mt-4 flex flex-wrap items-center gap-3">
-            <input type="file" wire:model="fotos" multiple accept="image/*" capture="environment"
-                   class="block text-sm text-slate-600 file:me-3 file:px-4 file:py-2.5 file:rounded-xl file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold hover:file:bg-blue-100 file:cursor-pointer">
+        @php $etiquetaEtapa = \App\Enums\EtapaFoto::from($etapa)->etiqueta(); @endphp
 
-            <button type="submit" class="btn-primario btn-sm"
-                    wire:loading.attr="disabled" wire:target="fotos,subir">
-                <x-icono nombre="descargar" clase="w-4 h-4 rotate-180" />
-                <span wire:loading.remove wire:target="subir">{{ __('Subir a «:etapa»', ['etapa' => \App\Enums\EtapaFoto::from($etapa)->etiqueta()]) }}</span>
-                <span wire:loading wire:target="subir">{{ __('Subiendo…') }}</span>
-            </button>
+        <div class="mt-4">
+            {{-- Zona para elegir / arrastrar (el input invisible cubre toda el área) --}}
+            <div class="relative rounded-2xl border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50/40 transition p-6 text-center">
+                <input type="file" wire:model="fotos" multiple accept="image/*"
+                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                       aria-label="{{ __('Elegir fotos') }}">
+                <x-icono nombre="camara" clase="w-9 h-9 mx-auto text-slate-400" />
+                <p class="mt-2 text-sm font-semibold text-slate-700">{{ __('Toca para elegir fotos o arrástralas aquí') }}</p>
+                <p class="text-xs text-slate-400 mt-0.5">{{ __('Se subirán a la etapa «:etapa» · máx. 10 fotos, 5 MB c/u', ['etapa' => $etiquetaEtapa]) }}</p>
+                <p class="text-sm text-blue-700 font-medium mt-2" wire:loading wire:target="fotos">{{ __('Cargando archivos…') }}</p>
+            </div>
 
-            <span class="text-sm text-slate-400" wire:loading wire:target="fotos">{{ __('Cargando archivos…') }}</span>
-        </form>
-        <x-input-error :messages="$errors->get('fotos')" class="mt-2" />
-        <x-input-error :messages="$errors->get('fotos.*')" class="mt-2" />
+            <x-input-error :messages="$errors->get('fotos')" class="mt-2" />
+            <x-input-error :messages="$errors->get('fotos.*')" class="mt-2" />
+
+            {{-- Previsualización de la selección antes de confirmar --}}
+            @if (count($fotos))
+                <div class="mt-3 bg-slate-50 border border-slate-200 rounded-2xl p-3.5">
+                    <p class="etiqueta-seccion mb-2.5">{{ __('Previsualización (:n)', ['n' => count($fotos)]) }}</p>
+
+                    <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                        @foreach ($fotos as $indice => $foto)
+                            @php
+                                try { $urlPrevia = $foto->temporaryUrl(); } catch (\Throwable) { $urlPrevia = null; }
+                            @endphp
+                            <div class="relative rounded-xl overflow-hidden aspect-square bg-slate-200 ring-1 ring-slate-200"
+                                 wire:key="previa-{{ $indice }}-{{ $foto->getFilename() }}">
+                                @if ($urlPrevia)
+                                    <img src="{{ $urlPrevia }}" class="w-full h-full object-cover" alt="">
+                                @else
+                                    <div class="grid place-items-center w-full h-full text-slate-400">
+                                        <x-icono nombre="sin-foto" clase="w-6 h-6" />
+                                    </div>
+                                @endif
+                                <button type="button" wire:click="quitarSeleccion({{ $indice }})"
+                                        class="absolute top-1 right-1 bg-slate-900/70 hover:bg-red-600 text-white rounded-full w-6 h-6 grid place-items-center text-xs font-bold"
+                                        aria-label="{{ __('Quitar') }}">✕</button>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-2 justify-end">
+                        <button type="button" wire:click="limpiarSeleccion" class="btn-secundario btn-sm">
+                            {{ __('Cancelar') }}
+                        </button>
+                        <button type="button" wire:click="subir" class="btn-primario btn-sm"
+                                wire:loading.attr="disabled" wire:target="subir,fotos">
+                            <x-icono nombre="check" clase="w-4 h-4" />
+                            <span wire:loading.remove wire:target="subir">{{ __('Subir :n a «:etapa»', ['n' => count($fotos), 'etapa' => $etiquetaEtapa]) }}</span>
+                            <span wire:loading wire:target="subir">{{ __('Subiendo…') }}</span>
+                        </button>
+                    </div>
+                </div>
+            @endif
+        </div>
     @endif
 
     {{-- Galería de la etapa activa --}}
