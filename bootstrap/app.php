@@ -11,6 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Confía en los encabezados X-Forwarded-* del proxy que tenga delante
+        // (túnel de Cloudflare en demos, balanceador de Hostinger en prod).
+        // Sin esto, detrás de HTTPS Laravel generaría URLs http:// (contenido mixto).
+        $middleware->trustProxies(at: '*');
+
         // Fija el idioma (es/en) en cada petición web según la preferencia
         // del usuario o de la sesión.
         $middleware->web(append: [
