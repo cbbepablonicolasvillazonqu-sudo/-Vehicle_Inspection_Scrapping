@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\EtapaFoto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class VehiclePhoto extends Model
 {
@@ -34,9 +33,16 @@ class VehiclePhoto extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /** URL pública de la imagen (requiere `php artisan storage:link`). */
+    /**
+     * URL pública de la imagen (requiere `php artisan storage:link`).
+     *
+     * Usa asset() —no Storage::url()— para que la URL apunte al host real de
+     * la petición (localhost, túnel de Cloudflare o dominio en producción) y no
+     * al APP_URL fijo. Así una persona externa que entra por el túnel también
+     * ve las fotos. Con trustProxies=* la petición conserva host/esquema reales.
+     */
     public function url(): string
     {
-        return Storage::disk('public')->url($this->ruta);
+        return asset('storage/'.ltrim($this->ruta, '/'));
     }
 }

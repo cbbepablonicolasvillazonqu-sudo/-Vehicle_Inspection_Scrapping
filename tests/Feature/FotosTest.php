@@ -89,6 +89,31 @@ class FotosTest extends TestCase
         $this->assertSame(0, $vehiculo->fotos()->count());
     }
 
+    public function test_url_de_foto_usa_el_host_de_la_peticion_no_app_url(): void
+    {
+        $admin = $this->usuarioConRol('admin');
+        $vehiculo = Vehicle::factory()->create();
+        $vehiculo->fotos()->create([
+            'etapa' => 'compra',
+            'ruta' => "vehiculos/{$vehiculo->id}/compra/demo.jpg",
+            'nombre_original' => 'demo.jpg',
+            'user_id' => $admin->id,
+        ]);
+
+        // Simula la entrada por el túnel: Cloudflare reenvía host y esquema reales.
+        $respuesta = $this->actingAs($admin)
+            ->withHeaders([
+                'X-Forwarded-Host' => 'tunel-demo.trycloudflare.com',
+                'X-Forwarded-Proto' => 'https',
+            ])
+            ->get("/vehiculos/{$vehiculo->id}");
+
+        $respuesta->assertOk();
+        // La foto debe apuntar al host por el que entró el usuario, no a APP_URL.
+        $respuesta->assertSee("https://tunel-demo.trycloudflare.com/storage/vehiculos/{$vehiculo->id}/compra/demo.jpg", false);
+        $respuesta->assertDontSee("http://localhost/storage/vehiculos/{$vehiculo->id}/compra/demo.jpg", false);
+    }
+
     public function test_vehiculo_vendido_bloquea_subida_salvo_admin(): void
     {
         $vendido = Vehicle::factory()->enEstado(EstadoVehiculo::Vendido)->create();
