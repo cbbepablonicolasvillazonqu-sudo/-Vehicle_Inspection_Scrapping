@@ -72,7 +72,7 @@ class GestorFotos extends Component
         $this->validate([
             'etapa' => ['required', Rule::enum(EtapaFoto::class)],
             'fotos' => ['required', 'array', 'min:1', 'max:10'],
-            'fotos.*' => ['image', 'max:5120'], // 5 MB por foto
+            'fotos.*' => ['image', 'max:10240'], // 10 MB por foto (holgura para fotos de cámara)
         ]);
 
         $auditoria = app(ServicioAuditoria::class);
