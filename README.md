@@ -6,7 +6,7 @@ Aplicación web (con soporte **PWA**, instalable en el celular) para gestionar e
 
 | Capa | Tecnología |
 |---|---|
-| Framework | **Laravel 11** (monolito) |
+| Framework | **Laravel 12** (monolito) |
 | Interactividad | **Livewire 3** + **Alpine.js** (incluido por Livewire) |
 | Vistas | Blade + **Tailwind CSS** (mobile-first) |
 | Base de datos | **MariaDB** (driver `mysql`) |
@@ -66,7 +66,7 @@ php artisan serve
 
 Abrir <http://localhost:8000>. Para servir por Apache de XAMPP, apunta el DocumentRoot (o un VirtualHost) a la carpeta `public/`.
 
-> **Importante (MariaDB):** el `.env.example` ya trae `DB_COLLATION=utf8mb4_unicode_ci`. No lo quites: la colación por defecto de Laravel 11 solo existe en MySQL 8 y MariaDB fallaría.
+> **Importante (MariaDB):** el `.env.example` ya trae `DB_COLLATION=utf8mb4_unicode_ci`. No lo quites: la colación por defecto de Laravel (utf8mb4_0900_ai_ci) solo existe en MySQL 8 y MariaDB fallaría.
 
 > Los vehículos de demostración se cargan solo si `SEED_DEMO_DATA=true` (ya viene así en `.env.example`). En producción ponlo en `false`.
 
@@ -155,4 +155,4 @@ app/
 
 ## Nota de seguridad
 
-El proyecto usa **Laravel 11** por requerimiento del stack. Laravel 11 dejó de recibir parches de seguridad en **marzo de 2026** (por eso `composer.json` desactiva `audit.block-insecure`). Recomendación: planificar la migración a **Laravel 12** antes de exponer la app a internet en producción; el código usa APIs estándar y la migración es directa.
+El proyecto usa **Laravel 12** (migrado desde Laravel 11), que recibe parches de seguridad activos. Mantén las dependencias al día con `composer update` periódico y revisa `composer audit`. La opción `audit.block-insecure` sigue en `false` para no bloquear instalaciones por avisos de terceros; conviene revisarla manualmente antes de cada despliegue.
