@@ -107,7 +107,7 @@ class ReporteTest extends TestCase
     {
         $this->actingAs($this->usuarioConRol('admin'))->get('/reportes/ganancias')->assertOk();
 
-        foreach (['comprador', 'mecanico', 'vendedor'] as $rol) {
+        foreach (['gruero', 'mecanico', 'vendedor'] as $rol) {
             $this->actingAs($this->usuarioConRol($rol))->get('/reportes/ganancias')->assertForbidden();
             $this->actingAs(User::factory()->create()->assignRole($rol))->get('/exportar/ganancias')->assertForbidden();
         }

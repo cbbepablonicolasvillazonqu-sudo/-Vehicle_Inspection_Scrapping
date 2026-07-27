@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use App\Livewire\Admin\GestionUsuarios;
 use App\Livewire\Admin\ReporteGanancias;
 use App\Livewire\Dashboard;
+use App\Livewire\Vehiculos\AsignarRecojo;
+use App\Livewire\Vehiculos\EnvioJunkCar;
 use App\Livewire\Vehiculos\FichaVehiculo;
 use App\Livewire\Vehiculos\FormularioVehiculo;
 use App\Livewire\Vehiculos\ListaVehiculos;
@@ -51,12 +53,22 @@ Route::middleware(['auth', 'permission:exportar datos'])->group(function () {
 Route::middleware(['auth', 'permission:ver vehiculos'])->group(function () {
     Route::get('/vehiculos', ListaVehiculos::class)->name('vehiculos.index');
 
-    Route::middleware('role:admin|comprador')->group(function () {
+    Route::middleware('role:admin')->group(function () {
         Route::get('/vehiculos/crear', FormularioVehiculo::class)->name('vehiculos.crear');
         Route::get('/vehiculos/{vehiculo}/editar', FormularioVehiculo::class)->name('vehiculos.editar');
     });
 
     Route::get('/vehiculos/{vehiculo}', FichaVehiculo::class)->name('vehiculos.ficha');
+});
+
+// Asignación de recojo al Gruero (solo Admin).
+Route::middleware(['auth', 'permission:asignar recojo'])->group(function () {
+    Route::get('/recojos/asignar', AsignarRecojo::class)->name('recojos.asignar');
+});
+
+// Envío masivo a Junk car con búsqueda y filtros (Admin y Gruero).
+Route::middleware(['auth', 'permission:enviar a junk'])->group(function () {
+    Route::get('/junk-car', EnvioJunkCar::class)->name('junk.masivo');
 });
 
 require __DIR__.'/auth.php';

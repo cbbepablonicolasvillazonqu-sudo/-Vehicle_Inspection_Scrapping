@@ -36,7 +36,7 @@
                     {{-- Acciones --}}
                     <div class="mt-4 flex flex-wrap gap-2">
                         @can('update', $vehiculo)
-                            @hasanyrole('admin|comprador')
+                            @hasanyrole('admin')
                                 <a href="{{ route('vehiculos.editar', $vehiculo) }}" class="btn-secundario btn-sm">
                                     <x-icono nombre="editar" clase="w-4 h-4" /> {{ __('Editar datos') }}
                                 </a>
@@ -59,7 +59,7 @@
                 <dl class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-4 text-sm">
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Millas') }}</dt>
-                        <dd class="font-semibold text-slate-900 tabular">{{ number_format($vehiculo->millas) }} {{ __('mi') }}</dd>
+                        <dd class="font-semibold text-slate-900 tabular">{{ $vehiculo->millas !== null ? number_format($vehiculo->millas).' '.__('mi') : '—' }}</dd>
                     </div>
 
                     @can('ver precios compra')
@@ -71,15 +71,21 @@
 
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Fecha de compra') }}</dt>
-                        <dd class="font-semibold text-slate-900">{{ $vehiculo->fecha_compra->format('d/m/Y') }}</dd>
+                        <dd class="font-semibold text-slate-900">{{ $vehiculo->fecha_compra?->format('d/m/Y') ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Lugar de compra') }}</dt>
-                        <dd class="font-semibold text-slate-900">{{ $vehiculo->lugar_compra->etiqueta() }}</dd>
+                        <dd class="font-semibold text-slate-900">{{ $vehiculo->lugar_compra?->etiqueta() ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Título') }}</dt>
-                        <dd><span class="chip {{ $vehiculo->estado_titulo->colorBadge() }}">{{ $vehiculo->estado_titulo->etiqueta() }}</span></dd>
+                        <dd>
+                            @if ($vehiculo->estado_titulo)
+                                <span class="chip {{ $vehiculo->estado_titulo->colorBadge() }}">{{ $vehiculo->estado_titulo->etiqueta() }}</span>
+                            @else
+                                <span class="text-slate-300">—</span>
+                            @endif
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Registrado por') }}</dt>
@@ -151,13 +157,18 @@
                             @if ($vehiculo->estado === \App\Enums\EstadoVehiculo::Vendido)
                                 {{ __('Este vehículo está vendido y el registro quedó bloqueado. Solo el Administrador puede modificarlo.') }}
                             @else
-                                {{ __('Este vehículo está en desguace y el registro quedó bloqueado. Solo el Administrador puede modificarlo.') }}
+                                {{ __('Este vehículo está en Junk car y el registro quedó bloqueado. Solo el Administrador puede modificarlo.') }}
                             @endif
                         </span>
                     </div>
                 @endif
             </div>
         </div>
+
+        {{-- Recojo: ubicación de origen, pago, destino, catalizador y monto --}}
+        @if ($vehiculo->ubicacion_origen_url || $vehiculo->asignado_a || auth()->user()->hasRole(['admin', 'gruero']))
+            <livewire:vehiculos.gestor-recojo :vehiculo="$vehiculo" :key="'recojo-'.$vehiculo->id" />
+        @endif
 
         {{-- Estado y transiciones --}}
         <livewire:vehiculos.gestor-estado :vehiculo="$vehiculo" :key="'estado-'.$vehiculo->id" />
@@ -168,13 +179,10 @@
         {{-- Desguace (solo Admin registra; tarjeta si ya se desguazó) --}}
         <livewire:vehiculos.gestor-desguace :vehiculo="$vehiculo" :key="'desguace-'.$vehiculo->id" />
 
-        {{-- Gastos (Admin, Comprador y Mecánico) --}}
+        {{-- Gastos, con sus fotos (Admin y Mecánico). Único módulo con fotos. --}}
         @can('registrar gastos')
             <livewire:vehiculos.gestor-gastos :vehiculo="$vehiculo" :key="'gastos-'.$vehiculo->id" />
         @endcan
-
-        {{-- Fotos por etapa --}}
-        <livewire:vehiculos.gestor-fotos :vehiculo="$vehiculo" :key="'fotos-'.$vehiculo->id" />
 
         {{-- Auditoría (solo Admin) --}}
         @role('admin')

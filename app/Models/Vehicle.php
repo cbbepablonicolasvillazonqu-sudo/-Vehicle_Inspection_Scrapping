@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\EstadoTitulo;
 use App\Enums\EstadoVehiculo;
 use App\Enums\LugarCompra;
+use App\Enums\MetodoPagoGruero;
+use App\Enums\UbicacionDestino;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +33,12 @@ class Vehicle extends Model
         'estado',
         'notas',
         'created_by',
+        'ubicacion_origen_url',
+        'ubicacion_destino',
+        'asignado_a',
+        'metodo_pago_gruero',
+        'tiene_catalizador',
+        'monto_pagado',
     ];
 
     protected function casts(): array
@@ -40,10 +48,14 @@ class Vehicle extends Model
             'millas' => 'integer',
             'precio_compra' => 'decimal:2',
             'precio_sugerido' => 'decimal:2',
+            'monto_pagado' => 'decimal:2',
             'fecha_compra' => 'date',
             'lugar_compra' => LugarCompra::class,
             'estado_titulo' => EstadoTitulo::class,
             'estado' => EstadoVehiculo::class,
+            'ubicacion_destino' => UbicacionDestino::class,
+            'metodo_pago_gruero' => MetodoPagoGruero::class,
+            'tiene_catalizador' => 'boolean',
         ];
     }
 
@@ -52,6 +64,12 @@ class Vehicle extends Model
     public function creador(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** Gruero al que el Admin asignó el recojo. */
+    public function gruero(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'asignado_a');
     }
 
     public function fotos(): HasMany
@@ -94,11 +112,16 @@ class Vehicle extends Model
 
     /**
      * Restringe la consulta a los vehículos que el rol del usuario puede ver:
+     * gruero → solo los que el Admin le asignó;
      * mecánico → pendientes de revisión, en reparación y listos;
-     * vendedor → listos/publicados/vendidos; admin y comprador → todos.
+     * vendedor → listos/publicados/vendidos; admin → todos.
      */
     public function scopeVisiblePara(Builder $query, User $usuario): Builder
     {
+        if ($usuario->hasRole('gruero')) {
+            return $query->where('asignado_a', $usuario->id);
+        }
+
         if ($usuario->hasRole('mecanico')) {
             return $query->whereIn('estado', [
                 EstadoVehiculo::Comprado,
@@ -189,6 +212,10 @@ class Vehicle extends Model
     /** Versión por-modelo del scope visiblePara (para policies). */
     public function esVisiblePara(User $usuario): bool
     {
+        if ($usuario->hasRole('gruero')) {
+            return $this->asignado_a === $usuario->id;
+        }
+
         if ($usuario->hasRole('mecanico')) {
             return in_array($this->estado, [
                 EstadoVehiculo::Comprado,

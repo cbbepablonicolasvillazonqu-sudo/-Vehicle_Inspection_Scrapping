@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Livewire\Vehiculos;
+
+use App\Enums\MetodoPagoGruero;
+use App\Enums\UbicacionDestino;
+use App\Models\Vehicle;
+use App\Services\ServicioAuditoria;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
+use Livewire\Component;
+
+/**
+ * Datos que registra el Gruero al recoger el vehículo: forma de pago,
+ * dónde lo dejó, si tiene catalizador y cuánto pagó por él.
+ */
+class GestorRecojo extends Component
+{
+    public Vehicle $vehiculo;
+
+    public string $metodo_pago_gruero = '';
+
+    public string $ubicacion_destino = '';
+
+    public string $tiene_catalizador = '';
+
+    public string $monto_pagado = '';
+
+    public function mount(Vehicle $vehiculo): void
+    {
+        $this->vehiculo = $vehiculo;
+        $this->sincronizar();
+    }
+
+    private function sincronizar(): void
+    {
+        $this->metodo_pago_gruero = $this->vehiculo->metodo_pago_gruero?->value ?? '';
+        $this->ubicacion_destino = $this->vehiculo->ubicacion_destino?->value ?? '';
+        $this->tiene_catalizador = $this->vehiculo->tiene_catalizador === null
+            ? ''
+            : ($this->vehiculo->tiene_catalizador ? '1' : '0');
+        $this->monto_pagado = $this->vehiculo->monto_pagado !== null
+            ? (string) $this->vehiculo->monto_pagado
+            : '';
+    }
+
+    #[On('vehiculo-actualizado')]
+    public function refrescar(): void
+    {
+        $this->vehiculo->refresh();
+        $this->sincronizar();
+    }
+
+    /** Solo el Gruero asignado (o el Admin) puede registrar el recojo. */
+    public function puedeRegistrar(): bool
+    {
+        $usuario = auth()->user();
+
+        if ($usuario->hasRole('admin')) {
+            return true;
+        }
+
+        return $usuario->can('registrar recojo')
+            && $this->vehiculo->asignado_a === $usuario->id
+            && ! $this->vehiculo->estaBloqueado();
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'metodo_pago_gruero' => ['required', Rule::enum(MetodoPagoGruero::class)],
+            'ubicacion_destino' => ['required', Rule::enum(UbicacionDestino::class)],
+            'tiene_catalizador' => ['required', 'in:0,1'],
+            'monto_pagado' => ['required', 'numeric', 'min:0', 'max:9999999'],
+        ];
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'metodo_pago_gruero' => __('forma de pago'),
+            'ubicacion_destino' => __('ubicación de destino'),
+            'tiene_catalizador' => __('catalizador'),
+            'monto_pagado' => __('monto pagado'),
+        ];
+    }
+
+    public function guardar(): void
+    {
+        abort_unless($this->puedeRegistrar(), 403);
+
+        $datos = $this->validate();
+
+        $this->vehiculo->forceFill([
+            'metodo_pago_gruero' => $datos['metodo_pago_gruero'],
+            'ubicacion_destino' => $datos['ubicacion_destino'],
+            'tiene_catalizador' => (bool) $datos['tiene_catalizador'],
+            'monto_pagado' => number_format(round((float) $datos['monto_pagado'], 2), 2, '.', ''),
+        ])->save();
+
+        app(ServicioAuditoria::class)->registrar($this->vehiculo, 'recojo_registrado', [
+            'pago' => $datos['metodo_pago_gruero'],
+            'destino' => $datos['ubicacion_destino'],
+            'catalizador' => (bool) $datos['tiene_catalizador'],
+            'monto' => $datos['monto_pagado'],
+        ]);
+
+        $this->dispatch('vehiculo-actualizado');
+        $this->dispatch('notificar', mensaje: __('Recojo registrado'));
+    }
+
+    public function render()
+    {
+        return view('livewire.vehiculos.gestor-recojo', [
+            'metodos' => MetodoPagoGruero::opciones(),
+            'destinos' => UbicacionDestino::opciones(),
+        ]);
+    }
+}

@@ -40,6 +40,30 @@ class Dashboard extends Component
             'desguace' => $base()->where('estado', EstadoVehiculo::Desguace)->count(),
         ];
 
+        // Tarjetas que ve cada rol:
+        // - Mecánico: sin "Publicados" ni "Vendidos este mes".
+        // - Vendedor: sin "En reparación" ni "Junk car".
+        // - Gruero: solo su inventario asignado.
+        $ocultas = match (true) {
+            $usuario->hasRole('mecanico') => ['publicados', 'vendidosMes'],
+            $usuario->hasRole('vendedor') => ['reparacion', 'desguace'],
+            $usuario->hasRole('gruero') => ['reparacion', 'listos', 'publicados', 'vendidosMes'],
+            default => [],
+        };
+
+        $tarjetas = collect([
+            ['clave' => 'inventario', 'txt' => __('En inventario'), 'icono' => 'archivo', 'color' => 'slate', 'estado' => null],
+            ['clave' => 'reparacion', 'txt' => __('En reparación'), 'icono' => 'llave-inglesa', 'color' => 'yellow', 'estado' => 'en_reparacion'],
+            ['clave' => 'listos', 'txt' => __('Listos'), 'icono' => 'check', 'color' => 'green', 'estado' => 'listo'],
+            ['clave' => 'publicados', 'txt' => __('Publicados'), 'icono' => 'etiqueta', 'color' => 'sky', 'estado' => 'publicado'],
+            ['clave' => 'vendidosMes', 'txt' => __('Vendidos este mes'), 'icono' => 'dinero', 'color' => 'blue', 'estado' => 'vendido'],
+            ['clave' => 'desguace', 'txt' => __('Junk car'), 'icono' => 'engranaje', 'color' => 'gray', 'estado' => 'desguace'],
+        ])
+            ->reject(fn (array $t) => in_array($t['clave'], $ocultas, true))
+            ->map(fn (array $t) => $t + ['n' => $conteos[$t['clave']]])
+            ->values()
+            ->all();
+
         $finanzas = null;
 
         if ($usuario->can('ver ganancias')) {
@@ -54,6 +78,7 @@ class Dashboard extends Component
 
         return view('livewire.dashboard', [
             'conteos' => $conteos,
+            'tarjetas' => $tarjetas,
             'finanzas' => $finanzas,
         ]);
     }

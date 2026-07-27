@@ -4,7 +4,7 @@
         <div class="tarjeta p-4 sm:p-6 border-t-4 border-t-slate-500">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <x-icono nombre="engranaje" clase="w-5 h-5 text-slate-500" /> {{ __('Desguace') }}
+                    <x-icono nombre="engranaje" clase="w-5 h-5 text-slate-500" /> {{ __('Junk car') }}
                 </h3>
 
                 @if ($this->puedeGestionar() && ! $editando)
@@ -13,7 +13,7 @@
                             <x-icono nombre="editar" clase="w-4 h-4" /> {{ __('Editar (Admin)') }}
                         </button>
                         <button wire:click="eliminarDesguace"
-                                wire:confirm="{{ __('¿Eliminar el desguace? El vehículo volverá a su estado anterior.') }}"
+                                wire:confirm="{{ __('¿Eliminar el registro de Junk car? El vehículo volverá a su estado anterior.') }}"
                                 class="btn-peligro btn-sm">
                             <x-icono nombre="basura" clase="w-4 h-4" /> {{ __('Eliminar') }}
                         </button>
@@ -74,7 +74,7 @@
         <div class="tarjeta p-4 sm:p-6 border-t-4 border-t-slate-500" x-data="{ abierto: false }">
             <button type="button" @click="abierto = !abierto" class="w-full flex items-center justify-between">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <x-icono nombre="engranaje" clase="w-5 h-5 text-slate-500" /> {{ __('Enviar a desguace (Admin)') }}
+                    <x-icono nombre="engranaje" clase="w-5 h-5 text-slate-500" /> {{ __('Enviar a Junk car (Admin)') }}
                 </h3>
                 <span class="text-slate-400 transition" :class="abierto && 'rotate-180'">▾</span>
             </button>
@@ -85,9 +85,9 @@
 
                 <div class="sm:col-span-2 flex justify-end">
                     <button type="submit"
-                            wire:confirm="{{ __('¿Enviar este vehículo a desguace? El registro quedará bloqueado.') }}"
+                            wire:confirm="{{ __('¿Enviar este vehículo a Junk car? El registro quedará bloqueado.') }}"
                             class="btn bg-slate-700 text-white hover:bg-slate-800 focus:ring-slate-500">
-                        <x-icono nombre="engranaje" clase="w-5 h-5" /> {{ __('Confirmar desguace') }}
+                        <x-icono nombre="engranaje" clase="w-5 h-5" /> {{ __('Confirmar Junk car') }}
                     </button>
                 </div>
             </form>

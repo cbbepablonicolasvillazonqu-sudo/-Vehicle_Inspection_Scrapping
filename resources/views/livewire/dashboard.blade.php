@@ -13,14 +13,6 @@
 
         {{-- Tarjetas por estado --}}
         @php
-            $tarjetas = [
-                ['n' => $conteos['inventario'], 'txt' => __('En inventario'), 'icono' => 'archivo', 'color' => 'slate', 'estado' => null],
-                ['n' => $conteos['reparacion'], 'txt' => __('En reparación'), 'icono' => 'llave-inglesa', 'color' => 'yellow', 'estado' => 'en_reparacion'],
-                ['n' => $conteos['listos'], 'txt' => __('Listos'), 'icono' => 'check', 'color' => 'green', 'estado' => 'listo'],
-                ['n' => $conteos['publicados'], 'txt' => __('Publicados'), 'icono' => 'etiqueta', 'color' => 'sky', 'estado' => 'publicado'],
-                ['n' => $conteos['vendidosMes'], 'txt' => __('Vendidos este mes'), 'icono' => 'dinero', 'color' => 'blue', 'estado' => 'vendido'],
-                ['n' => $conteos['desguace'], 'txt' => __('Desguace'), 'icono' => 'engranaje', 'color' => 'gray', 'estado' => 'desguace'],
-            ];
             $estilos = [
                 'slate' => ['ring' => 'hover:ring-slate-300', 'chip' => 'bg-slate-100 text-slate-600', 'num' => 'text-slate-900'],
                 'yellow' => ['ring' => 'hover:ring-yellow-300', 'chip' => 'bg-yellow-100 text-yellow-700', 'num' => 'text-yellow-600'],
@@ -80,7 +72,7 @@
                     <div class="text-3xl font-extrabold mt-2 tabular {{ $finanzas['gananciaAcumulada'] >= 0 ? 'text-green-700' : 'text-red-700' }}">
                         {{ dinero($finanzas['gananciaAcumulada']) }}
                     </div>
-                    <div class="text-xs text-slate-400 mt-1">{{ __('ventas + desguaces históricos') }}</div>
+                    <div class="text-xs text-slate-400 mt-1">{{ __('ventas + Junk car históricos') }}</div>
                 </div>
             </div>
         @endif

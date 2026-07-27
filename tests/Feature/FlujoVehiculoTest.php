@@ -30,11 +30,11 @@ class FlujoVehiculoTest extends TestCase
         return User::factory()->create()->assignRole($rol);
     }
 
-    public function test_comprador_registra_vehiculo_con_historial_y_auditoria(): void
+    public function test_admin_registra_vehiculo_con_historial_y_auditoria(): void
     {
-        $comprador = $this->usuarioConRol('comprador');
+        $admin = $this->usuarioConRol('admin');
 
-        Livewire::actingAs($comprador)
+        Livewire::actingAs($admin)
             ->test(FormularioVehiculo::class)
             ->set('marca', 'Toyota')
             ->set('modelo', 'Corolla')
@@ -44,7 +44,7 @@ class FlujoVehiculoTest extends TestCase
             ->set('precio_compra', '2500')
             ->set('fecha_compra', now()->format('Y-m-d'))
             ->set('lugar_compra', 'subasta')
-            ->set('estado_titulo', 'en_mano')
+            ->set('estado_titulo', 'clean')
             ->call('guardar')
             ->assertHasNoErrors()
             ->assertRedirect();
@@ -53,13 +53,13 @@ class FlujoVehiculoTest extends TestCase
 
         $this->assertSame('1HGBH41JXMN109186', $vehiculo->vin); // VIN normalizado a mayúsculas
         $this->assertSame(EstadoVehiculo::Comprado, $vehiculo->estado);
-        $this->assertSame($comprador->id, $vehiculo->created_by);
+        $this->assertSame($admin->id, $vehiculo->created_by);
 
         $this->assertDatabaseHas('vehicle_status_histories', [
             'vehicle_id' => $vehiculo->id,
             'estado_anterior' => null,
             'estado_nuevo' => 'comprado',
-            'user_id' => $comprador->id,
+            'user_id' => $admin->id,
         ]);
 
         $this->assertDatabaseHas('audit_logs', [
@@ -70,7 +70,7 @@ class FlujoVehiculoTest extends TestCase
 
     public function test_vin_invalido_es_rechazado(): void
     {
-        Livewire::actingAs($this->usuarioConRol('comprador'))
+        Livewire::actingAs($this->usuarioConRol('admin'))
             ->test(FormularioVehiculo::class)
             ->set('marca', 'Ford')
             ->set('modelo', 'Focus')
@@ -80,7 +80,7 @@ class FlujoVehiculoTest extends TestCase
             ->set('precio_compra', '1800')
             ->set('fecha_compra', now()->format('Y-m-d'))
             ->set('lugar_compra', 'particular')
-            ->set('estado_titulo', 'pendiente')
+            ->set('estado_titulo', 'rebuild')
             ->call('guardar')
             ->assertHasErrors(['vin']);
     }
@@ -148,18 +148,18 @@ class FlujoVehiculoTest extends TestCase
         $servicio = app(ServicioEstadoVehiculo::class);
         $vehiculo = Vehicle::factory()->create(); // comprado
 
-        $comprador = $this->usuarioConRol('comprador');
+        $gruero = $this->usuarioConRol('gruero');
         $mecanico = $this->usuarioConRol('mecanico');
         $vendedor = $this->usuarioConRol('vendedor');
 
-        // Comprador: comprado → en reparación (permitido)
-        $servicio->cambiar($comprador, $vehiculo, EstadoVehiculo::EnReparacion);
+        // Mecánico: comprado → en reparación (él inicia la revisión)
+        $servicio->cambiar($mecanico, $vehiculo, EstadoVehiculo::EnReparacion);
         $this->assertSame(EstadoVehiculo::EnReparacion, $vehiculo->fresh()->estado);
 
-        // Comprador NO puede saltar a listo
+        // El gruero no participa del flujo de estados
         try {
-            $servicio->cambiar($comprador, $vehiculo->fresh(), EstadoVehiculo::Listo);
-            $this->fail('El comprador no debería poder marcar Listo.');
+            $servicio->cambiar($gruero, $vehiculo->fresh(), EstadoVehiculo::Listo);
+            $this->fail('El gruero no debería poder cambiar estados.');
         } catch (ValidationException) {
             // esperado
         }

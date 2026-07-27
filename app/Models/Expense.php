@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CategoriaGasto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Expense extends Model
 {
@@ -34,5 +35,11 @@ class Expense extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** Fotos adjuntas al gasto (único módulo con carga de fotos). */
+    public function fotos(): HasMany
+    {
+        return $this->hasMany(VehiclePhoto::class, 'expense_id');
     }
 }

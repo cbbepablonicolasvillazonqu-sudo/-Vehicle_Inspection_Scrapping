@@ -55,7 +55,7 @@
                         </div>
                     </a>
                 @empty
-                    <p class="p-8 text-center text-slate-500 text-sm">{{ __('Sin ventas ni desguaces en :mes.', ['mes' => $nombreMes]) }}</p>
+                    <p class="p-8 text-center text-slate-500 text-sm">{{ __('Sin ventas ni Junk car en :mes.', ['mes' => $nombreMes]) }}</p>
                 @endforelse
             </div>
 
@@ -97,7 +97,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-10 text-center text-slate-500">{{ __('Sin ventas ni desguaces en :mes.', ['mes' => $nombreMes]) }}</td>
+                                <td colspan="7" class="px-4 py-10 text-center text-slate-500">{{ __('Sin ventas ni Junk car en :mes.', ['mes' => $nombreMes]) }}</td>
                             </tr>
                         @endforelse
                     </tbody>

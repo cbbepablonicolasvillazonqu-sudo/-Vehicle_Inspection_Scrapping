@@ -38,7 +38,7 @@ class RolAccesoTest extends TestCase
 
     public function test_roles_sin_permiso_no_ven_gestion_de_usuarios(): void
     {
-        foreach (['comprador', 'mecanico', 'vendedor'] as $rol) {
+        foreach (['gruero', 'mecanico', 'vendedor'] as $rol) {
             $this->actingAs($this->usuarioConRol($rol))
                 ->get('/usuarios')
                 ->assertForbidden();

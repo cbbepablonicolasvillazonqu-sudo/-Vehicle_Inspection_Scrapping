@@ -98,10 +98,10 @@ class FlujoVentaTest extends TestCase
         ]);
         $this->assertDatabaseHas('audit_logs', ['vehicle_id' => $vehiculo->id, 'accion' => 'venta_registrada']);
 
-        // Bloqueado: comprador ya no puede editar; admin sí.
-        $comprador = $this->usuarioConRol('comprador');
+        // Bloqueado: el mecánico ya no puede editar; admin sí.
+        $otroRol = $this->usuarioConRol('mecanico');
         $admin = $this->usuarioConRol('admin');
-        $this->assertFalse($comprador->can('update', $vehiculo));
+        $this->assertFalse($otroRol->can('update', $vehiculo));
         $this->assertTrue($admin->can('update', $vehiculo));
 
         // El vendedor no puede volver a vender ni cambiar estado.
@@ -192,11 +192,11 @@ class FlujoVentaTest extends TestCase
         $this->assertSame(-500.0, $vehiculo->ganancia()); // 300 − 800
         $this->assertDatabaseHas('audit_logs', ['vehicle_id' => $vehiculo->id, 'accion' => 'desguace_registrado']);
 
-        // Comprador no puede registrar desguace.
-        $comprador = $this->usuarioConRol('comprador');
+        // Un rol sin permiso no puede registrar Junk car.
+        $otroRol = $this->usuarioConRol('mecanico');
         $otro = Vehicle::factory()->create();
 
-        Livewire::actingAs($comprador)
+        Livewire::actingAs($otroRol)
             ->test(GestorDesguace::class, ['vehiculo' => $otro])
             ->set('fecha', now()->format('Y-m-d'))
             ->set('monto_recibido', '100')

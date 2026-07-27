@@ -13,7 +13,6 @@ use Illuminate\Validation\ValidationException;
  *
  * - Admin: puede mover a cualquier estado (Vendido y Desguace solo mediante
  *   sus formularios, que capturan los datos de la operación).
- * - Comprador: Comprado ⇄ En reparación.
  * - Mecánico: Comprado → En reparación (él inicia la revisión/ingreso al
  *   taller) y En reparación ⇄ Listo para la venta.
  * - Vendedor: Listo ⇄ Publicado (Vendido se marca al registrar la venta).
@@ -46,10 +45,6 @@ class ServicioEstadoVehiculo
         }
 
         $matriz = [
-            'comprador' => [
-                EstadoVehiculo::Comprado->value => [EstadoVehiculo::EnReparacion],
-                EstadoVehiculo::EnReparacion->value => [EstadoVehiculo::Comprado],
-            ],
             'mecanico' => [
                 EstadoVehiculo::Comprado->value => [EstadoVehiculo::EnReparacion],
                 EstadoVehiculo::EnReparacion->value => [EstadoVehiculo::Listo],

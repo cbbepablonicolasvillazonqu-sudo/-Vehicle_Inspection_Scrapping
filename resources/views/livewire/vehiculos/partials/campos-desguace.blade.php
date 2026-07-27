@@ -12,7 +12,7 @@
 </div>
 
 <div class="sm:col-span-2">
-    <x-input-label for="empresa" :value="__('Empresa / lugar de desguace *')" />
+    <x-input-label for="empresa" :value="__('Empresa / lugar de Junk car *')" />
     <x-text-input id="empresa" type="text" class="mt-1 block w-full" wire:model="empresa" placeholder="Junkyard Central" />
     <x-input-error :messages="$errors->get('empresa')" class="mt-2" />
 </div>

@@ -26,7 +26,7 @@
     @else
         <p class="mt-2 text-sm text-slate-500">
             @if ($vehiculo->estado->esFinal())
-                {{ __('Estado final.') }} @role('admin') {{ __('Para revertirlo, elimina la venta o el desguace en su sección.') }} @endrole
+                {{ __('Estado final.') }} @role('admin') {{ __('Para revertirlo, elimina la venta o el registro de Junk car en su sección.') }} @endrole
             @else
                 {{ __('Tu rol no tiene transiciones disponibles desde este estado.') }}
             @endif

@@ -2,27 +2,27 @@
 
 namespace App\Enums;
 
-enum EstadoTitulo: string
+/**
+ * Forma de pago que usó el Gruero para pagar el vehículo al recogerlo.
+ */
+enum MetodoPagoGruero: string
 {
-    case Clean = 'clean';
-    case Rebuild = 'rebuild';
-    case Salvage = 'salvage';
+    case Efectivo = 'efectivo';
+    case Zelle = 'zelle';
 
     public function etiqueta(): string
     {
         return __(match ($this) {
-            self::Clean => 'Clean',
-            self::Rebuild => 'Rebuild',
-            self::Salvage => 'Salvage',
+            self::Efectivo => 'Efectivo',
+            self::Zelle => 'Zelle',
         });
     }
 
     public function colorBadge(): string
     {
         return match ($this) {
-            self::Clean => 'bg-green-100 text-green-800',
-            self::Rebuild => 'bg-yellow-100 text-yellow-800',
-            self::Salvage => 'bg-red-100 text-red-800',
+            self::Efectivo => 'bg-green-100 text-green-800',
+            self::Zelle => 'bg-purple-100 text-purple-800',
         };
     }
 

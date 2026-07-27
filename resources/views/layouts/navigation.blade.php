@@ -3,6 +3,8 @@
     $enlaces = collect([
         ['ruta' => 'dashboard', 'patron' => 'dashboard', 'icono' => 'panel', 'texto' => __('Panel'), 'ver' => true],
         ['ruta' => 'vehiculos.index', 'patron' => 'vehiculos.*', 'icono' => 'vehiculo', 'texto' => __('Vehículos'), 'ver' => auth()->user()->can('ver vehiculos')],
+        ['ruta' => 'recojos.asignar', 'patron' => 'recojos.*', 'icono' => 'etiqueta', 'texto' => __('Recojos'), 'ver' => auth()->user()->can('asignar recojo')],
+        ['ruta' => 'junk.masivo', 'patron' => 'junk.*', 'icono' => 'engranaje', 'texto' => __('Junk car'), 'ver' => auth()->user()->can('enviar a junk')],
         ['ruta' => 'reportes.ganancias', 'patron' => 'reportes.*', 'icono' => 'reportes', 'texto' => __('Reportes'), 'ver' => auth()->user()->can('ver ganancias')],
         ['ruta' => 'usuarios.index', 'patron' => 'usuarios.*', 'icono' => 'usuarios', 'texto' => __('Usuarios'), 'ver' => auth()->user()->can('gestionar usuarios')],
     ])->where('ver', true);

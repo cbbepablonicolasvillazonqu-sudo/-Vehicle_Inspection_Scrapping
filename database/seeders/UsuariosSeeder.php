@@ -18,7 +18,7 @@ class UsuariosSeeder extends Seeder
     {
         $usuarios = [
             ['name' => 'Administrador', 'email' => 'admin@fortetowing.com', 'rol' => 'admin'],
-            ['name' => 'Comprador', 'email' => 'compras@fortetowing.com', 'rol' => 'comprador'],
+            ['name' => 'Gruero', 'email' => 'gruero@fortetowing.com', 'rol' => 'gruero'],
             ['name' => 'Mecánico', 'email' => 'taller@fortetowing.com', 'rol' => 'mecanico'],
             ['name' => 'Vendedor', 'email' => 'ventas@fortetowing.com', 'rol' => 'vendedor'],
         ];
