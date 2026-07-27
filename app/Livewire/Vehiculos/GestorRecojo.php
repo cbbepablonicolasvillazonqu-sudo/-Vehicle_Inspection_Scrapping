@@ -12,7 +12,8 @@ use Livewire\Component;
 
 /**
  * Datos que registra el Gruero al recoger el vehículo: forma de pago,
- * dónde lo dejó, si tiene catalizador y cuánto pagó por él.
+ * dónde lo dejó y cuánto pagó por él.
+ * (El catalizador se registra en el formulario de Junk car.)
  */
 class GestorRecojo extends Component
 {
@@ -21,8 +22,6 @@ class GestorRecojo extends Component
     public string $metodo_pago_gruero = '';
 
     public string $ubicacion_destino = '';
-
-    public string $tiene_catalizador = '';
 
     public string $monto_pagado = '';
 
@@ -36,9 +35,6 @@ class GestorRecojo extends Component
     {
         $this->metodo_pago_gruero = $this->vehiculo->metodo_pago_gruero?->value ?? '';
         $this->ubicacion_destino = $this->vehiculo->ubicacion_destino?->value ?? '';
-        $this->tiene_catalizador = $this->vehiculo->tiene_catalizador === null
-            ? ''
-            : ($this->vehiculo->tiene_catalizador ? '1' : '0');
         $this->monto_pagado = $this->vehiculo->monto_pagado !== null
             ? (string) $this->vehiculo->monto_pagado
             : '';
@@ -70,7 +66,6 @@ class GestorRecojo extends Component
         return [
             'metodo_pago_gruero' => ['required', Rule::enum(MetodoPagoGruero::class)],
             'ubicacion_destino' => ['required', Rule::enum(UbicacionDestino::class)],
-            'tiene_catalizador' => ['required', 'in:0,1'],
             'monto_pagado' => ['required', 'numeric', 'min:0', 'max:9999999'],
         ];
     }
@@ -80,7 +75,6 @@ class GestorRecojo extends Component
         return [
             'metodo_pago_gruero' => __('forma de pago'),
             'ubicacion_destino' => __('ubicación de destino'),
-            'tiene_catalizador' => __('catalizador'),
             'monto_pagado' => __('monto pagado'),
         ];
     }
@@ -94,14 +88,12 @@ class GestorRecojo extends Component
         $this->vehiculo->forceFill([
             'metodo_pago_gruero' => $datos['metodo_pago_gruero'],
             'ubicacion_destino' => $datos['ubicacion_destino'],
-            'tiene_catalizador' => (bool) $datos['tiene_catalizador'],
             'monto_pagado' => number_format(round((float) $datos['monto_pagado'], 2), 2, '.', ''),
         ])->save();
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'recojo_registrado', [
             'pago' => $datos['metodo_pago_gruero'],
             'destino' => $datos['ubicacion_destino'],
-            'catalizador' => (bool) $datos['tiene_catalizador'],
             'monto' => $datos['monto_pagado'],
         ]);
 

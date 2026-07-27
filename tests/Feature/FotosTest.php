@@ -134,4 +134,47 @@ class FotosTest extends TestCase
 
         $this->assertSame(1, $vendido->fotos()->count());
     }
+
+    public function test_admin_sube_la_foto_del_vehiculo_al_crearlo_y_la_reemplaza_al_editar(): void
+    {
+        $admin = $this->usuarioConRol('admin');
+
+        Livewire::actingAs($admin)
+            ->test(\App\Livewire\Vehiculos\FormularioVehiculo::class)
+            ->set('marca', 'Toyota')
+            ->set('modelo', 'Corolla')
+            ->set('anio', '2015')
+            ->set('vin', '1HGBH41JXMN109186')
+            ->set('millas', '120000')
+            ->set('precio_compra', '2500')
+            ->set('fecha_compra', now()->format('Y-m-d'))
+            ->set('ubicacion_destino', 'oficina_1_aldi')
+            ->set('estado_titulo', 'clean')
+            ->set('foto', UploadedFile::fake()->image('frente.jpg'))
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $vehiculo = Vehicle::firstOrFail();
+        $foto = $vehiculo->fotos()->whereNull('expense_id')->sole();
+
+        $this->assertSame('frente.jpg', $foto->nombre_original);
+        $this->assertSame('vehiculo', $foto->etapa->value);
+        Storage::disk('public')->assertExists($foto->ruta);
+        $rutaVieja = $foto->ruta;
+
+        // Al editar se ve la misma foto y, si se sube otra, reemplaza a la anterior.
+        Livewire::actingAs($admin)
+            ->test(\App\Livewire\Vehiculos\FormularioVehiculo::class, ['vehiculo' => $vehiculo])
+            ->assertSet('marca', 'Toyota')
+            ->set('foto', UploadedFile::fake()->image('nueva.jpg'))
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $vehiculo->refresh();
+        $fotos = $vehiculo->fotos()->whereNull('expense_id')->get();
+
+        $this->assertCount(1, $fotos);
+        $this->assertSame('nueva.jpg', $fotos->first()->nombre_original);
+        Storage::disk('public')->assertMissing($rutaVieja);
+    }
 }

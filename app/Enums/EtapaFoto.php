@@ -3,16 +3,19 @@
 namespace App\Enums;
 
 /**
- * Etapas de las fotos. Desde el rediseño, las fotos solo se cargan dentro
- * del módulo de Gastos: las etapas compra / reparación / venta se retiraron.
+ * Etapas de las fotos:
+ * - Vehiculo: la foto principal, que carga el Admin desde el formulario.
+ * - Gasto: las que se adjuntan a cada gasto.
  */
 enum EtapaFoto: string
 {
+    case Vehiculo = 'vehiculo';
     case Gasto = 'gasto';
 
     public function etiqueta(): string
     {
         return __(match ($this) {
+            self::Vehiculo => 'Vehículo',
             self::Gasto => 'Gasto',
         });
     }

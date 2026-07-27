@@ -43,7 +43,7 @@ class FlujoVehiculoTest extends TestCase
             ->set('millas', '120000')
             ->set('precio_compra', '2500')
             ->set('fecha_compra', now()->format('Y-m-d'))
-            ->set('lugar_compra', 'subasta')
+            ->set('ubicacion_destino', 'oficina_1_aldi')
             ->set('estado_titulo', 'clean')
             ->call('guardar')
             ->assertHasNoErrors()
@@ -79,7 +79,7 @@ class FlujoVehiculoTest extends TestCase
             ->set('millas', '90000')
             ->set('precio_compra', '1800')
             ->set('fecha_compra', now()->format('Y-m-d'))
-            ->set('lugar_compra', 'particular')
+            ->set('ubicacion_destino', 'casa_hugo')
             ->set('estado_titulo', 'rebuild')
             ->call('guardar')
             ->assertHasErrors(['vin']);

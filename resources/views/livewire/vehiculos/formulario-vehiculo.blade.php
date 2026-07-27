@@ -56,14 +56,14 @@
                 </div>
 
                 <div>
-                    <x-input-label for="lugar_compra" :value="__('Lugar de compra *')" />
-                    <select id="lugar_compra" wire:model="lugar_compra" class="campo">
+                    <x-input-label for="ubicacion_destino" :value="__('Dónde está *')" />
+                    <select id="ubicacion_destino" wire:model="ubicacion_destino" class="campo">
                         <option value="">{{ __('— Seleccionar —') }}</option>
-                        @foreach ($lugares as $valor => $etiqueta)
+                        @foreach ($ubicaciones as $valor => $etiqueta)
                             <option value="{{ $valor }}">{{ $etiqueta }}</option>
                         @endforeach
                     </select>
-                    <x-input-error :messages="$errors->get('lugar_compra')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('ubicacion_destino')" class="mt-2" />
                 </div>
 
                 <div>
@@ -75,6 +75,49 @@
                         @endforeach
                     </select>
                     <x-input-error :messages="$errors->get('estado_titulo')" class="mt-2" />
+                </div>
+
+                {{-- Foto del vehículo: la misma en alta y en edición --}}
+                <div class="sm:col-span-2">
+                    <x-input-label :value="__('Foto del vehículo')" />
+
+                    @php
+                        $urlPrevia = null;
+                        if ($foto) {
+                            try { $urlPrevia = $foto->temporaryUrl(); } catch (\Throwable) { $urlPrevia = null; }
+                        }
+                    @endphp
+
+                    <div class="mt-1 flex flex-wrap items-start gap-4">
+                        {{-- Vista de la foto: la nueva si acabás de elegirla, si no la guardada --}}
+                        @if ($urlPrevia || $fotoActual)
+                            <div class="relative w-40 h-28 rounded-xl overflow-hidden bg-slate-100 ring-1 ring-slate-200 shrink-0">
+                                <img src="{{ $urlPrevia ?? $fotoActual->url() }}" alt="{{ __('Foto del vehículo') }}"
+                                     class="w-full h-full object-cover">
+                                @if ($urlPrevia)
+                                    <button type="button" wire:click="quitarFotoSeleccionada"
+                                            class="absolute top-1 right-1 bg-slate-900/70 hover:bg-red-600 text-white rounded-full w-6 h-6 grid place-items-center text-xs font-bold"
+                                            aria-label="{{ __('Quitar') }}">✕</button>
+                                    <span class="absolute bottom-0 inset-x-0 bg-blue-700/90 text-white text-[10px] text-center py-0.5">{{ __('Nueva') }}</span>
+                                @endif
+                            </div>
+                        @endif
+
+                        {{-- Zona para elegir o arrastrar --}}
+                        <div class="relative flex-1 min-w-[200px] rounded-2xl border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50/40 transition p-5 text-center">
+                            <input type="file" wire:model="foto" accept="image/*"
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                   aria-label="{{ __('Elegir foto') }}">
+                            <x-icono nombre="camara" clase="w-8 h-8 mx-auto text-slate-400" />
+                            <p class="mt-2 text-sm font-semibold text-slate-700">
+                                {{ $fotoActual ? __('Toca para cambiar la foto') : __('Toca para elegir una foto o arrástrala aquí') }}
+                            </p>
+                            <p class="text-xs text-slate-400 mt-0.5">{{ __('Una foto, máx. 10 MB') }}</p>
+                            <p class="text-sm text-blue-700 font-medium mt-2" wire:loading wire:target="foto">{{ __('Cargando archivo…') }}</p>
+                        </div>
+                    </div>
+
+                    <x-input-error :messages="$errors->get('foto')" class="mt-2" />
                 </div>
 
                 <div class="sm:col-span-2">

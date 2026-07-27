@@ -74,8 +74,14 @@
                         <dd class="font-semibold text-slate-900">{{ $vehiculo->fecha_compra?->format('d/m/Y') ?? '—' }}</dd>
                     </div>
                     <div>
-                        <dt class="text-slate-400 text-xs">{{ __('Lugar de compra') }}</dt>
-                        <dd class="font-semibold text-slate-900">{{ $vehiculo->lugar_compra?->etiqueta() ?? '—' }}</dd>
+                        <dt class="text-slate-400 text-xs">{{ __('Dónde está') }}</dt>
+                        <dd>
+                            @if ($vehiculo->ubicacion_destino)
+                                <span class="chip {{ $vehiculo->ubicacion_destino->colorBadge() }}">{{ $vehiculo->ubicacion_destino->etiqueta() }}</span>
+                            @else
+                                <span class="text-slate-300">—</span>
+                            @endif
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Título') }}</dt>
@@ -176,8 +182,11 @@
         {{-- Venta (formulario para Vendedor/Admin; tarjeta si ya se vendió) --}}
         <livewire:vehiculos.gestor-venta :vehiculo="$vehiculo" :key="'venta-'.$vehiculo->id" />
 
-        {{-- Desguace (solo Admin registra; tarjeta si ya se desguazó) --}}
+        {{-- Junk car (solo Admin registra; tarjeta si ya se envió) --}}
         <livewire:vehiculos.gestor-desguace :vehiculo="$vehiculo" :key="'desguace-'.$vehiculo->id" />
+
+        {{-- Catalizador y monto del Junk car (Admin o el Gruero asignado) --}}
+        <livewire:vehiculos.gestor-junk-car :vehiculo="$vehiculo" :key="'junk-'.$vehiculo->id" />
 
         {{-- Gastos, con sus fotos (Admin y Mecánico). Único módulo con fotos. --}}
         @can('registrar gastos')
