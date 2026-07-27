@@ -75,10 +75,6 @@
                 <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
                 <h3 class="font-bold text-slate-800">{{ __('Recogidos (últimos :n días)', ['n' => $recogidosDias]) }}</h3>
                 <span class="chip bg-slate-100 text-slate-600">{{ $recogidosTotal }}</span>
-                <a href="{{ route('vehiculos.index') }}" wire:navigate
-                   class="ms-auto text-sm font-semibold text-blue-700 hover:underline">
-                    {{ __('Ver todo mi historial') }}
-                </a>
             </div>
 
             <div class="tarjeta divide-y divide-slate-100">
@@ -103,10 +99,9 @@
                 @endforelse
 
                 @if ($recogidosTotal > $recogidos->count())
-                    <a href="{{ route('vehiculos.index') }}" wire:navigate
-                       class="block p-3 text-center text-sm font-semibold text-blue-700 hover:bg-slate-50">
+                    <p class="p-3 text-center text-sm text-slate-400">
                         {{ __('y :n más', ['n' => $recogidosTotal - $recogidos->count()]) }}
-                    </a>
+                    </p>
                 @endif
             </div>
         </section>

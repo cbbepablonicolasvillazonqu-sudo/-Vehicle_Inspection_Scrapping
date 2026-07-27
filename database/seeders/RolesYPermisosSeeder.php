@@ -20,7 +20,11 @@ class RolesYPermisosSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permisos = [
+            // Abrir la ficha de un vehículo (alcance según el rol).
             'ver vehiculos',
+            // Entrar al listado del inventario. El Gruero no lo tiene: él
+            // trabaja solo desde su panel de recojos y Junk car.
+            'ver inventario',
             'crear vehiculos',
             'editar vehiculos',
             'eliminar vehiculos',
@@ -51,9 +55,9 @@ class RolesYPermisosSeeder extends Seeder
         // Admin: acceso total.
         Role::findOrCreate('admin', 'web')->syncPermissions($permisos);
 
-        // Gruero: solo ve los vehículos que el Admin le asigna. Registra el
-        // recojo (pago, destino y monto) y completa los datos del Junk car
-        // (catalizador y monto) de los vehículos que el Admin envió allí.
+        // Gruero: trabaja solo desde su panel (recojos y Junk car). No entra
+        // al inventario: abre la ficha únicamente de los vehículos que el Admin
+        // le asignó, para registrar el recojo y completar el Junk car.
         // No decide qué vehículo va a Junk car: eso es exclusivo del Admin.
         Role::findOrCreate('gruero', 'web')->syncPermissions([
             'ver vehiculos',
@@ -65,6 +69,7 @@ class RolesYPermisosSeeder extends Seeder
         // (con fotos). No ve precios de compra ni ganancias.
         Role::findOrCreate('mecanico', 'web')->syncPermissions([
             'ver vehiculos',
+            'ver inventario',
             'cambiar estado',
             'registrar gastos',
             'subir fotos',
@@ -73,6 +78,7 @@ class RolesYPermisosSeeder extends Seeder
         // Vendedor: vehículos listos/publicados; registra ventas. Sin fotos.
         Role::findOrCreate('vendedor', 'web')->syncPermissions([
             'ver vehiculos',
+            'ver inventario',
             'cambiar estado',
             'registrar ventas',
             'exportar datos',

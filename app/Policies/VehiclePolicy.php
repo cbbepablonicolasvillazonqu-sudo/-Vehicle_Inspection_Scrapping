@@ -7,9 +7,10 @@ use App\Models\Vehicle;
 
 class VehiclePolicy
 {
+    /** Entrar al listado del inventario (el Gruero no: usa su panel). */
     public function viewAny(User $usuario): bool
     {
-        return $usuario->can('ver vehiculos');
+        return $usuario->can('ver inventario');
     }
 
     public function view(User $usuario, Vehicle $vehiculo): bool

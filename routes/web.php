@@ -51,7 +51,11 @@ Route::middleware(['auth', 'permission:exportar datos'])->group(function () {
 // crear/editar además exigen rol admin. Las policies y los componentes
 // Livewire validan de nuevo (defensa en profundidad).
 Route::middleware(['auth', 'permission:ver vehiculos'])->group(function () {
-    Route::get('/vehiculos', ListaVehiculos::class)->name('vehiculos.index');
+    // El listado del inventario exige además "ver inventario": el Gruero
+    // trabaja desde su panel y solo abre las fichas que tiene asignadas.
+    Route::middleware('permission:ver inventario')->group(function () {
+        Route::get('/vehiculos', ListaVehiculos::class)->name('vehiculos.index');
+    });
 
     Route::middleware('role:admin')->group(function () {
         Route::get('/vehiculos/crear', FormularioVehiculo::class)->name('vehiculos.crear');
