@@ -107,7 +107,7 @@ class GrueroTest extends TestCase
         $this->actingAs($gruero)->get("/vehiculos/{$ajeno->id}")->assertForbidden();
     }
 
-    public function test_gruero_registra_pago_destino_y_monto(): void
+    public function test_gruero_registra_pago_destino_titulacion_y_monto(): void
     {
         $gruero = $this->usuarioConRol('gruero');
         $vehiculo = Vehicle::factory()->create(['asignado_a' => $gruero->id]);
@@ -116,6 +116,7 @@ class GrueroTest extends TestCase
             ->test(GestorRecojo::class, ['vehiculo' => $vehiculo])
             ->set('metodo_pago_gruero', 'zelle')
             ->set('ubicacion_destino', 'casa_hugo')
+            ->set('estado_titulo', 'clean')
             ->set('monto_pagado', '450')
             ->call('guardar')
             ->assertHasNoErrors();
@@ -126,6 +127,7 @@ class GrueroTest extends TestCase
         $this->assertSame('casa_hugo', $vehiculo->ubicacion_destino->value);
         $this->assertSame('CASA HUGO', $vehiculo->ubicacion_destino->etiqueta());
         $this->assertSame('450.00', (string) $vehiculo->monto_pagado);
+        $this->assertSame('clean', $vehiculo->estado_titulo->value);
 
         $this->assertDatabaseHas('audit_logs', [
             'vehicle_id' => $vehiculo->id,
@@ -148,6 +150,7 @@ class GrueroTest extends TestCase
             ->test(GestorRecojo::class, ['vehiculo' => $vehiculo])
             ->set('metodo_pago_gruero', 'efectivo')
             ->set('ubicacion_destino', 'oficina_1_aldi')
+            ->set('estado_titulo', 'salvage')
             ->set('monto_pagado', '780.50')
             ->call('guardar')
             ->assertHasNoErrors();
@@ -155,6 +158,7 @@ class GrueroTest extends TestCase
         $vehiculo->refresh();
 
         $this->assertSame('780.50', (string) $vehiculo->precio_compra);
+        $this->assertSame('salvage', $vehiculo->estado_titulo->value);
         $this->assertSame(now()->toDateString(), $vehiculo->fecha_compra->toDateString());
 
         // Si más tarde corrige el monto, el precio se actualiza pero la fecha
@@ -165,6 +169,7 @@ class GrueroTest extends TestCase
             ->test(GestorRecojo::class, ['vehiculo' => $vehiculo->fresh()])
             ->set('metodo_pago_gruero', 'zelle')
             ->set('ubicacion_destino', 'casa_hugo')
+            ->set('estado_titulo', 'rebuild')
             ->set('monto_pagado', '900')
             ->call('guardar')
             ->assertHasNoErrors();
@@ -186,6 +191,7 @@ class GrueroTest extends TestCase
             ->test(GestorRecojo::class, ['vehiculo' => $ajeno])
             ->set('metodo_pago_gruero', 'efectivo')
             ->set('ubicacion_destino', 'oficina_1_aldi')
+            ->set('estado_titulo', 'clean')
             ->set('monto_pagado', '100')
             ->call('guardar')
             ->assertForbidden();

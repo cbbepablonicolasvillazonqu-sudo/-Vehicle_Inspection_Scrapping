@@ -42,6 +42,17 @@
             </div>
 
             <div>
+                <x-input-label for="estado_titulo" :value="__('Titulación del auto')" />
+                <select id="estado_titulo" wire:model="estado_titulo" class="campo w-full">
+                    <option value="">{{ __('Seleccionar…') }}</option>
+                    @foreach ($titulos as $valor => $etiqueta)
+                        <option value="{{ $valor }}">{{ $etiqueta }}</option>
+                    @endforeach
+                </select>
+                <x-input-error :messages="$errors->get('estado_titulo')" />
+            </div>
+
+            <div>
                 <x-input-label for="monto_pagado" :value="__('Monto pagado por el vehículo')" />
                 <x-text-input id="monto_pagado" type="number" step="0.01" min="0" inputmode="decimal"
                               wire:model="monto_pagado" class="block w-full tabular" placeholder="0.00" />
@@ -67,6 +78,16 @@
             <div>
                 <dt class="text-slate-400 text-xs">{{ __('Dejado en') }}</dt>
                 <dd class="font-semibold text-slate-800">{{ $vehiculo->ubicacion_destino?->etiqueta() ?? '—' }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-400 text-xs">{{ __('Titulación') }}</dt>
+                <dd>
+                    @if ($vehiculo->estado_titulo)
+                        <span class="chip {{ $vehiculo->estado_titulo->colorBadge() }}">{{ $vehiculo->estado_titulo->etiqueta() }}</span>
+                    @else
+                        <span class="text-slate-300">—</span>
+                    @endif
+                </dd>
             </div>
 
             @can('ver precios compra')
