@@ -341,7 +341,6 @@
     "{1} :n salida pendiente de valorar|[2,*] :n salidas pendientes de valorar": "{1} :n exit pending valuation|[2,*] :n exits pending valuation",
     "{1} :n salida sin valorar|[2,*] :n salidas sin valorar": "{1} :n unvalued exit|[2,*] :n unvalued exits",
     "Recogidos (últimos :n días)": "Picked up (last :n days)",
-    "Ver todo mi historial": "View my full history",
     "y :n más": "and :n more",
     "¿Cuánto pagaste por el vehículo?": "How much did you pay for the vehicle?",
     "Queda registrado como lo que pagaste, con la fecha del recojo. El admin puede ajustar el costo después.": "Recorded as what you paid, with the pickup date. The admin can adjust the cost later.",
@@ -359,5 +358,6 @@
     "Recojo asignado": "Pickup assigned",
     "Enviado a Junk car": "Sent to Junk car",
     "Junk car completado": "Junk car completed",
-    "Foto del vehículo actualizada": "Vehicle photo updated"
+    "Foto del vehículo actualizada": "Vehicle photo updated",
+    "← Volver al panel": "← Back to dashboard"
 }

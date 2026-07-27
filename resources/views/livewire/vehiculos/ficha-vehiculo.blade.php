@@ -1,9 +1,16 @@
 <div class="py-6">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
 
-        <a href="{{ route('vehiculos.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800">
-            <x-icono nombre="flecha-izq" clase="w-4 h-4" /> {{ __('← Volver a vehículos') }}
-        </a>
+        {{-- Quien no entra al inventario (el Gruero) vuelve a su panel. --}}
+        @can('ver inventario')
+            <a href="{{ route('vehiculos.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800">
+                <x-icono nombre="flecha-izq" clase="w-4 h-4" /> {{ __('← Volver a vehículos') }}
+            </a>
+        @else
+            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800">
+                <x-icono nombre="flecha-izq" clase="w-4 h-4" /> {{ __('← Volver al panel') }}
+            </a>
+        @endcan
 
         {{-- Encabezado con miniatura --}}
         <div class="tarjeta overflow-hidden">

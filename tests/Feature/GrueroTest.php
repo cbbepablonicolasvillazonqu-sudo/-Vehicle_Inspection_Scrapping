@@ -406,4 +406,47 @@ class GrueroTest extends TestCase
         $this->assertSame('600.00', (string) $vehiculo->monto_pagado);
         $this->assertSame('1200.00', (string) $vehiculo->precio_compra);
     }
+
+    /* ------------ El gruero trabaja solo desde su panel ------------ */
+
+    public function test_gruero_no_entra_al_inventario_pero_si_a_sus_fichas(): void
+    {
+        $gruero = $this->usuarioConRol('gruero');
+        $suyo = Vehicle::factory()->create(['asignado_a' => $gruero->id]);
+
+        $this->assertFalse($gruero->can('ver inventario'));
+
+        // El listado del inventario le queda cerrado…
+        $this->actingAs($gruero)->get('/vehiculos')->assertForbidden();
+
+        // …pero abre la ficha de lo suyo, que es donde registra el recojo.
+        $this->actingAs($gruero)->get("/vehiculos/{$suyo->id}")->assertOk();
+
+        // Y su panel sigue siendo su pantalla de trabajo.
+        $this->actingAs($gruero)->get('/panel')->assertOk();
+    }
+
+    public function test_el_gruero_no_ve_el_enlace_a_vehiculos_en_el_menu(): void
+    {
+        $gruero = $this->usuarioConRol('gruero');
+        Vehicle::factory()->create(['asignado_a' => $gruero->id]);
+
+        $panel = $this->actingAs($gruero)->get('/panel');
+
+        $panel->assertOk();
+        // Ojo: la URL de una ficha (/vehiculos/5) contiene a /vehiculos, así que
+        // se busca el enlace exacto del menú, no la ruta suelta.
+        $panel->assertDontSee('href="'.route('vehiculos.index').'"', false);
+        $panel->assertDontSee(__('Ver todo mi historial'));
+    }
+
+    public function test_mecanico_y_vendedor_conservan_el_inventario(): void
+    {
+        foreach (['mecanico', 'vendedor'] as $rol) {
+            $usuario = $this->usuarioConRol($rol);
+
+            $this->assertTrue($usuario->can('ver inventario'), $rol);
+            $this->actingAs($usuario)->get('/vehiculos')->assertOk();
+        }
+    }
 }
