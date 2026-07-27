@@ -44,6 +44,30 @@
                         <dd><a href="tel:{{ $venta->telefono_comprador }}" class="font-semibold text-blue-700 hover:underline inline-flex items-center gap-1">{{ $venta->telefono_comprador }}</a></dd>
                     </div>
                     <div>
+                        <dt class="text-slate-400 text-xs">{{ __('Correo electrónico') }}</dt>
+                        <dd>
+                            @if ($venta->email_comprador)
+                                <a href="mailto:{{ $venta->email_comprador }}" class="font-semibold text-blue-700 hover:underline break-all">{{ $venta->email_comprador }}</a>
+                            @else
+                                <span class="text-slate-300">—</span>
+                            @endif
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-slate-400 text-xs">{{ __('Contrato') }}</dt>
+                        <dd>
+                            @if ($venta->contratoUrl())
+                                <a href="{{ $venta->contratoUrl() }}" target="_blank" rel="noopener"
+                                   class="font-semibold text-blue-700 hover:underline inline-flex items-center gap-1">
+                                    <x-icono nombre="archivo" clase="w-4 h-4" />
+                                    {{ $venta->contratoEsPdf() ? __('Ver PDF') : __('Ver foto') }}
+                                </a>
+                            @else
+                                <span class="text-slate-300">—</span>
+                            @endif
+                        </dd>
+                    </div>
+                    <div>
                         <dt class="text-slate-400 text-xs">{{ __('Registrada por') }}</dt>
                         <dd class="font-semibold text-slate-900">{{ $venta->usuario?->name ?? '—' }}</dd>
                     </div>

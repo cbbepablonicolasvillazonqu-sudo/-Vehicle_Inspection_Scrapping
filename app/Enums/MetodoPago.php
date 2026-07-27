@@ -5,7 +5,7 @@ namespace App\Enums;
 enum MetodoPago: string
 {
     case Efectivo = 'efectivo';
-    case Transferencia = 'transferencia';
+    case Zelle = 'zelle';
     case Cheque = 'cheque';
     case Tarjeta = 'tarjeta';
     case Financiado = 'financiado';
@@ -15,7 +15,7 @@ enum MetodoPago: string
     {
         return __(match ($this) {
             self::Efectivo => 'Efectivo',
-            self::Transferencia => 'Transferencia',
+            self::Zelle => 'Zelle',
             self::Cheque => 'Cheque',
             self::Tarjeta => 'Tarjeta',
             self::Financiado => 'Financiado',

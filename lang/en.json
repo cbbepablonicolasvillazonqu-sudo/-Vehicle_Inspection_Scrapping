@@ -195,7 +195,6 @@
     "Grúa / transporte": "Tow / transport",
     "Título / trámites": "Title / paperwork",
     "Efectivo": "Cash",
-    "Transferencia": "Transfer",
     "Cheque": "Check",
     "Tarjeta": "Card",
     "Financiado": "Financed",
@@ -327,5 +326,17 @@
     "Completar": "Complete",
     "No hay Junk car pendientes.": "No pending junk cars.",
     "Con catalizador": "With catalytic converter",
-    "Sin catalizador": "Without catalytic converter"
+    "Sin catalizador": "Without catalytic converter",
+    "Contrato": "Contract",
+    "Ver PDF": "View PDF",
+    "Ver foto": "View photo",
+    "Ver contrato": "View contract",
+    "Correo electrónico del comprador *": "Buyer's email address *",
+    "Foto del contrato (imagen o PDF)": "Contract photo (image or PDF)",
+    "Elegir contrato": "Choose contract",
+    "Toca para cambiar el contrato": "Tap to change the contract",
+    "Toca para subir el contrato o arrástralo aquí": "Tap to upload the contract or drag it here",
+    "Foto o PDF, máx. 10 MB": "Photo or PDF, max. 10 MB",
+    "correo electrónico del comprador": "buyer's email address",
+    "contrato": "contract"
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Dashboard;
 use App\Models\User;
 use Database\Seeders\RolesYPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,5 +51,30 @@ class RolAccesoTest extends TestCase
         $this->actingAs($this->usuarioConRol('mecanico'))
             ->get('/panel')
             ->assertOk();
+    }
+
+    public function test_las_tarjetas_del_panel_cambian_segun_el_rol(): void
+    {
+        $claves = function (string $rol) {
+            $panel = \Livewire\Livewire::actingAs($this->usuarioConRol($rol))->test(Dashboard::class);
+
+            return collect($panel->viewData('tarjetas'))->pluck('clave')->all();
+        };
+
+        // Mecánico: sin publicados, sin vendidos del mes y sin Junk car.
+        $mecanico = $claves('mecanico');
+        $this->assertNotContains('desguace', $mecanico);
+        $this->assertNotContains('publicados', $mecanico);
+        $this->assertNotContains('vendidosMes', $mecanico);
+        $this->assertContains('reparacion', $mecanico);
+
+        // Vendedor: sin reparación y sin Junk car.
+        $vendedor = $claves('vendedor');
+        $this->assertNotContains('desguace', $vendedor);
+        $this->assertNotContains('reparacion', $vendedor);
+        $this->assertContains('publicados', $vendedor);
+
+        // Admin: las ve todas.
+        $this->assertContains('desguace', $claves('admin'));
     }
 }

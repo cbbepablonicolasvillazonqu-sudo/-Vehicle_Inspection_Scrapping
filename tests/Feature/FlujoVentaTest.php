@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\Vehicle;
 use Database\Seeders\RolesYPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -76,6 +78,7 @@ class FlujoVentaTest extends TestCase
             ->set('precio_venta', '4000')
             ->set('nombre_comprador', 'Juan Pérez')
             ->set('telefono_comprador', '555-1234')
+            ->set('email_comprador', 'juan@correo.com')
             ->set('metodo_pago', 'efectivo')
             ->call('registrar')
             ->assertHasNoErrors();
@@ -85,6 +88,7 @@ class FlujoVentaTest extends TestCase
         $this->assertSame(EstadoVehiculo::Vendido, $vehiculo->estado);
         $this->assertTrue($vehiculo->estaBloqueado());
         $this->assertSame('Juan Pérez', $vehiculo->venta->nombre_comprador);
+        $this->assertSame('juan@correo.com', $vehiculo->venta->email_comprador);
 
         // Ganancia = 4000 − 2000 − 500 = 1500
         $this->assertSame(1500.0, $vehiculo->ganancia());
@@ -122,6 +126,7 @@ class FlujoVentaTest extends TestCase
             ->set('precio_venta', '3000')
             ->set('nombre_comprador', 'X')
             ->set('telefono_comprador', '1')
+            ->set('email_comprador', 'x@correo.com')
             ->set('metodo_pago', 'efectivo')
             ->call('registrar')
             ->assertForbidden();
@@ -142,7 +147,8 @@ class FlujoVentaTest extends TestCase
             ->set('precio_venta', '3500')
             ->set('nombre_comprador', 'Ana')
             ->set('telefono_comprador', '555-9999')
-            ->set('metodo_pago', 'transferencia')
+            ->set('email_comprador', 'ana@correo.com')
+            ->set('metodo_pago', 'zelle')
             ->call('registrar');
 
         // Vendedor NO puede editar la venta cerrada.
@@ -220,5 +226,87 @@ class FlujoVentaTest extends TestCase
             Livewire::actingAs($admin)->test(GestorGastos::class, ['vehiculo' => $vehiculo])
                 ->instance()->puedeRegistrar()
         );
+    }
+
+    public function test_venta_guarda_el_contrato_en_pdf_y_rechaza_otros_archivos(): void
+    {
+        Storage::fake('public');
+
+        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Publicado)->create();
+        $vendedor = $this->usuarioConRol('vendedor');
+
+        $base = [
+            'fecha_venta' => now()->toDateString(),
+            'precio_venta' => '5000',
+            'nombre_comprador' => 'Luis',
+            'telefono_comprador' => '555-0000',
+            'email_comprador' => 'luis@correo.com',
+            'metodo_pago' => 'zelle',
+        ];
+
+        // Un archivo que no es foto ni PDF se rechaza.
+        Livewire::actingAs($vendedor)
+            ->test(GestorVenta::class, ['vehiculo' => $vehiculo])
+            ->set($base)
+            ->set('contrato', UploadedFile::fake()->create('contrato.exe', 20))
+            ->call('registrar')
+            ->assertHasErrors(['contrato']);
+
+        $this->assertNull($vehiculo->fresh()->venta);
+
+        // Con PDF sí se guarda.
+        Livewire::actingAs($vendedor)
+            ->test(GestorVenta::class, ['vehiculo' => $vehiculo])
+            ->set($base)
+            ->set('contrato', UploadedFile::fake()->create('contrato.pdf', 120, 'application/pdf'))
+            ->call('registrar')
+            ->assertHasNoErrors();
+
+        $venta = $vehiculo->fresh()->venta;
+
+        $this->assertSame('contrato.pdf', $venta->contrato_nombre);
+        $this->assertTrue($venta->contratoEsPdf());
+        $this->assertNotNull($venta->contratoUrl());
+        Storage::disk('public')->assertExists($venta->contrato_ruta);
+    }
+
+    public function test_la_venta_acepta_una_foto_como_contrato(): void
+    {
+        Storage::fake('public');
+
+        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Publicado)->create();
+
+        Livewire::actingAs($this->usuarioConRol('vendedor'))
+            ->test(GestorVenta::class, ['vehiculo' => $vehiculo])
+            ->set('fecha_venta', now()->toDateString())
+            ->set('precio_venta', '4200')
+            ->set('nombre_comprador', 'Marta')
+            ->set('telefono_comprador', '555-1111')
+            ->set('email_comprador', 'marta@correo.com')
+            ->set('metodo_pago', 'efectivo')
+            ->set('contrato', UploadedFile::fake()->image('contrato.jpg'))
+            ->call('registrar')
+            ->assertHasNoErrors();
+
+        $venta = $vehiculo->fresh()->venta;
+
+        $this->assertFalse($venta->contratoEsPdf());
+        Storage::disk('public')->assertExists($venta->contrato_ruta);
+    }
+
+    public function test_email_del_comprador_debe_ser_valido(): void
+    {
+        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Publicado)->create();
+
+        Livewire::actingAs($this->usuarioConRol('vendedor'))
+            ->test(GestorVenta::class, ['vehiculo' => $vehiculo])
+            ->set('fecha_venta', now()->toDateString())
+            ->set('precio_venta', '3000')
+            ->set('nombre_comprador', 'Pepe')
+            ->set('telefono_comprador', '555-2222')
+            ->set('email_comprador', 'no-es-un-correo')
+            ->set('metodo_pago', 'efectivo')
+            ->call('registrar')
+            ->assertHasErrors(['email_comprador']);
     }
 }

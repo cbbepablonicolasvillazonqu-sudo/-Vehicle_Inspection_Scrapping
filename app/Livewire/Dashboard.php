@@ -79,11 +79,11 @@ class Dashboard extends Component
         ];
 
         // Tarjetas que ve cada rol:
-        // - Mecánico: sin "Publicados" ni "Vendidos este mes".
+        // - Mecánico: sin "Publicados", "Vendidos este mes" ni "Junk car".
         // - Vendedor: sin "En reparación" ni "Junk car".
-        // - Gruero: solo su inventario asignado.
+        // - Gruero: tiene su propio panel (ver panelGruero).
         $ocultas = match (true) {
-            $usuario->hasRole('mecanico') => ['publicados', 'vendidosMes'],
+            $usuario->hasRole('mecanico') => ['publicados', 'vendidosMes', 'desguace'],
             $usuario->hasRole('vendedor') => ['reparacion', 'desguace'],
             $usuario->hasRole('gruero') => ['reparacion', 'listos', 'publicados', 'vendidosMes'],
             default => [],
