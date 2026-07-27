@@ -45,6 +45,7 @@
                 <x-input-label for="monto_pagado" :value="__('Monto pagado por el vehículo')" />
                 <x-text-input id="monto_pagado" type="number" step="0.01" min="0" inputmode="decimal"
                               wire:model="monto_pagado" class="block w-full tabular" placeholder="0.00" />
+                <p class="text-xs text-slate-400 mt-1">{{ __('Se registra como precio de compra, con la fecha del recojo.') }}</p>
                 <x-input-error :messages="$errors->get('monto_pagado')" />
             </div>
 

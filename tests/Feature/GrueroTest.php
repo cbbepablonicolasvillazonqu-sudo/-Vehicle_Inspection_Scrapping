@@ -133,6 +133,50 @@ class GrueroTest extends TestCase
         ]);
     }
 
+    public function test_el_monto_del_recojo_pasa_a_precio_y_fecha_de_compra(): void
+    {
+        $gruero = $this->usuarioConRol('gruero');
+
+        // Vehículo recién asignado: todavía no tiene datos de compra.
+        $vehiculo = Vehicle::factory()->create([
+            'asignado_a' => $gruero->id,
+            'precio_compra' => null,
+            'fecha_compra' => null,
+        ]);
+
+        Livewire::actingAs($gruero)
+            ->test(GestorRecojo::class, ['vehiculo' => $vehiculo])
+            ->set('metodo_pago_gruero', 'efectivo')
+            ->set('ubicacion_destino', 'oficina_1_aldi')
+            ->set('monto_pagado', '780.50')
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $vehiculo->refresh();
+
+        $this->assertSame('780.50', (string) $vehiculo->precio_compra);
+        $this->assertSame(now()->toDateString(), $vehiculo->fecha_compra->toDateString());
+
+        // Si más tarde corrige el monto, el precio se actualiza pero la fecha
+        // del recojo no se mueve.
+        $this->travel(3)->days();
+
+        Livewire::actingAs($gruero)
+            ->test(GestorRecojo::class, ['vehiculo' => $vehiculo->fresh()])
+            ->set('metodo_pago_gruero', 'zelle')
+            ->set('ubicacion_destino', 'casa_hugo')
+            ->set('monto_pagado', '900')
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $this->travelBack();
+        $vehiculo->refresh();
+
+        $this->assertSame('900.00', (string) $vehiculo->precio_compra);
+        $this->assertSame('900.00', (string) $vehiculo->monto_pagado);
+        $this->assertSame(now()->toDateString(), $vehiculo->fecha_compra->toDateString());
+    }
+
     public function test_gruero_no_puede_registrar_recojo_de_un_vehiculo_ajeno(): void
     {
         $gruero = $this->usuarioConRol('gruero');

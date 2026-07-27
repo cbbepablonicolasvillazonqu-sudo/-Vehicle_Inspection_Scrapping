@@ -85,16 +85,27 @@ class GestorRecojo extends Component
 
         $datos = $this->validate();
 
+        $monto = number_format(round((float) $datos['monto_pagado'], 2), 2, '.', '');
+
+        // Lo que paga el gruero ES el precio de compra del vehículo, y la
+        // fecha de compra es el día del recojo. La fecha se fija la primera
+        // vez: si después corrige el monto, no se mueve el día del recojo.
+        $fechaCompra = $this->vehiculo->fecha_compra?->format('Y-m-d') ?? now()->toDateString();
+
         $this->vehiculo->forceFill([
             'metodo_pago_gruero' => $datos['metodo_pago_gruero'],
             'ubicacion_destino' => $datos['ubicacion_destino'],
-            'monto_pagado' => number_format(round((float) $datos['monto_pagado'], 2), 2, '.', ''),
+            'monto_pagado' => $monto,
+            'precio_compra' => $monto,
+            'fecha_compra' => $fechaCompra,
         ])->save();
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'recojo_registrado', [
             'pago' => $datos['metodo_pago_gruero'],
             'destino' => $datos['ubicacion_destino'],
-            'monto' => $datos['monto_pagado'],
+            'monto' => $monto,
+            'precio_compra' => $monto,
+            'fecha_compra' => $fechaCompra,
         ]);
 
         $this->dispatch('vehiculo-actualizado');
