@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\EstadoTitulo;
 use App\Enums\EstadoVehiculo;
-use App\Enums\LugarCompra;
 use App\Enums\MetodoPagoGruero;
 use App\Enums\UbicacionDestino;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +27,6 @@ class Vehicle extends Model
         'precio_compra',
         'precio_sugerido',
         'fecha_compra',
-        'lugar_compra',
         'estado_titulo',
         'estado',
         'notas',
@@ -50,7 +48,6 @@ class Vehicle extends Model
             'precio_sugerido' => 'decimal:2',
             'monto_pagado' => 'decimal:2',
             'fecha_compra' => 'date',
-            'lugar_compra' => LugarCompra::class,
             'estado_titulo' => EstadoTitulo::class,
             'estado' => EstadoVehiculo::class,
             'ubicacion_destino' => UbicacionDestino::class,
@@ -77,10 +74,20 @@ class Vehicle extends Model
         return $this->hasMany(VehiclePhoto::class);
     }
 
-    /** Foto de portada (la más reciente) para miniaturas en listas y encabezados. */
+    /**
+     * Foto de portada para miniaturas en listas y encabezados: solo la foto
+     * del vehículo (la que carga el Admin en el formulario). Las de gastos
+     * quedan excluidas, si no una foto de un repuesto sería la portada.
+     */
     public function fotoPortada(): HasOne
     {
-        return $this->hasOne(VehiclePhoto::class)->latestOfMany();
+        // El filtro va dentro de ofMany() para que también acote la subconsulta
+        // que elige "la más reciente"; si no, elegiría la foto de un gasto y
+        // luego la descartaría, dejando el vehículo sin portada.
+        return $this->hasOne(VehiclePhoto::class)->ofMany(
+            ['id' => 'max'],
+            fn ($query) => $query->whereNull('expense_id'),
+        );
     }
 
     public function historialEstados(): HasMany
@@ -184,14 +191,17 @@ class Vehicle extends Model
         return round((float) $this->precio_compra + $this->totalGastos(), 2);
     }
 
-    /** Precio de venta o monto de desguace, según cómo salió del inventario. */
+    /**
+     * Precio de venta o monto del Junk car, según cómo salió del inventario.
+     * Null si todavía no se cargó el monto (Junk car pendiente de completar).
+     */
     public function montoRecuperado(): ?float
     {
         if ($this->estado === EstadoVehiculo::Vendido && $this->venta) {
             return (float) $this->venta->precio_venta;
         }
 
-        if ($this->estado === EstadoVehiculo::Desguace && $this->desguace) {
+        if ($this->estado === EstadoVehiculo::Desguace && $this->desguace?->monto_recibido !== null) {
             return (float) $this->desguace->monto_recibido;
         }
 
@@ -199,14 +209,19 @@ class Vehicle extends Model
     }
 
     /**
-     * Ganancia = (precio de venta o monto de desguace) − precio de compra − gastos.
-     * Null mientras el vehículo siga en inventario. Visible solo para Admin.
+     * Ganancia = (precio de venta o monto del Junk car) − precio de compra − gastos.
+     * Null mientras el vehículo siga en inventario, o mientras falte el monto de
+     * la salida o el precio de compra (no se inventa un 0). Solo para Admin.
      */
     public function ganancia(): ?float
     {
         $recuperado = $this->montoRecuperado();
 
-        return $recuperado === null ? null : round($recuperado - $this->inversionTotal(), 2);
+        if ($recuperado === null || $this->precio_compra === null) {
+            return null;
+        }
+
+        return round($recuperado - $this->inversionTotal(), 2);
     }
 
     /** Versión por-modelo del scope visiblePara (para policies). */

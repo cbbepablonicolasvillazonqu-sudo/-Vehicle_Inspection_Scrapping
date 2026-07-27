@@ -18,6 +18,11 @@ use Livewire\Component;
 #[Title('Panel')]
 class Dashboard extends Component
 {
+    /** Ventana y tope de la lista "Recogidos" del panel del Gruero. */
+    private const RECOGIDOS_DIAS = 30;
+
+    private const RECOGIDOS_LIMITE = 20;
+
     /**
      * Panel del Gruero, agrupado por lo que tiene que hacer:
      * por recoger → recogidos → Junk car por completar → Junk car listos.
@@ -27,12 +32,22 @@ class Dashboard extends Component
         $activos = fn () => $base()->where('estado', '!=', EstadoVehiculo::Desguace->value);
         $enJunk = fn () => $base()->where('estado', EstadoVehiculo::Desguace->value);
 
+        // "Recogidos" es el acuse de su trabajo reciente, no un archivo histórico:
+        // se acota a los últimos días y con tope, para que el celular no cargue
+        // cientos de vehículos. El historial completo está en /vehiculos.
+        $recientes = fn () => $activos()
+            ->whereNotNull('metodo_pago_gruero')
+            ->where(fn ($q) => $q->whereNull('fecha_compra')
+                ->orWhereDate('fecha_compra', '>=', now()->subDays(self::RECOGIDOS_DIAS)));
+
         return view('livewire.panel-gruero', [
             // Todavía no registró el recojo.
             'porRecoger' => $activos()->whereNull('metodo_pago_gruero')->latest()->get(),
 
-            // Ya registró pago, destino, titulación y monto.
-            'recogidos' => $activos()->whereNotNull('metodo_pago_gruero')->latest()->get(),
+            // Ya registró pago, destino, titulación y monto (solo los recientes).
+            'recogidos' => $recientes()->latest()->limit(self::RECOGIDOS_LIMITE)->get(),
+            'recogidosTotal' => $recientes()->count(),
+            'recogidosDias' => self::RECOGIDOS_DIAS,
 
             // En Junk car pero falta el catalizador o el monto pagado.
             'junkPorCompletar' => $enJunk()
@@ -111,6 +126,7 @@ class Dashboard extends Component
                 'invertido' => $rentabilidad->totalInvertidoInventario(),
                 'gananciaMes' => $rentabilidad->gananciaDelMes(now()),
                 'gananciaAcumulada' => $rentabilidad->gananciaAcumulada(),
+                'pendientes' => $rentabilidad->contarPendientesDeValorar(),
             ];
         }
 

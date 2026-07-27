@@ -10,8 +10,9 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
 /**
- * Reporte de ganancias del mes (solo Admin): una fila por venta/desguace
- * con la ganancia calculada, más una fila de totales.
+ * Reporte de ganancias del mes (solo Admin): una fila por venta/Junk car con
+ * la ganancia calculada, más una fila de totales. Las salidas que aún no se
+ * pueden valorar van en un bloque aparte para que no falseen el total.
  */
 class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
 {
@@ -30,9 +31,11 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
         $inicio = Carbon::createFromFormat('Y-m', $this->mes)->startOfMonth();
         $fin = $inicio->copy()->endOfMonth();
 
-        $salidas = app(ServicioRentabilidad::class)->salidas($inicio, $fin);
+        $rentabilidad = app(ServicioRentabilidad::class);
+        $salidas = $rentabilidad->salidasValoradas($inicio, $fin);
+        $pendientes = $rentabilidad->salidasPendientes($inicio, $fin);
 
-        $filas = $salidas->map(fn (array $salida) => [
+        $fila = fn (array $salida) => [
             $salida['vehiculo']->nombreCompleto(),
             $salida['vehiculo']->vin,
             $salida['tipo'],
@@ -41,7 +44,9 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
             $salida['gastos'],
             $salida['recuperado'],
             $salida['ganancia'],
-        ]);
+        ];
+
+        $filas = $salidas->map($fila);
 
         if ($filas->isNotEmpty()) {
             $filas->push([
@@ -51,6 +56,27 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
                 round($salidas->sum('recuperado'), 2),
                 round($salidas->sum('ganancia'), 2),
             ]);
+        }
+
+        // Bloque aparte: no suman en el total porque les falta un dato.
+        if ($pendientes->isNotEmpty()) {
+            $filas->push(['', '', '', '', '', '', '', '']);
+            $filas->push(['PENDIENTES DE VALORAR (no suman)', '', '', '', '', '', '', '']);
+
+            foreach ($pendientes as $salida) {
+                $filas->push([
+                    $salida['vehiculo']->nombreCompleto(),
+                    $salida['vehiculo']->vin,
+                    $salida['motivo'] === 'sin_monto_junk'
+                        ? 'Falta el monto del Junk car'
+                        : 'Falta el precio de compra',
+                    $salida['fecha']->format('d/m/Y'),
+                    $salida['compra'],
+                    $salida['gastos'],
+                    null,
+                    null,
+                ]);
+            }
         }
 
         return $filas;

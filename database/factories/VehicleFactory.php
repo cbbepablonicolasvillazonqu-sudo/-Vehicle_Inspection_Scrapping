@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Enums\EstadoTitulo;
 use App\Enums\EstadoVehiculo;
-use App\Enums\LugarCompra;
 use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -35,7 +34,6 @@ class VehicleFactory extends Factory
             'millas' => $this->faker->numberBetween(30_000, 220_000),
             'precio_compra' => $this->faker->randomFloat(2, 500, 9500),
             'fecha_compra' => $this->faker->dateTimeBetween('-10 months', 'now')->format('Y-m-d'),
-            'lugar_compra' => $this->faker->randomElement(LugarCompra::cases()),
             'estado_titulo' => $this->faker->randomElement(EstadoTitulo::cases()),
             'estado' => EstadoVehiculo::Comprado,
             'notas' => $this->faker->boolean(40) ? $this->faker->sentence(8) : null,

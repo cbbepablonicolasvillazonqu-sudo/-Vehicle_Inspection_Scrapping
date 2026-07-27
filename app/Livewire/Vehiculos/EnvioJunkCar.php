@@ -16,7 +16,7 @@ use Livewire\WithPagination;
 
 /**
  * Envío masivo de vehículos a Junk car: búsqueda con filtros y selección
- * múltiple. Disponible para Admin y Gruero (este último solo ve sus asignados).
+ * múltiple. Solo Admin: es quien decide qué vehículo va a Junk car.
  *
  * El monto recibido y la empresa se completan después, desde la ficha.
  */

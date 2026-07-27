@@ -93,26 +93,36 @@ class GestorRecojo extends Component
 
         $monto = number_format(round((float) $datos['monto_pagado'], 2), 2, '.', '');
 
-        // Lo que paga el gruero ES el precio de compra del vehículo, y la
-        // fecha de compra es el día del recojo. La fecha se fija la primera
-        // vez: si después corrige el monto, no se mueve el día del recojo.
+        // La fecha de compra es el día del recojo y se fija la primera vez: si
+        // después el gruero corrige el monto, el día del recojo no se mueve.
         $fechaCompra = $this->vehiculo->fecha_compra?->format('Y-m-d') ?? now()->toDateString();
 
-        $this->vehiculo->forceFill([
+        // Lo que paga el gruero alimenta el precio de compra, pero sin pisar un
+        // ajuste del Admin: si él ya corrigió el costo contable, ese valor manda
+        // y "monto pagado" queda como el dato histórico de lo que salió en la calle.
+        $sinAjusteDelAdmin = $this->vehiculo->precio_compra === null
+            || (string) $this->vehiculo->precio_compra === (string) $this->vehiculo->monto_pagado;
+
+        $cambios = [
             'metodo_pago_gruero' => $datos['metodo_pago_gruero'],
             'ubicacion_destino' => $datos['ubicacion_destino'],
             'estado_titulo' => $datos['estado_titulo'],
             'monto_pagado' => $monto,
-            'precio_compra' => $monto,
             'fecha_compra' => $fechaCompra,
-        ])->save();
+        ];
+
+        if ($sinAjusteDelAdmin) {
+            $cambios['precio_compra'] = $monto;
+        }
+
+        $this->vehiculo->forceFill($cambios)->save();
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'recojo_registrado', [
             'pago' => $datos['metodo_pago_gruero'],
             'destino' => $datos['ubicacion_destino'],
             'titulacion' => $datos['estado_titulo'],
             'monto' => $monto,
-            'precio_compra' => $monto,
+            'precio_compra_actualizado' => $sinAjusteDelAdmin,
             'fecha_compra' => $fechaCompra,
         ]);
 

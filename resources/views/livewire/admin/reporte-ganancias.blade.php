@@ -14,6 +14,37 @@
             </div>
         </div>
 
+        {{-- Salidas que todavía no se pueden valorar --}}
+        @if ($pendientes->isNotEmpty())
+            <div class="rounded-2xl bg-amber-50 ring-1 ring-amber-200 p-4">
+                <div class="flex items-start gap-2.5">
+                    <x-icono nombre="reloj" clase="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div class="min-w-0">
+                        <p class="font-bold text-amber-900">
+                            {{ trans_choice('{1} :n salida pendiente de valorar|[2,*] :n salidas pendientes de valorar', $pendientes->count(), ['n' => $pendientes->count()]) }}
+                        </p>
+                        <p class="text-sm text-amber-800 mt-0.5">
+                            {{ __('No se incluyen en la ganancia hasta que se complete el dato que falta.') }}
+                        </p>
+
+                        <ul class="mt-2.5 space-y-1.5">
+                            @foreach ($pendientes as $s)
+                                <li class="text-sm">
+                                    <a href="{{ route('vehiculos.ficha', $s['vehiculo']) }}" wire:navigate
+                                       class="font-semibold text-amber-900 hover:underline">
+                                        {{ $s['vehiculo']->nombreCompleto() }}
+                                    </a>
+                                    <span class="text-amber-700">
+                                        · {{ $s['motivo'] === 'sin_monto_junk' ? __('Falta el monto del Junk car') : __('Falta el precio de compra') }}
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Resumen del mes --}}
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div class="tarjeta p-4">

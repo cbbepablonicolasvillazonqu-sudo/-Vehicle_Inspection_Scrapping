@@ -46,10 +46,16 @@ class AuditLog extends Model
             'venta_registrada' => 'Venta registrada',
             'venta_editada' => 'Venta editada',
             'venta_eliminada' => 'Venta eliminada',
-            'desguace_registrado' => 'Desguace registrado',
-            'desguace_editado' => 'Desguace editado',
-            'desguace_eliminado' => 'Desguace eliminado',
+            'desguace_registrado' => 'Junk car registrado',
+            'desguace_editado' => 'Junk car editado',
+            'desguace_eliminado' => 'Junk car eliminado',
             'precio_sugerido_actualizado' => 'Precio sugerido actualizado',
+            // Flujo de grúa y Junk car.
+            'recojo_asignado' => 'Recojo asignado',
+            'recojo_registrado' => 'Recojo registrado',
+            'enviado_a_junk' => 'Enviado a Junk car',
+            'junk_car_completado' => 'Junk car completado',
+            'foto_vehiculo_actualizada' => 'Foto del vehículo actualizada',
             default => ucfirst(str_replace('_', ' ', $this->accion)),
         });
     }

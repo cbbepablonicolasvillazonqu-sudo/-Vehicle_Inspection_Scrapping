@@ -177,4 +177,59 @@ class FotosTest extends TestCase
         $this->assertSame('nueva.jpg', $fotos->first()->nombre_original);
         Storage::disk('public')->assertMissing($rutaVieja);
     }
+
+    public function test_la_portada_ignora_las_fotos_de_los_gastos(): void
+    {
+        $admin = $this->usuarioConRol('admin');
+
+        // 1) El Admin carga la foto oficial del vehículo.
+        Livewire::actingAs($admin)
+            ->test(\App\Livewire\Vehiculos\FormularioVehiculo::class)
+            ->set('marca', 'Toyota')
+            ->set('modelo', 'Corolla')
+            ->set('anio', '2015')
+            ->set('vin', '1HGBH41JXMN109186')
+            ->set('millas', '120000')
+            ->set('precio_compra', '2500')
+            ->set('fecha_compra', now()->format('Y-m-d'))
+            ->set('ubicacion_destino', 'oficina_1_aldi')
+            ->set('estado_titulo', 'clean')
+            ->set('foto', UploadedFile::fake()->image('auto.jpg'))
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $vehiculo = Vehicle::firstOrFail();
+
+        // 2) Después el mecánico sube la foto de un repuesto en un gasto.
+        Livewire::actingAs($admin)
+            ->test(GestorGastos::class, ['vehiculo' => $vehiculo])
+            ->call('nuevo')
+            ->set($this->gastoBase())
+            ->set('fotos', [UploadedFile::fake()->image('repuesto.jpg')])
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        // La portada sigue siendo la del vehículo, no la del repuesto.
+        $portada = $vehiculo->fresh()->fotoPortada;
+
+        $this->assertNotNull($portada);
+        $this->assertSame('auto.jpg', $portada->nombre_original);
+        $this->assertNull($portada->expense_id);
+    }
+
+    public function test_sin_foto_del_vehiculo_no_hay_portada(): void
+    {
+        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::EnReparacion)->create();
+
+        Livewire::actingAs($this->usuarioConRol('mecanico'))
+            ->test(GestorGastos::class, ['vehiculo' => $vehiculo])
+            ->call('nuevo')
+            ->set($this->gastoBase())
+            ->set('fotos', [UploadedFile::fake()->image('repuesto.jpg')])
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $this->assertSame(1, $vehiculo->fresh()->fotos()->count());
+        $this->assertNull($vehiculo->fresh()->fotoPortada);
+    }
 }
