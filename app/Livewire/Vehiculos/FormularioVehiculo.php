@@ -3,14 +3,17 @@
 namespace App\Livewire\Vehiculos;
 
 use App\Enums\EstadoTitulo;
-use App\Enums\LugarCompra;
+use App\Enums\UbicacionDestino;
 use App\Models\Vehicle;
+use App\Models\VehiclePhoto;
 use App\Services\ServicioAuditoria;
 use App\Services\ServicioEstadoVehiculo;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * Alta y edición de vehículos (solo Admin).
@@ -18,7 +21,7 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class FormularioVehiculo extends Component
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, WithFileUploads;
 
     public ?Vehicle $vehiculo = null;
 
@@ -36,11 +39,14 @@ class FormularioVehiculo extends Component
 
     public string $fecha_compra = '';
 
-    public string $lugar_compra = '';
+    public string $ubicacion_destino = '';
 
     public string $estado_titulo = '';
 
     public string $notas = '';
+
+    /** Foto principal del vehículo (la misma en alta y edición). */
+    public $foto = null;
 
     public function mount(?Vehicle $vehiculo = null): void
     {
@@ -55,7 +61,7 @@ class FormularioVehiculo extends Component
             $this->millas = (string) ($vehiculo->millas ?? '');
             $this->precio_compra = (string) ($vehiculo->precio_compra ?? '');
             $this->fecha_compra = $vehiculo->fecha_compra?->format('Y-m-d') ?? now()->format('Y-m-d');
-            $this->lugar_compra = $vehiculo->lugar_compra?->value ?? '';
+            $this->ubicacion_destino = $vehiculo->ubicacion_destino?->value ?? '';
             $this->estado_titulo = $vehiculo->estado_titulo?->value ?? '';
             $this->notas = (string) $vehiculo->notas;
         } else {
@@ -77,10 +83,31 @@ class FormularioVehiculo extends Component
             'millas' => ['required', 'integer', 'min:0', 'max:2000000'],
             'precio_compra' => ['required', 'numeric', 'min:0', 'max:9999999'],
             'fecha_compra' => ['required', 'date', 'before_or_equal:today'],
-            'lugar_compra' => ['required', Rule::enum(LugarCompra::class)],
+            'ubicacion_destino' => ['required', Rule::enum(UbicacionDestino::class)],
             'estado_titulo' => ['required', Rule::enum(EstadoTitulo::class)],
             'notas' => ['nullable', 'string', 'max:5000'],
+            'foto' => ['nullable', 'image', 'max:10240'], // 10 MB
         ];
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'ubicacion_destino' => __('dónde está'),
+            'foto' => __('foto del vehículo'),
+        ];
+    }
+
+    /** Foto principal ya guardada (para mostrarla al editar). */
+    public function fotoActual(): ?VehiclePhoto
+    {
+        return $this->vehiculo?->fotos()->whereNull('expense_id')->latest('id')->first();
+    }
+
+    public function quitarFotoSeleccionada(): void
+    {
+        $this->reset('foto');
+        $this->resetValidation('foto');
     }
 
     public function updatedVin(string $valor): void
@@ -93,6 +120,9 @@ class FormularioVehiculo extends Component
         $this->vin = strtoupper(trim($this->vin));
         $datos = $this->validate();
         $datos['notas'] = filled($datos['notas'] ?? null) ? $datos['notas'] : null;
+
+        $foto = $datos['foto'] ?? null;
+        unset($datos['foto']);
 
         $auditoria = app(ServicioAuditoria::class);
 
@@ -116,6 +146,10 @@ class FormularioVehiculo extends Component
                 $auditoria->registrar($this->vehiculo, 'vehiculo_editado', ['cambios' => $cambios]);
             }
 
+            if ($foto) {
+                $this->guardarFoto($this->vehiculo, $foto, $auditoria);
+            }
+
             return $this->redirectRoute('vehiculos.ficha', $this->vehiculo, navigate: false);
         }
 
@@ -127,9 +161,40 @@ class FormularioVehiculo extends Component
         app(ServicioEstadoVehiculo::class)->registrarEstadoInicial(auth()->user(), $vehiculo);
         $auditoria->registrar($vehiculo, 'vehiculo_creado', ['vin' => $vehiculo->vin]);
 
+        if ($foto) {
+            $this->guardarFoto($vehiculo, $foto, $auditoria);
+        }
+
         session()->flash('ok', 'Vehículo registrado correctamente.');
 
         return $this->redirectRoute('vehiculos.ficha', $vehiculo, navigate: false);
+    }
+
+    /**
+     * Guarda la foto principal del vehículo. Es una sola: si ya había otra,
+     * se reemplaza (así la de alta y la de edición son siempre la misma).
+     */
+    private function guardarFoto(Vehicle $vehiculo, $foto, ServicioAuditoria $auditoria): void
+    {
+        $anteriores = $vehiculo->fotos()->whereNull('expense_id')->get();
+
+        $ruta = $foto->store("vehiculos/{$vehiculo->id}/vehiculo", 'public');
+
+        $vehiculo->fotos()->create([
+            'etapa' => 'vehiculo',
+            'ruta' => $ruta,
+            'nombre_original' => $foto->getClientOriginalName(),
+            'user_id' => auth()->id(),
+        ]);
+
+        foreach ($anteriores as $vieja) {
+            Storage::disk('public')->delete($vieja->ruta);
+            $vieja->delete();
+        }
+
+        $auditoria->registrar($vehiculo, 'foto_vehiculo_actualizada', [
+            'archivo' => $foto->getClientOriginalName(),
+        ]);
     }
 
     private function normalizar(mixed $valor): mixed
@@ -148,8 +213,9 @@ class FormularioVehiculo extends Component
     public function render()
     {
         return view('livewire.vehiculos.formulario-vehiculo', [
-            'lugares' => LugarCompra::opciones(),
+            'ubicaciones' => UbicacionDestino::opciones(),
             'titulos' => EstadoTitulo::opciones(),
+            'fotoActual' => $this->fotoActual(),
         ])->title($this->vehiculo ? 'Editar vehículo' : 'Nuevo vehículo');
     }
 }

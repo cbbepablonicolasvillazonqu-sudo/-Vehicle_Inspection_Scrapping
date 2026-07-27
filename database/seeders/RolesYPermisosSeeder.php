@@ -38,8 +38,10 @@ class RolesYPermisosSeeder extends Seeder
             // Flujo de grúa: el Admin asigna el recojo y el Gruero lo registra.
             'asignar recojo',
             'registrar recojo',
-            // Envío masivo a Junk car (Admin y Gruero).
+            // Envío a Junk car: lo decide únicamente el Admin.
             'enviar a junk',
+            // Completar los datos del Junk car (catalizador y monto pagado).
+            'completar junk',
         ];
 
         foreach ($permisos as $permiso) {
@@ -50,11 +52,13 @@ class RolesYPermisosSeeder extends Seeder
         Role::findOrCreate('admin', 'web')->syncPermissions($permisos);
 
         // Gruero: solo ve los vehículos que el Admin le asigna. Registra el
-        // recojo (pago, destino, catalizador, monto) y puede enviar a Junk car.
+        // recojo (pago, destino y monto) y completa los datos del Junk car
+        // (catalizador y monto) de los vehículos que el Admin envió allí.
+        // No decide qué vehículo va a Junk car: eso es exclusivo del Admin.
         Role::findOrCreate('gruero', 'web')->syncPermissions([
             'ver vehiculos',
             'registrar recojo',
-            'enviar a junk',
+            'completar junk',
         ]);
 
         // Mecánico: vehículos comprados/en reparación/listos; registra gastos

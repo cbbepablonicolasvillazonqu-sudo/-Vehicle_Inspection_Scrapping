@@ -38,7 +38,7 @@ class VehiculosExport implements FromCollection, ShouldAutoSize, WithHeadings, W
 
     public function headings(): array
     {
-        $columnas = ['Marca', 'Modelo', 'Año', 'VIN', 'Millas', 'Estado', 'Título', 'Lugar de compra', 'Fecha de compra'];
+        $columnas = ['Marca', 'Modelo', 'Año', 'VIN', 'Millas', 'Estado', 'Título', 'Dónde está', 'Fecha de compra'];
 
         if ($this->usuario->can('ver precios compra')) {
             $columnas[] = 'Precio de compra';
@@ -78,7 +78,7 @@ class VehiculosExport implements FromCollection, ShouldAutoSize, WithHeadings, W
             $vehiculo->millas,
             $vehiculo->estado->etiqueta(),
             $vehiculo->estado_titulo?->etiqueta(),
-            $vehiculo->lugar_compra?->etiqueta(),
+            $vehiculo->ubicacion_destino?->etiqueta(),
             $vehiculo->fecha_compra?->format('d/m/Y'),
         ];
 
