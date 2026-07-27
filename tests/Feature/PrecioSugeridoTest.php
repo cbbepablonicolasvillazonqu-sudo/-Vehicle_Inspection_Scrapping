@@ -78,11 +78,13 @@ class PrecioSugeridoTest extends TestCase
         $this->assertSame('4500.00', (string) $vehiculo->fresh()->precio_sugerido);
     }
 
-    public function test_comprador_tampoco_puede_fijar_el_precio_sugerido(): void
+    public function test_gruero_tampoco_puede_fijar_el_precio_sugerido(): void
     {
-        $vehiculo = Vehicle::factory()->create();
+        // El gruero solo ve los vehículos que tiene asignados.
+        $gruero = $this->usuarioConRol('gruero');
+        $vehiculo = Vehicle::factory()->create(['asignado_a' => $gruero->id]);
 
-        Livewire::actingAs($this->usuarioConRol('comprador'))
+        Livewire::actingAs($gruero)
             ->test(FichaVehiculo::class, ['vehiculo' => $vehiculo])
             ->set('precioSugerido', '5000')
             ->call('guardarPrecioSugerido')

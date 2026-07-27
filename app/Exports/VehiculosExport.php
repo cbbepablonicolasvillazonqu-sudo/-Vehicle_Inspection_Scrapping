@@ -77,9 +77,9 @@ class VehiculosExport implements FromCollection, ShouldAutoSize, WithHeadings, W
             $vehiculo->vin,
             $vehiculo->millas,
             $vehiculo->estado->etiqueta(),
-            $vehiculo->estado_titulo->etiqueta(),
-            $vehiculo->lugar_compra->etiqueta(),
-            $vehiculo->fecha_compra->format('d/m/Y'),
+            $vehiculo->estado_titulo?->etiqueta(),
+            $vehiculo->lugar_compra?->etiqueta(),
+            $vehiculo->fecha_compra?->format('d/m/Y'),
         ];
 
         if ($this->usuario->can('ver precios compra')) {

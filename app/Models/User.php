@@ -54,7 +54,7 @@ class User extends Authenticatable
     {
         return __(match ($this->getRoleNames()->first()) {
             'admin' => 'Administrador',
-            'comprador' => 'Comprador',
+            'gruero' => 'Gruero',
             'mecanico' => 'Mecánico',
             'vendedor' => 'Vendedor',
             default => 'Sin rol',

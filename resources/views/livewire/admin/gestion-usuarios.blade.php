@@ -11,10 +11,10 @@
         </div>
 
         @php
-            $etiquetasRol = ['admin' => __('Administrador'), 'comprador' => __('Comprador'), 'mecanico' => __('Mecánico'), 'vendedor' => __('Vendedor')];
+            $etiquetasRol = ['admin' => __('Administrador'), 'gruero' => __('Gruero'), 'mecanico' => __('Mecánico'), 'vendedor' => __('Vendedor')];
             $coloresRol = [
                 'admin' => ['chip' => 'bg-purple-100 text-purple-800', 'av' => 'from-purple-500 to-purple-700'],
-                'comprador' => ['chip' => 'bg-orange-100 text-orange-800', 'av' => 'from-orange-500 to-orange-700'],
+                'gruero' => ['chip' => 'bg-orange-100 text-orange-800', 'av' => 'from-orange-500 to-orange-700'],
                 'mecanico' => ['chip' => 'bg-yellow-100 text-yellow-800', 'av' => 'from-yellow-500 to-amber-600'],
                 'vendedor' => ['chip' => 'bg-blue-100 text-blue-800', 'av' => 'from-blue-500 to-blue-700'],
             ];

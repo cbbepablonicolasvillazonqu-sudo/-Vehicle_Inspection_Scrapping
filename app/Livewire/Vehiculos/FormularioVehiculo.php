@@ -13,7 +13,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * Alta y edición de vehículos (Admin y Comprador).
+ * Alta y edición de vehículos (solo Admin).
  */
 #[Layout('layouts.app')]
 class FormularioVehiculo extends Component
@@ -52,11 +52,11 @@ class FormularioVehiculo extends Component
             $this->modelo = $vehiculo->modelo;
             $this->anio = (string) $vehiculo->anio;
             $this->vin = $vehiculo->vin;
-            $this->millas = (string) $vehiculo->millas;
-            $this->precio_compra = (string) $vehiculo->precio_compra;
-            $this->fecha_compra = $vehiculo->fecha_compra->format('Y-m-d');
-            $this->lugar_compra = $vehiculo->lugar_compra->value;
-            $this->estado_titulo = $vehiculo->estado_titulo->value;
+            $this->millas = (string) ($vehiculo->millas ?? '');
+            $this->precio_compra = (string) ($vehiculo->precio_compra ?? '');
+            $this->fecha_compra = $vehiculo->fecha_compra?->format('Y-m-d') ?? now()->format('Y-m-d');
+            $this->lugar_compra = $vehiculo->lugar_compra?->value ?? '';
+            $this->estado_titulo = $vehiculo->estado_titulo?->value ?? '';
             $this->notas = (string) $vehiculo->notas;
         } else {
             $this->authorize('create', Vehicle::class);

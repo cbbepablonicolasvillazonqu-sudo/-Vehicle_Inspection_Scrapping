@@ -53,7 +53,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     @foreach ([
                         ['Admin', 'admin@fortetowing.com', 'bg-purple-50 text-purple-800 hover:bg-purple-100 ring-purple-200'],
-                        ['Comprador', 'compras@fortetowing.com', 'bg-orange-50 text-orange-800 hover:bg-orange-100 ring-orange-200'],
+                        ['Gruero', 'gruero@fortetowing.com', 'bg-orange-50 text-orange-800 hover:bg-orange-100 ring-orange-200'],
                         ['Mecánico', 'taller@fortetowing.com', 'bg-yellow-50 text-yellow-800 hover:bg-yellow-100 ring-yellow-200'],
                         ['Vendedor', 'ventas@fortetowing.com', 'bg-blue-50 text-blue-800 hover:bg-blue-100 ring-blue-200'],
                     ] as [$rol, $correo, $clase])

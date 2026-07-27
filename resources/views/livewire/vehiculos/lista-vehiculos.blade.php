@@ -78,8 +78,8 @@
                         <span class="chip mt-2 {{ $vehiculo->estado->colorBadge() }}">{{ $vehiculo->estado->etiquetaCorta() }}</span>
 
                         <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 tabular">
-                            <span class="inline-flex items-center gap-1"><x-icono nombre="velocimetro" clase="w-3.5 h-3.5" />{{ number_format($vehiculo->millas) }}</span>
-                            <span class="inline-flex items-center gap-1"><x-icono nombre="calendario" clase="w-3.5 h-3.5" />{{ $vehiculo->fecha_compra->format('d/m/y') }}</span>
+                            <span class="inline-flex items-center gap-1"><x-icono nombre="velocimetro" clase="w-3.5 h-3.5" />{{ $vehiculo->millas !== null ? number_format($vehiculo->millas) : '—' }}</span>
+                            <span class="inline-flex items-center gap-1"><x-icono nombre="calendario" clase="w-3.5 h-3.5" />{{ $vehiculo->fecha_compra?->format('d/m/y') ?? '—' }}</span>
                         </div>
 
                         @can('ver precios compra')

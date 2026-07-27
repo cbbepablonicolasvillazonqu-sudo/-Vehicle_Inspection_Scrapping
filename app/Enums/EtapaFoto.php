@@ -3,21 +3,17 @@
 namespace App\Enums;
 
 /**
- * Etapas en las que se organizan las fotos de cada vehículo
- * (carpetas separadas en el disco).
+ * Etapas de las fotos. Desde el rediseño, las fotos solo se cargan dentro
+ * del módulo de Gastos: las etapas compra / reparación / venta se retiraron.
  */
 enum EtapaFoto: string
 {
-    case Compra = 'compra';
-    case Reparacion = 'reparacion';
-    case Venta = 'venta';
+    case Gasto = 'gasto';
 
     public function etiqueta(): string
     {
         return __(match ($this) {
-            self::Compra => 'Compra',
-            self::Reparacion => 'Reparación',
-            self::Venta => 'Venta',
+            self::Gasto => 'Gasto',
         });
     }
 

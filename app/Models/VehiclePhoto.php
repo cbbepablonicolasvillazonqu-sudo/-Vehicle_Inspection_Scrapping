@@ -10,6 +10,7 @@ class VehiclePhoto extends Model
 {
     protected $fillable = [
         'vehicle_id',
+        'expense_id',
         'etapa',
         'ruta',
         'nombre_original',
@@ -31,6 +32,12 @@ class VehiclePhoto extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** Gasto al que pertenece la foto. */
+    public function gasto(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class, 'expense_id');
     }
 
     /**

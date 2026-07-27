@@ -25,7 +25,7 @@ enum EstadoVehiculo: string
             self::Listo => 'Listo para la venta',
             self::Publicado => 'Publicado / en venta',
             self::Vendido => 'Vendido',
-            self::Desguace => 'Desguace',
+            self::Desguace => 'Junk car',
         });
     }
 
@@ -37,7 +37,7 @@ enum EstadoVehiculo: string
             self::Listo => 'Listo',
             self::Publicado => 'Publicado',
             self::Vendido => 'Vendido',
-            self::Desguace => 'Desguace',
+            self::Desguace => 'Junk car',
         });
     }
 

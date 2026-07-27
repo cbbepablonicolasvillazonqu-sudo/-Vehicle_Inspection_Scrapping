@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\EstadoVehiculo;
-use App\Livewire\Vehiculos\GestorFotos;
+use App\Livewire\Vehiculos\GestorGastos;
 use App\Models\User;
 use App\Models\Vehicle;
 use Database\Seeders\RolesYPermisosSeeder;
@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
+/**
+ * Las fotos solo existen dentro del módulo de Gastos.
+ */
 class FotosTest extends TestCase
 {
     use RefreshDatabase;
@@ -30,24 +33,36 @@ class FotosTest extends TestCase
         return User::factory()->create()->assignRole($rol);
     }
 
-    public function test_mecanico_previsualiza_quita_una_y_sube_el_resto(): void
+    private function gastoBase(): array
+    {
+        return [
+            'categoria' => 'reparacion',
+            'descripcion' => 'Cambio de frenos',
+            'monto' => '150.00',
+            'fecha' => now()->toDateString(),
+        ];
+    }
+
+    public function test_mecanico_registra_un_gasto_con_fotos_previsualizadas(): void
     {
         $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::EnReparacion)->create();
         $mecanico = $this->usuarioConRol('mecanico');
 
         Livewire::actingAs($mecanico)
-            ->test(GestorFotos::class, ['vehiculo' => $vehiculo])
-            ->set('etapa', 'reparacion')
+            ->test(GestorGastos::class, ['vehiculo' => $vehiculo])
+            ->call('nuevo')
+            ->set($this->gastoBase())
             ->set('fotos', [
                 UploadedFile::fake()->image('frente.jpg'),
                 UploadedFile::fake()->image('borrosa.jpg'),
                 UploadedFile::fake()->image('motor.jpg'),
             ])
             ->call('quitarSeleccion', 1) // descarta "borrosa" desde la previsualización
-            ->call('subir')
+            ->call('guardar')
             ->assertHasNoErrors();
 
-        $fotos = $vehiculo->fotos()->get();
+        $gasto = $vehiculo->gastos()->sole();
+        $fotos = $gasto->fotos()->get();
 
         $this->assertCount(2, $fotos);
         $this->assertEqualsCanonicalizing(
@@ -56,23 +71,24 @@ class FotosTest extends TestCase
         );
 
         foreach ($fotos as $foto) {
-            $this->assertSame('reparacion', $foto->etapa->value);
+            $this->assertSame('gasto', $foto->etapa->value);
+            $this->assertSame($gasto->id, $foto->expense_id);
             Storage::disk('public')->assertExists($foto->ruta);
         }
-
-        $this->assertSame(2, $vehiculo->auditoria()->where('accion', 'foto_subida')->count());
     }
 
-    public function test_limpiar_seleccion_descarta_todo_sin_subir(): void
+    public function test_gasto_sin_fotos_sigue_siendo_valido(): void
     {
         $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::EnReparacion)->create();
 
         Livewire::actingAs($this->usuarioConRol('mecanico'))
-            ->test(GestorFotos::class, ['vehiculo' => $vehiculo])
-            ->set('fotos', [UploadedFile::fake()->image('a.jpg')])
-            ->call('limpiarSeleccion')
-            ->assertSet('fotos', []);
+            ->test(GestorGastos::class, ['vehiculo' => $vehiculo])
+            ->call('nuevo')
+            ->set($this->gastoBase())
+            ->call('guardar')
+            ->assertHasNoErrors();
 
+        $this->assertSame(1, $vehiculo->gastos()->count());
         $this->assertSame(0, $vehiculo->fotos()->count());
     }
 
@@ -81,53 +97,39 @@ class FotosTest extends TestCase
         $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::EnReparacion)->create();
 
         Livewire::actingAs($this->usuarioConRol('mecanico'))
-            ->test(GestorFotos::class, ['vehiculo' => $vehiculo])
+            ->test(GestorGastos::class, ['vehiculo' => $vehiculo])
+            ->call('nuevo')
+            ->set($this->gastoBase())
             ->set('fotos', [UploadedFile::fake()->create('documento.pdf', 100, 'application/pdf')])
-            ->call('subir')
+            ->call('guardar')
             ->assertHasErrors(['fotos.0']);
 
         $this->assertSame(0, $vehiculo->fotos()->count());
     }
 
-    public function test_url_de_foto_usa_el_host_de_la_peticion_no_app_url(): void
+    public function test_vendedor_no_puede_subir_fotos_ni_registrar_gastos(): void
     {
-        $admin = $this->usuarioConRol('admin');
-        $vehiculo = Vehicle::factory()->create();
-        $vehiculo->fotos()->create([
-            'etapa' => 'compra',
-            'ruta' => "vehiculos/{$vehiculo->id}/compra/demo.jpg",
-            'nombre_original' => 'demo.jpg',
-            'user_id' => $admin->id,
-        ]);
+        $vendedor = $this->usuarioConRol('vendedor');
 
-        // Simula la entrada por el túnel: Cloudflare reenvía host y esquema reales.
-        $respuesta = $this->actingAs($admin)
-            ->withHeaders([
-                'X-Forwarded-Host' => 'tunel-demo.trycloudflare.com',
-                'X-Forwarded-Proto' => 'https',
-            ])
-            ->get("/vehiculos/{$vehiculo->id}");
-
-        $respuesta->assertOk();
-        // La foto debe apuntar al host por el que entró el usuario, no a APP_URL.
-        $respuesta->assertSee("https://tunel-demo.trycloudflare.com/storage/vehiculos/{$vehiculo->id}/compra/demo.jpg", false);
-        $respuesta->assertDontSee("http://localhost/storage/vehiculos/{$vehiculo->id}/compra/demo.jpg", false);
+        $this->assertFalse($vendedor->can('subir fotos'));
+        $this->assertFalse($vendedor->can('registrar gastos'));
     }
 
-    public function test_vehiculo_vendido_bloquea_subida_salvo_admin(): void
+    public function test_vehiculo_vendido_bloquea_gastos_y_fotos_salvo_admin(): void
     {
         $vendido = Vehicle::factory()->enEstado(EstadoVehiculo::Vendido)->create();
 
         Livewire::actingAs($this->usuarioConRol('mecanico'))
-            ->test(GestorFotos::class, ['vehiculo' => $vendido])
-            ->set('fotos', [UploadedFile::fake()->image('tarde.jpg')])
-            ->call('subir')
+            ->test(GestorGastos::class, ['vehiculo' => $vendido])
+            ->call('nuevo')
             ->assertForbidden();
 
         Livewire::actingAs($this->usuarioConRol('admin'))
-            ->test(GestorFotos::class, ['vehiculo' => $vendido])
+            ->test(GestorGastos::class, ['vehiculo' => $vendido])
+            ->call('nuevo')
+            ->set($this->gastoBase())
             ->set('fotos', [UploadedFile::fake()->image('ok.jpg')])
-            ->call('subir')
+            ->call('guardar')
             ->assertHasNoErrors();
 
         $this->assertSame(1, $vendido->fotos()->count());
