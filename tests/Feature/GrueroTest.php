@@ -293,10 +293,10 @@ class GrueroTest extends TestCase
             'metodo_pago_gruero' => null,
         ]);
 
-        // Ya recogido.
+        // Ya recogido (fecha fija: la lista solo muestra los últimos 30 días).
         $recogido = Vehicle::factory()->create([
             'asignado_a' => $gruero->id, 'marca' => 'Honda', 'modelo' => 'Pilot',
-            'metodo_pago_gruero' => 'efectivo',
+            'metodo_pago_gruero' => 'efectivo', 'fecha_compra' => now()->toDateString(),
         ]);
 
         // En Junk car sin completar.
@@ -340,5 +340,70 @@ class GrueroTest extends TestCase
         $this->actingAs($this->usuarioConRol('mecanico'))->get('/junk-car')->assertForbidden();
         $this->actingAs($this->usuarioConRol('vendedor'))->get('/junk-car')->assertForbidden();
         $this->actingAs($this->usuarioConRol('gruero'))->get('/junk-car')->assertForbidden();
+    }
+
+    /* -------------------- Panel acotado y costo contable -------------------- */
+
+    public function test_el_panel_no_lista_recojos_viejos_ni_mas_de_veinte(): void
+    {
+        $gruero = $this->usuarioConRol('gruero');
+
+        $reciente = Vehicle::factory()->create([
+            'asignado_a' => $gruero->id, 'metodo_pago_gruero' => 'efectivo',
+            'fecha_compra' => now()->subDays(5)->toDateString(), 'marca' => 'Honda', 'modelo' => 'Fit',
+        ]);
+
+        $viejo = Vehicle::factory()->create([
+            'asignado_a' => $gruero->id, 'metodo_pago_gruero' => 'efectivo',
+            'fecha_compra' => now()->subDays(60)->toDateString(), 'marca' => 'Subaru', 'modelo' => 'Legacy',
+        ]);
+
+        $panel = Livewire::actingAs($gruero)->test(Dashboard::class);
+
+        $panel->assertViewHas('recogidos', fn ($c) => $c->pluck('id')->all() === [$reciente->id]);
+        $panel->assertSee('Fit')->assertDontSee('Legacy');
+
+        // Con más de 20 recientes, la lista se corta pero el total los cuenta.
+        Vehicle::factory()->count(24)->create([
+            'asignado_a' => $gruero->id, 'metodo_pago_gruero' => 'zelle',
+            'fecha_compra' => now()->toDateString(),
+        ]);
+
+        $panel = Livewire::actingAs($gruero)->test(Dashboard::class);
+
+        $panel->assertViewHas('recogidos', fn ($c) => $c->count() === 20);
+        $panel->assertViewHas('recogidosTotal', 25);
+    }
+
+    public function test_el_ajuste_del_admin_al_costo_no_lo_pisa_el_gruero(): void
+    {
+        $gruero = $this->usuarioConRol('gruero');
+        $vehiculo = Vehicle::factory()->create([
+            'asignado_a' => $gruero->id, 'precio_compra' => null, 'fecha_compra' => null,
+        ]);
+
+        $recojo = fn (string $monto) => Livewire::actingAs($gruero)
+            ->test(GestorRecojo::class, ['vehiculo' => $vehiculo->fresh()])
+            ->set('metodo_pago_gruero', 'efectivo')
+            ->set('ubicacion_destino', 'oficina_1_aldi')
+            ->set('estado_titulo', 'clean')
+            ->set('monto_pagado', $monto)
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        // Primer recojo: el monto alimenta el costo contable.
+        $recojo('500');
+        $vehiculo->refresh();
+        $this->assertSame('500.00', (string) $vehiculo->precio_compra);
+
+        // El Admin ajusta el costo contable.
+        $vehiculo->forceFill(['precio_compra' => '1200.00'])->save();
+
+        // El gruero corrige lo que pagó: su dato cambia, el del Admin se respeta.
+        $recojo('600');
+        $vehiculo->refresh();
+
+        $this->assertSame('600.00', (string) $vehiculo->monto_pagado);
+        $this->assertSame('1200.00', (string) $vehiculo->precio_compra);
     }
 }

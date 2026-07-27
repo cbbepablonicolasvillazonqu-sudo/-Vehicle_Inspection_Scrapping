@@ -64,9 +64,11 @@ class VehiculosExport implements FromCollection, ShouldAutoSize, WithHeadings, W
     {
         $gastos = (float) ($vehiculo->gastos_total ?? 0);
 
+        // Un Junk car sin monto cargado queda vacío, nunca en 0: valorarlo en 0
+        // lo convertiría en una pérdida ficticia.
         $recuperado = match (true) {
             $vehiculo->venta !== null => (float) $vehiculo->venta->precio_venta,
-            $vehiculo->desguace !== null => (float) $vehiculo->desguace->monto_recibido,
+            $vehiculo->desguace?->monto_recibido !== null => (float) $vehiculo->desguace->monto_recibido,
             default => null,
         };
 
@@ -93,7 +95,7 @@ class VehiculosExport implements FromCollection, ShouldAutoSize, WithHeadings, W
         $fila[] = $recuperado;
 
         if ($this->usuario->can('ver ganancias')) {
-            $fila[] = $recuperado === null
+            $fila[] = ($recuperado === null || $vehiculo->precio_compra === null)
                 ? null
                 : round($recuperado - (float) $vehiculo->precio_compra - $gastos, 2);
         }

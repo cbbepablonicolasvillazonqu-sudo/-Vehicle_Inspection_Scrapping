@@ -37,10 +37,14 @@ class ReporteGanancias extends Component
         $inicio = Carbon::createFromFormat('Y-m', $this->mes)->startOfMonth();
         $fin = $inicio->copy()->endOfMonth();
 
-        $salidas = $rentabilidad->salidas($inicio, $fin);
+        // Solo las salidas valoradas suman: las que esperan el monto del Junk car
+        // o el precio de compra se listan aparte para que el Admin las complete.
+        $salidas = $rentabilidad->salidasValoradas($inicio, $fin);
+        $pendientes = $rentabilidad->salidasPendientes($inicio, $fin);
 
         return view('livewire.admin.reporte-ganancias', [
             'salidas' => $salidas,
+            'pendientes' => $pendientes,
             'totalMes' => round($salidas->sum('ganancia'), 2),
             'totalRecuperado' => round($salidas->sum('recuperado'), 2),
             'totalInvertidoMes' => round($salidas->sum(fn ($s) => $s['compra'] + $s['gastos']), 2),

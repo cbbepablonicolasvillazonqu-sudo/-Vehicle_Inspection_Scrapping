@@ -48,13 +48,17 @@
                     </div>
 
                     <div>
+                        @php $esPropio = $usuarioId === auth()->id(); @endphp
                         <x-input-label for="rol" :value="__('Rol')" />
-                        <select id="rol" wire:model="rol" class="campo">
+                        <select id="rol" wire:model="rol" class="campo disabled:bg-slate-100 disabled:text-slate-400" @disabled($esPropio)>
                             <option value="">{{ __('— Seleccionar rol —') }}</option>
                             @foreach ($roles as $nombreRol)
                                 <option value="{{ $nombreRol }}">{{ $etiquetasRol[$nombreRol] ?? ucfirst($nombreRol) }}</option>
                             @endforeach
                         </select>
+                        @if ($esPropio)
+                            <p class="text-xs text-slate-400 mt-1">{{ __('No puedes cambiar tu propio rol') }}</p>
+                        @endif
                         <x-input-error :messages="$errors->get('rol')" class="mt-2" />
                     </div>
 
@@ -98,7 +102,7 @@
 
                         @if ($usuario->id !== auth()->id())
                             <button wire:click="eliminar({{ $usuario->id }})"
-                                    wire:confirm="{{ __('¿Eliminar al usuario :nombre?', ['nombre' => $usuario->name]) }}"
+                                    wire:confirm="{{ __('¿Eliminar al usuario :nombre? Los vehículos que haya recogido quedarán sin gruero asignado.', ['nombre' => $usuario->name]) }}"
                                     class="p-2 text-red-600 hover:bg-red-50 rounded-lg" aria-label="{{ __('Eliminar') }}">
                                 <x-icono nombre="basura" clase="w-4 h-4" />
                             </button>

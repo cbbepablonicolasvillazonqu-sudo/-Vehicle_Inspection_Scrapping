@@ -53,10 +53,10 @@
             </div>
 
             <div>
-                <x-input-label for="monto_pagado" :value="__('Monto pagado por el vehículo')" />
+                <x-input-label for="monto_pagado" :value="__('¿Cuánto pagaste por el vehículo?')" />
                 <x-text-input id="monto_pagado" type="number" step="0.01" min="0" inputmode="decimal"
                               wire:model="monto_pagado" class="block w-full tabular" placeholder="0.00" />
-                <p class="text-xs text-slate-400 mt-1">{{ __('Se registra como precio de compra, con la fecha del recojo.') }}</p>
+                <p class="text-xs text-slate-400 mt-1">{{ __('Queda registrado como lo que pagaste, con la fecha del recojo. El admin puede ajustar el costo después.') }}</p>
                 <x-input-error :messages="$errors->get('monto_pagado')" />
             </div>
 
@@ -92,10 +92,16 @@
 
             @can('ver precios compra')
                 <div>
-                    <dt class="text-slate-400 text-xs">{{ __('Monto pagado') }}</dt>
+                    <dt class="text-slate-400 text-xs">{{ __('Pagado por el gruero') }}</dt>
                     <dd class="font-semibold text-slate-800 tabular">
                         {{ $vehiculo->monto_pagado !== null ? '$'.number_format((float) $vehiculo->monto_pagado, 2) : '—' }}
                     </dd>
+                    @if ($vehiculo->monto_pagado !== null && $vehiculo->precio_compra !== null
+                        && (string) $vehiculo->monto_pagado !== (string) $vehiculo->precio_compra)
+                        <dd class="text-xs text-amber-700 mt-0.5">
+                            {{ __('Costo contable ajustado: :monto', ['monto' => dinero($vehiculo->precio_compra)]) }}
+                        </dd>
+                    @endif
                 </div>
             @endcan
         </dl>

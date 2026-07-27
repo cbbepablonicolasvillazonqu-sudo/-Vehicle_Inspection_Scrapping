@@ -48,8 +48,8 @@ Route::middleware(['auth', 'permission:exportar datos'])->group(function () {
 });
 
 // Vehículos: todas las rutas exigen sesión + permiso "ver vehiculos";
-// crear/editar además exigen rol admin o comprador. Las policies y los
-// componentes Livewire validan de nuevo (defensa en profundidad).
+// crear/editar además exigen rol admin. Las policies y los componentes
+// Livewire validan de nuevo (defensa en profundidad).
 Route::middleware(['auth', 'permission:ver vehiculos'])->group(function () {
     Route::get('/vehiculos', ListaVehiculos::class)->name('vehiculos.index');
 
@@ -66,7 +66,8 @@ Route::middleware(['auth', 'permission:asignar recojo'])->group(function () {
     Route::get('/recojos/asignar', AsignarRecojo::class)->name('recojos.asignar');
 });
 
-// Envío masivo a Junk car con búsqueda y filtros (Admin y Gruero).
+// Envío masivo a Junk car con búsqueda y filtros (solo Admin: es él quien
+// decide qué vehículo va a Junk car).
 Route::middleware(['auth', 'permission:enviar a junk'])->group(function () {
     Route::get('/junk-car', EnvioJunkCar::class)->name('junk.masivo');
 });

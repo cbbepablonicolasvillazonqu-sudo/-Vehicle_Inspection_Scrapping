@@ -34,6 +34,8 @@ class VehiclePolicy
 
     public function delete(User $usuario, Vehicle $vehiculo): bool
     {
-        return $usuario->hasRole('admin');
+        // Hoy solo el Admin tiene este permiso: el comportamiento es el mismo
+        // que antes, pero la regla vive en un único lugar (el seeder de roles).
+        return $usuario->can('eliminar vehiculos');
     }
 }

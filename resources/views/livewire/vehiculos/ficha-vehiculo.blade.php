@@ -63,10 +63,27 @@
                     </div>
 
                     @can('ver precios compra')
+                        @php
+                            $costoAjustado = $vehiculo->monto_pagado !== null
+                                && $vehiculo->precio_compra !== null
+                                && (string) $vehiculo->monto_pagado !== (string) $vehiculo->precio_compra;
+                        @endphp
                         <div>
                             <dt class="text-slate-400 text-xs">{{ __('Precio de compra') }}</dt>
-                            <dd class="font-semibold text-slate-900 tabular">{{ dinero($vehiculo->precio_compra) }}</dd>
+                            <dd class="font-semibold text-slate-900 tabular">
+                                {{ $vehiculo->precio_compra !== null ? dinero($vehiculo->precio_compra) : '—' }}
+                                @if ($costoAjustado)
+                                    <span class="chip bg-amber-100 text-amber-800 ms-1">{{ __('ajustado') }}</span>
+                                @endif
+                            </dd>
                         </div>
+
+                        @if ($vehiculo->monto_pagado !== null)
+                            <div>
+                                <dt class="text-slate-400 text-xs">{{ __('Pagado por el gruero') }}</dt>
+                                <dd class="font-semibold text-slate-900 tabular">{{ dinero($vehiculo->monto_pagado) }}</dd>
+                            </div>
+                        @endif
                     @endcan
 
                     <div>

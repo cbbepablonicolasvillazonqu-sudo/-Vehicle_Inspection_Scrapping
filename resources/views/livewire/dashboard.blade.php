@@ -73,6 +73,13 @@
                         {{ dinero($finanzas['gananciaAcumulada']) }}
                     </div>
                     <div class="text-xs text-slate-400 mt-1">{{ __('ventas + Junk car históricos') }}</div>
+                    @if ($finanzas['pendientes'] > 0)
+                        <a href="{{ route('reportes.ganancias') }}" wire:navigate
+                           class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:underline">
+                            <x-icono nombre="reloj" clase="w-3.5 h-3.5" />
+                            {{ trans_choice('{1} :n salida sin valorar|[2,*] :n salidas sin valorar', $finanzas['pendientes'], ['n' => $finanzas['pendientes']]) }}
+                        </a>
+                    @endif
                 </div>
             </div>
         @endif

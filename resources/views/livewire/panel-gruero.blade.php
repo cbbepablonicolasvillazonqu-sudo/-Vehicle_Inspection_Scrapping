@@ -71,10 +71,14 @@
 
         {{-- 2. Recogidos --}}
         <section>
-            <div class="flex items-center gap-2 mb-2.5">
+            <div class="flex flex-wrap items-center gap-2 mb-2.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                <h3 class="font-bold text-slate-800">{{ __('Recogidos') }}</h3>
-                <span class="chip bg-slate-100 text-slate-600">{{ $recogidos->count() }}</span>
+                <h3 class="font-bold text-slate-800">{{ __('Recogidos (últimos :n días)', ['n' => $recogidosDias]) }}</h3>
+                <span class="chip bg-slate-100 text-slate-600">{{ $recogidosTotal }}</span>
+                <a href="{{ route('vehiculos.index') }}" wire:navigate
+                   class="ms-auto text-sm font-semibold text-blue-700 hover:underline">
+                    {{ __('Ver todo mi historial') }}
+                </a>
             </div>
 
             <div class="tarjeta divide-y divide-slate-100">
@@ -97,6 +101,13 @@
                 @empty
                     <p class="p-5 text-sm text-slate-500 text-center">{{ __('Todavía no registraste ningún recojo.') }}</p>
                 @endforelse
+
+                @if ($recogidosTotal > $recogidos->count())
+                    <a href="{{ route('vehiculos.index') }}" wire:navigate
+                       class="block p-3 text-center text-sm font-semibold text-blue-700 hover:bg-slate-50">
+                        {{ __('y :n más', ['n' => $recogidosTotal - $recogidos->count()]) }}
+                    </a>
+                @endif
             </div>
         </section>
 

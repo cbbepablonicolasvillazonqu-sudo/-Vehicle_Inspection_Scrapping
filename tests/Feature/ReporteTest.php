@@ -127,4 +127,115 @@ class ReporteTest extends TestCase
             ->get('/exportar/vehiculos/csv')
             ->assertForbidden();
     }
+
+    /* ---- Salidas pendientes de valorar (Junk car masivo sin completar) ---- */
+
+    /** Vehículo enviado a Junk car sin monto: el flujo del envío masivo. */
+    private function junkSinMonto(float $compra): Vehicle
+    {
+        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Desguace)->create(['precio_compra' => $compra]);
+
+        $vehiculo->desguace()->create(['fecha' => now()->format('Y-m-d')]);
+
+        return $vehiculo;
+    }
+
+    public function test_junk_sin_monto_no_afecta_la_ganancia(): void
+    {
+        // Venta real: 4000 − 2000 − 500 = 1500
+        $this->vehiculoVendido(2000, 500, 4000, now()->format('Y-m-d'));
+
+        $servicio = app(ServicioRentabilidad::class);
+        $antes = $servicio->gananciaDelMes(now());
+
+        // Un Junk car sin completar no puede mover el número.
+        $this->junkSinMonto(900);
+
+        $this->assertSame($antes, $servicio->gananciaDelMes(now()));
+        $this->assertSame(1500.0, $servicio->gananciaDelMes(now()));
+        $this->assertSame(1500.0, $servicio->gananciaAcumulada());
+    }
+
+    public function test_junk_sin_monto_se_cuenta_como_pendiente(): void
+    {
+        $vehiculo = $this->junkSinMonto(900);
+
+        $servicio = app(ServicioRentabilidad::class);
+        $pendientes = $servicio->salidasPendientes();
+
+        $this->assertCount(1, $pendientes);
+        $this->assertSame('sin_monto_junk', $pendientes->first()['motivo']);
+        $this->assertNull($pendientes->first()['ganancia']);
+        $this->assertNull($pendientes->first()['recuperado']);
+        $this->assertSame($vehiculo->id, $pendientes->first()['vehiculo']->id);
+        $this->assertSame(1, $servicio->contarPendientesDeValorar());
+        $this->assertCount(0, $servicio->salidasValoradas());
+    }
+
+    public function test_al_completar_el_junk_la_salida_entra_en_la_ganancia(): void
+    {
+        $vehiculo = $this->junkSinMonto(800);
+        $servicio = app(ServicioRentabilidad::class);
+
+        $this->assertSame(0.0, $servicio->gananciaDelMes(now()));
+
+        // El gruero (o el admin) carga el monto: 300 − 800 = −500
+        $vehiculo->desguace->update(['monto_recibido' => 300]);
+
+        $this->assertSame(-500.0, $servicio->gananciaDelMes(now()));
+        $this->assertSame(0, $servicio->contarPendientesDeValorar());
+    }
+
+    public function test_salida_sin_precio_de_compra_queda_pendiente(): void
+    {
+        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Vendido)->create(['precio_compra' => null]);
+        $vehiculo->venta()->create([
+            'fecha_venta' => now()->format('Y-m-d'),
+            'precio_venta' => 5000,
+            'nombre_comprador' => 'Cliente',
+            'telefono_comprador' => '555',
+            'metodo_pago' => 'efectivo',
+        ]);
+
+        $servicio = app(ServicioRentabilidad::class);
+
+        $this->assertSame('sin_precio_compra', $servicio->salidasPendientes()->first()['motivo']);
+        $this->assertSame(0.0, $servicio->gananciaAcumulada());
+    }
+
+    public function test_la_ganancia_del_modelo_es_null_si_falta_el_monto_del_junk(): void
+    {
+        $vehiculo = $this->junkSinMonto(800);
+
+        $this->assertNull($vehiculo->montoRecuperado());
+        $this->assertNull($vehiculo->ganancia());
+
+        $vehiculo->desguace->update(['monto_recibido' => 300]);
+        $vehiculo->refresh()->load('desguace');
+
+        $this->assertSame(300.0, $vehiculo->montoRecuperado());
+        $this->assertSame(-500.0, $vehiculo->ganancia());
+    }
+
+    public function test_el_panel_avisa_de_las_salidas_pendientes(): void
+    {
+        $this->junkSinMonto(900);
+
+        \Livewire\Livewire::actingAs($this->usuarioConRol('admin'))
+            ->test(\App\Livewire\Dashboard::class)
+            ->assertViewHas('finanzas', fn ($f) => $f['pendientes'] === 1);
+    }
+
+    public function test_el_reporte_separa_las_pendientes_de_las_valoradas(): void
+    {
+        $this->vehiculoVendido(2000, 500, 4000, now()->format('Y-m-d'));
+        $this->junkSinMonto(900);
+
+        \Livewire\Livewire::actingAs($this->usuarioConRol('admin'))
+            ->test(\App\Livewire\Admin\ReporteGanancias::class)
+            ->assertViewHas('salidas', fn ($s) => $s->count() === 1)
+            ->assertViewHas('pendientes', fn ($p) => $p->count() === 1)
+            ->assertViewHas('totalMes', 1500.0)
+            ->assertSee('Falta el monto del Junk car');
+    }
 }
