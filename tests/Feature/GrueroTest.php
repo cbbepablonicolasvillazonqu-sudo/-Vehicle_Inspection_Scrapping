@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\EstadoVehiculo;
+use App\Livewire\Dashboard;
 use App\Livewire\Vehiculos\AsignarRecojo;
 use App\Livewire\Vehiculos\EnvioJunkCar;
 use App\Livewire\Vehiculos\GestorJunkCar;
@@ -279,6 +280,59 @@ class GrueroTest extends TestCase
             ->set('monto_junk', '100')
             ->call('guardar')
             ->assertForbidden();
+    }
+
+    public function test_el_panel_del_gruero_separa_por_recoger_recogidos_y_junk_car(): void
+    {
+        $admin = $this->usuarioConRol('admin');
+        $gruero = $this->usuarioConRol('gruero');
+
+        // Sin recojo registrado todavía.
+        $porRecoger = Vehicle::factory()->create([
+            'asignado_a' => $gruero->id, 'marca' => 'Nissan', 'modelo' => 'Frontier',
+            'metodo_pago_gruero' => null,
+        ]);
+
+        // Ya recogido.
+        $recogido = Vehicle::factory()->create([
+            'asignado_a' => $gruero->id, 'marca' => 'Honda', 'modelo' => 'Pilot',
+            'metodo_pago_gruero' => 'efectivo',
+        ]);
+
+        // En Junk car sin completar.
+        $junkPendiente = Vehicle::factory()->create([
+            'asignado_a' => $gruero->id, 'marca' => 'Kia', 'modelo' => 'Rio',
+        ]);
+
+        // En Junk car ya completado.
+        $junkListo = Vehicle::factory()->create([
+            'asignado_a' => $gruero->id, 'marca' => 'Mazda', 'modelo' => 'Tribute',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(EnvioJunkCar::class)
+            ->set('seleccion', [$junkPendiente->id, $junkListo->id])
+            ->call('enviar');
+
+        Livewire::actingAs($gruero)
+            ->test(GestorJunkCar::class, ['vehiculo' => $junkListo->fresh()])
+            ->set('tiene_catalizador', '0')
+            ->set('monto_junk', '210')
+            ->call('guardar');
+
+        $panel = Livewire::actingAs($gruero)->test(Dashboard::class);
+
+        $panel->assertViewHas('porRecoger', fn ($c) => $c->pluck('id')->all() === [$porRecoger->id]);
+        $panel->assertViewHas('recogidos', fn ($c) => $c->pluck('id')->all() === [$recogido->id]);
+        $panel->assertViewHas('junkPorCompletar', fn ($c) => $c->pluck('id')->all() === [$junkPendiente->id]);
+        $panel->assertViewHas('junkCompletados', fn ($c) => $c->pluck('id')->all() === [$junkListo->id]);
+
+        // Y las secciones se ven en pantalla.
+        $panel->assertSee('Por recoger')
+            ->assertSee('Recogidos')
+            ->assertSee('Junk car por completar')
+            ->assertSee('Frontier')
+            ->assertSee('Pilot');
     }
 
     public function test_mecanico_y_vendedor_no_acceden_al_envio_masivo(): void

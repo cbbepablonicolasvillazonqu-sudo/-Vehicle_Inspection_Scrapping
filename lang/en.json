@@ -313,5 +313,19 @@
     "Se registra como precio de compra, con la fecha del recojo.": "It is recorded as the purchase price, with the pickup date.",
     "Titulación del auto": "Vehicle title status",
     "Titulación": "Title status",
-    "titulación": "title status"
+    "titulación": "title status",
+    "Por recoger": "To pick up",
+    "Junk car por completar": "Junk cars to complete",
+    "Junk car completados": "Completed junk cars",
+    "Ubicación": "Location",
+    "Registrar recojo": "Register pickup",
+    "No tenés vehículos pendientes de recoger.": "You have no vehicles pending pickup.",
+    "Recogidos": "Picked up",
+    "Todavía no registraste ningún recojo.": "You haven't registered any pickup yet.",
+    "Falta catalizador y monto": "Missing catalytic converter and amount",
+    "Falta el monto pagado": "Missing the amount paid",
+    "Completar": "Complete",
+    "No hay Junk car pendientes.": "No pending junk cars.",
+    "Con catalizador": "With catalytic converter",
+    "Sin catalizador": "Without catalytic converter"
 }

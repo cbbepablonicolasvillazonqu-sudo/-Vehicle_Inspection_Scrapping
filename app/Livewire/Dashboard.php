@@ -18,11 +18,49 @@ use Livewire\Component;
 #[Title('Panel')]
 class Dashboard extends Component
 {
+    /**
+     * Panel del Gruero, agrupado por lo que tiene que hacer:
+     * por recoger → recogidos → Junk car por completar → Junk car listos.
+     */
+    private function panelGruero(callable $base)
+    {
+        $activos = fn () => $base()->where('estado', '!=', EstadoVehiculo::Desguace->value);
+        $enJunk = fn () => $base()->where('estado', EstadoVehiculo::Desguace->value);
+
+        return view('livewire.panel-gruero', [
+            // Todavía no registró el recojo.
+            'porRecoger' => $activos()->whereNull('metodo_pago_gruero')->latest()->get(),
+
+            // Ya registró pago, destino, titulación y monto.
+            'recogidos' => $activos()->whereNotNull('metodo_pago_gruero')->latest()->get(),
+
+            // En Junk car pero falta el catalizador o el monto pagado.
+            'junkPorCompletar' => $enJunk()
+                ->where(fn ($q) => $q->whereNull('tiene_catalizador')
+                    ->orWhereDoesntHave('desguace')
+                    ->orWhereHas('desguace', fn ($d) => $d->whereNull('monto_recibido')))
+                ->latest()->get(),
+
+            // En Junk car con todos los datos cargados.
+            'junkCompletados' => $enJunk()
+                ->whereNotNull('tiene_catalizador')
+                ->whereHas('desguace', fn ($d) => $d->whereNotNull('monto_recibido'))
+                ->with('desguace')
+                ->latest()->get(),
+        ]);
+    }
+
     public function render()
     {
         $usuario = auth()->user();
 
         $base = fn () => Vehicle::query()->visiblePara($usuario);
+
+        // El Gruero tiene su propio panel: lo que le falta recoger, lo que ya
+        // recogió y los Junk car pendientes de completar.
+        if ($usuario->hasRole('gruero')) {
+            return $this->panelGruero($base);
+        }
 
         $conteos = [
             'inventario' => $base()->whereNotIn('estado', [
