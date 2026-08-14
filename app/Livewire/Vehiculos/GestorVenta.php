@@ -80,6 +80,12 @@ class GestorVenta extends Component
         ];
     }
 
+    /** Valida el contrato apenas se elige, igual que la foto del vehículo. */
+    public function updatedContrato(): void
+    {
+        $this->validateOnly('contrato');
+    }
+
     public function quitarContratoSeleccionado(): void
     {
         $this->reset('contrato');

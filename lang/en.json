@@ -360,5 +360,7 @@
     "Junk car completado": "Junk car completed",
     "Foto del vehículo actualizada": "Vehicle photo updated",
     "← Volver al panel": "← Back to dashboard",
-    "Opcional. Sirve para llamar con un toque desde la ficha del vehículo.": "Optional. Lets you call with one tap from the vehicle record."
+    "Opcional. Sirve para llamar con un toque desde la ficha del vehículo.": "Optional. Lets you call with one tap from the vehicle record.",
+    "No se pudo guardar. Revisá tu conexión e intentá de nuevo.": "Couldn't save. Check your connection and try again.",
+    "No se pudo subir el archivo. Revisá tu conexión.": "Couldn't upload the file. Check your connection."
 }

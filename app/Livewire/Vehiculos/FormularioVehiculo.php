@@ -104,6 +104,15 @@ class FormularioVehiculo extends Component
         return $this->vehiculo?->fotos()->whereNull('expense_id')->latest('id')->first();
     }
 
+    /**
+     * Valida la foto apenas se elige, sin esperar al Guardar: si el archivo no
+     * es una imagen el usuario lo sabe en el momento, no tras pulsar el botón.
+     */
+    public function updatedFoto(): void
+    {
+        $this->validateOnly('foto');
+    }
+
     public function quitarFotoSeleccionada(): void
     {
         $this->reset('foto');

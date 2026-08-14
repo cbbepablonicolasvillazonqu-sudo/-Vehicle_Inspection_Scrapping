@@ -89,12 +89,22 @@
                     @endphp
 
                     <div class="mt-1 flex flex-wrap items-start gap-4">
-                        {{-- Vista de la foto: la nueva si acabás de elegirla, si no la guardada --}}
-                        @if ($urlPrevia || $fotoActual)
+                        {{-- Vista de la foto: la nueva si acabás de elegirla, si no la guardada.
+                             Si el archivo elegido no se puede previsualizar (un PDF, un .exe) igual
+                             se muestra su nombre: nunca hay que quedarse sin saber qué se eligió. --}}
+                        @if ($urlPrevia || $foto || $fotoActual)
                             <div class="relative w-40 h-28 rounded-xl overflow-hidden bg-slate-100 ring-1 ring-slate-200 shrink-0">
-                                <img src="{{ $urlPrevia ?? $fotoActual->url() }}" alt="{{ __('Foto del vehículo') }}"
-                                     class="w-full h-full object-cover">
-                                @if ($urlPrevia)
+                                @if ($urlPrevia || (! $foto && $fotoActual))
+                                    <img src="{{ $urlPrevia ?? $fotoActual->url() }}" alt="{{ __('Foto del vehículo') }}"
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <div class="grid place-items-center w-full h-full text-slate-400 px-2 text-center">
+                                        <x-icono nombre="sin-foto" clase="w-7 h-7 mx-auto" />
+                                        <span class="block text-[10px] mt-1 truncate w-full">{{ $foto->getClientOriginalName() }}</span>
+                                    </div>
+                                @endif
+
+                                @if ($foto)
                                     <button type="button" wire:click="quitarFotoSeleccionada"
                                             class="absolute top-1 right-1 bg-slate-900/70 hover:bg-red-600 text-white rounded-full w-6 h-6 grid place-items-center text-xs font-bold"
                                             aria-label="{{ __('Quitar') }}">✕</button>

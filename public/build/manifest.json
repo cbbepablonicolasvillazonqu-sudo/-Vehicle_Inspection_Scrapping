@@ -28,12 +28,12 @@
     "src": "node_modules/@fontsource-variable/inter/files/inter-vietnamese-wght-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-D8G3pBOW.css",
+    "file": "assets/app-ky60hhEJ.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-CIomGrQN.js",
+    "file": "assets/app-CJAbOWvc.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
