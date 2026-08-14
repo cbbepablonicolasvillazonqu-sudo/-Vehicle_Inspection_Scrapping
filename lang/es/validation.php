@@ -204,6 +204,7 @@ return [
         'fecha_venta' => 'fecha de venta',
         'precio_venta' => 'precio de venta',
         'nombre_comprador' => 'nombre del comprador',
+        'telefono' => 'teléfono',
         'telefono_comprador' => 'teléfono del comprador',
         'metodo_pago' => 'método de pago',
 

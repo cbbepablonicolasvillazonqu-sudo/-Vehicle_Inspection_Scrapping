@@ -12,6 +12,29 @@
         </a>
     @endif
 
+    {{-- Gruero asignado. Va fuera del if para que el Admin lo vea aunque le
+         aparezca el formulario. El teléfono es dato personal: solo Admin. --}}
+    @if ($vehiculo->gruero)
+        <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-slate-50 ring-1 ring-slate-200 px-3.5 py-3">
+            <span class="grid place-items-center w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 text-white font-bold shrink-0">
+                {{ mb_substr($vehiculo->gruero->name, 0, 1) }}
+            </span>
+            <div class="min-w-0">
+                <p class="text-xs text-slate-400">{{ __('Gruero asignado') }}</p>
+                <p class="font-semibold text-slate-800 truncate">{{ $vehiculo->gruero->name }}</p>
+            </div>
+
+            @can('gestionar usuarios')
+                @if ($vehiculo->gruero->telefono)
+                    <a href="tel:{{ $vehiculo->gruero->telefono }}"
+                       class="ms-auto btn-secundario btn-sm text-blue-700 border-blue-200 hover:bg-blue-50">
+                        <x-icono nombre="telefono" clase="w-4 h-4" />{{ $vehiculo->gruero->telefono }}
+                    </a>
+                @endif
+            @endcan
+        </div>
+    @endif
+
     @if ($this->puedeRegistrar())
         <form wire:submit="guardar" class="mt-4 space-y-4">
             <div>
