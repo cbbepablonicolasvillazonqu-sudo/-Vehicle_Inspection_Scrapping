@@ -26,8 +26,8 @@
                     </a>
                 </div>
 
-                <!-- Enlaces (escritorio) -->
-                <div class="hidden sm:flex sm:-my-px sm:ms-8 gap-6">
+                <!-- Enlaces (escritorio, desde lg: por debajo manda la barra inferior) -->
+                <div class="hidden lg:flex lg:-my-px lg:ms-6 gap-4 min-w-0">
                     @foreach ($enlaces as $e)
                         <x-nav-link :href="route($e['ruta'])" :active="request()->routeIs($e['patron'])">
                             <x-icono :nombre="$e['icono']" clase="w-5 h-5" />
@@ -38,7 +38,7 @@
             </div>
 
             <!-- Idioma + usuario (escritorio) -->
-            <div class="hidden sm:flex sm:items-center gap-3">
+            <div class="hidden lg:flex lg:items-center gap-3 shrink-0">
                 <x-selector-idioma />
 
                 <x-dropdown align="right" width="52">
@@ -47,9 +47,11 @@
                             <span class="grid place-items-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 text-white text-sm font-bold">
                                 {{ mb_substr(Auth::user()->name, 0, 1) }}
                             </span>
-                            <span class="text-left leading-tight">
-                                <span class="block text-sm font-semibold text-slate-800">{{ Auth::user()->name }}</span>
-                                <span class="block text-xs text-slate-400">{{ Auth::user()->nombreRol() }}</span>
+                            {{-- Entre 1024 y 1279 px solo se ve el avatar: el nombre no entra
+                                 junto a los 6 enlaces del Admin. Desde xl vuelve completo. --}}
+                            <span class="hidden xl:block text-left leading-tight min-w-0">
+                                <span class="block text-sm font-semibold text-slate-800 truncate max-w-[9rem]">{{ Auth::user()->name }}</span>
+                                <span class="block text-xs text-slate-400 truncate max-w-[9rem]">{{ Auth::user()->nombreRol() }}</span>
                             </span>
                             <svg class="fill-current h-4 w-4 text-slate-400" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                         </button>
@@ -76,7 +78,7 @@
             </div>
 
             <!-- Móvil: idioma + avatar con menú -->
-            <div class="flex items-center gap-2 sm:hidden">
+            <div class="flex items-center gap-2 lg:hidden">
                 <x-selector-idioma />
                 <x-dropdown align="right" width="52">
                     <x-slot name="trigger">
@@ -108,7 +110,7 @@
 </nav>
 
 {{-- Barra de navegación inferior fija (solo móvil) — estilo app nativa --}}
-<nav class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 shadow-elevada"
+<nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 shadow-elevada"
      style="padding-bottom: env(safe-area-inset-bottom);">
     <div class="grid h-16" style="grid-template-columns: repeat({{ max($enlaces->count(), 1) }}, minmax(0, 1fr));">
         @foreach ($enlaces as $e)

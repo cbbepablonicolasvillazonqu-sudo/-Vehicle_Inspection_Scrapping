@@ -232,4 +232,65 @@ class FotosTest extends TestCase
         $this->assertSame(1, $vehiculo->fresh()->fotos()->count());
         $this->assertNull($vehiculo->fresh()->fotoPortada);
     }
+
+    /* ---- Archivos invalidos: el usuario tiene que enterarse al elegirlos ---- */
+
+    private function datosVehiculo(): array
+    {
+        return [
+            'marca' => 'Toyota',
+            'modelo' => 'Corolla',
+            'anio' => '2015',
+            'vin' => '1HGBH41JXMN109186',
+            'millas' => '120000',
+            'precio_compra' => '2500',
+            'fecha_compra' => now()->format('Y-m-d'),
+            'ubicacion_destino' => 'oficina_1_aldi',
+            'estado_titulo' => 'clean',
+        ];
+    }
+
+    public function test_foto_invalida_avisa_al_elegir_el_archivo(): void
+    {
+        // Sin llamar a guardar(): el error tiene que salir apenas se elige.
+        Livewire::actingAs($this->usuarioConRol('admin'))
+            ->test(\App\Livewire\Vehiculos\FormularioVehiculo::class)
+            ->set('foto', UploadedFile::fake()->create('documento.pdf', 100, 'application/pdf'))
+            ->assertHasErrors(['foto']);
+    }
+
+    public function test_foto_invalida_no_crea_el_vehiculo(): void
+    {
+        Livewire::actingAs($this->usuarioConRol('admin'))
+            ->test(\App\Livewire\Vehiculos\FormularioVehiculo::class)
+            ->set($this->datosVehiculo())
+            ->set('foto', UploadedFile::fake()->create('malicioso.exe', 50))
+            ->call('guardar')
+            ->assertHasErrors(['foto']);
+
+        $this->assertSame(0, Vehicle::count());
+    }
+
+    public function test_una_foto_valida_sigue_sin_dar_errores(): void
+    {
+        Livewire::actingAs($this->usuarioConRol('admin'))
+            ->test(\App\Livewire\Vehiculos\FormularioVehiculo::class)
+            ->set($this->datosVehiculo())
+            ->set('foto', UploadedFile::fake()->image('frente.jpg'))
+            ->assertHasNoErrors()
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $this->assertSame(1, Vehicle::count());
+    }
+
+    public function test_contrato_invalido_avisa_al_elegir_el_archivo(): void
+    {
+        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Publicado)->create();
+
+        Livewire::actingAs($this->usuarioConRol('vendedor'))
+            ->test(\App\Livewire\Vehiculos\GestorVenta::class, ['vehiculo' => $vehiculo])
+            ->set('contrato', UploadedFile::fake()->create('contrato.exe', 50))
+            ->assertHasErrors(['contrato']);
+    }
 }

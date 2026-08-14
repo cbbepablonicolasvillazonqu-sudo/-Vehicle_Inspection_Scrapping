@@ -23,7 +23,7 @@
     </head>
     <body class="font-sans antialiased">
         {{-- pb-24 en móvil deja aire para la barra de navegación inferior fija --}}
-        <div class="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200/60 pb-24 sm:pb-10">
+        <div class="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200/60 pb-24 lg:pb-10">
             @include('layouts.navigation')
 
             <!-- Encabezado de página -->
@@ -54,9 +54,15 @@
             </main>
         </div>
 
-        <!-- Notificaciones flotantes disparadas por Livewire ($this->dispatch('notificar', mensaje: '...')) -->
-        <div x-data="{ mostrar: false, mensaje: '' }"
-             x-on:notificar.window="mensaje = $event.detail.mensaje ?? '{{ __('Listo') }}'; mostrar = true; clearTimeout(window._toastTimer); window._toastTimer = setTimeout(() => mostrar = false, 2600)"
+        <!-- Notificaciones flotantes: las dispara Livewire ($this->dispatch('notificar', mensaje: '...'))
+             y también el JS del front cuando falla la red (con tipo: 'error'). -->
+        <div x-data="{ mostrar: false, mensaje: '', tipo: 'ok' }"
+             x-on:notificar.window="
+                mensaje = $event.detail.mensaje ?? '{{ __('Listo') }}';
+                tipo = $event.detail.tipo ?? 'ok';
+                mostrar = true;
+                clearTimeout(window._toastTimer);
+                window._toastTimer = setTimeout(() => mostrar = false, tipo === 'error' ? 4500 : 2600)"
              x-show="mostrar"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-y-4"
@@ -65,11 +71,22 @@
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 translate-y-4"
              class="fixed bottom-24 sm:bottom-6 inset-x-0 flex justify-center z-[60] px-4 pointer-events-none" style="display: none;">
-            <div class="bg-slate-900 text-white text-base font-medium px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5">
-                <x-icono nombre="check" clase="w-5 h-5 text-green-400" />
+            <div class="text-white text-base font-medium px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5"
+                 :class="tipo === 'error' ? 'bg-red-600' : 'bg-slate-900'">
+                <span x-show="tipo === 'error'" class="text-lg leading-none" aria-hidden="true">⚠</span>
+                <span x-show="tipo !== 'error'"><x-icono nombre="check" clase="w-5 h-5 text-green-400" /></span>
                 <span x-text="mensaje"></span>
             </div>
         </div>
+
+        {{-- Textos que usa el JS al fallar la red. Van acá y no en app.js para que
+             pasen por __() y los detecte el verificador de traducciones. --}}
+        <script>
+            window.avisos = {
+                sinConexion: @js(__('No se pudo guardar. Revisá tu conexión e intentá de nuevo.')),
+                subidaFallida: @js(__('No se pudo subir el archivo. Revisá tu conexión.')),
+            };
+        </script>
 
         @livewireScripts
 
