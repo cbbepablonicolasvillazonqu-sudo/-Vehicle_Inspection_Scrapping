@@ -186,6 +186,7 @@ return [
         'fecha_venta' => 'sale date',
         'precio_venta' => 'sale price',
         'nombre_comprador' => 'buyer name',
+        'telefono' => 'phone',
         'telefono_comprador' => 'buyer phone',
         'metodo_pago' => 'payment method',
 

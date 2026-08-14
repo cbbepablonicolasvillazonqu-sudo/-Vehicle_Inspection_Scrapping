@@ -449,4 +449,28 @@ class GrueroTest extends TestCase
             $this->actingAs($usuario)->get('/vehiculos')->assertOk();
         }
     }
+
+    public function test_el_telefono_del_gruero_en_la_ficha_es_solo_para_el_admin(): void
+    {
+        $gruero = $this->usuarioConRol('gruero');
+        $gruero->update(['name' => 'Juan Gruero', 'telefono' => '555-7788']);
+
+        // En reparación para que el mecánico también pueda abrir la ficha.
+        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::EnReparacion)
+            ->create(['asignado_a' => $gruero->id]);
+
+        // El Admin ve el nombre y puede llamarlo.
+        $this->actingAs($this->usuarioConRol('admin'))
+            ->get("/vehiculos/{$vehiculo->id}")
+            ->assertOk()
+            ->assertSee('Juan Gruero')
+            ->assertSee('555-7788');
+
+        // El mecánico ve de quién es el recojo, pero no su teléfono.
+        $this->actingAs($this->usuarioConRol('mecanico'))
+            ->get("/vehiculos/{$vehiculo->id}")
+            ->assertOk()
+            ->assertSee('Juan Gruero')
+            ->assertDontSee('555-7788');
+    }
 }

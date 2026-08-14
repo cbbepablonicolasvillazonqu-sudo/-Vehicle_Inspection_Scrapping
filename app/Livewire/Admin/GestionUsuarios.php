@@ -26,6 +26,9 @@ class GestionUsuarios extends Component
 
     public string $email = '';
 
+    /** Teléfono de contacto (opcional): solo lo carga el Admin. */
+    public string $telefono = '';
+
     public string $password = '';
 
     public string $rol = '';
@@ -54,6 +57,7 @@ class GestionUsuarios extends Component
                 'required', 'string', 'lowercase', 'email', 'max:255',
                 Rule::unique(User::class, 'email')->ignore($this->usuarioId),
             ],
+            'telefono' => ['nullable', 'string', 'max:30'],
             'password' => $this->usuarioId
                 ? ['nullable', 'string', 'min:8']
                 : ['required', 'string', 'min:8'],
@@ -66,7 +70,7 @@ class GestionUsuarios extends Component
         abort_unless($this->puedeGestionar(), 403);
 
         $this->resetValidation();
-        $this->reset(['usuarioId', 'name', 'email', 'password', 'rol']);
+        $this->reset(['usuarioId', 'name', 'email', 'telefono', 'password', 'rol']);
         $this->mostrandoFormulario = true;
     }
 
@@ -80,6 +84,7 @@ class GestionUsuarios extends Component
         $this->usuarioId = $usuario->id;
         $this->name = $usuario->name;
         $this->email = $usuario->email;
+        $this->telefono = (string) $usuario->telefono;
         $this->password = '';
         $this->rol = $usuario->getRoleNames()->first() ?? '';
         $this->mostrandoFormulario = true;
@@ -113,11 +118,15 @@ class GestionUsuarios extends Component
             }
         }
 
+        // El teléfono es opcional: vacío se guarda como NULL, no como cadena vacía.
+        $telefono = filled($datos['telefono'] ?? null) ? $datos['telefono'] : null;
+
         if ($this->usuarioId) {
             $usuario = User::findOrFail($this->usuarioId);
             $usuario->update([
                 'name' => $datos['name'],
                 'email' => $datos['email'],
+                'telefono' => $telefono,
             ]);
 
             if (filled($datos['password'])) {
@@ -127,6 +136,7 @@ class GestionUsuarios extends Component
             $usuario = User::create([
                 'name' => $datos['name'],
                 'email' => $datos['email'],
+                'telefono' => $telefono,
                 'password' => Hash::make($datos['password']),
                 'email_verified_at' => now(),
             ]);

@@ -154,4 +154,77 @@ class GestionUsuariosTest extends TestCase
 
         $this->assertDatabaseHas('users', ['id' => $otro->id]);
     }
+
+    /* ------------------------ Teléfono de contacto ------------------------ */
+
+    public function test_el_admin_crea_un_usuario_con_telefono(): void
+    {
+        $admin = $this->usuarioConRol('admin');
+        $this->usuarioConRol('admin'); // para que no sea el último
+
+        Livewire::actingAs($admin)
+            ->test(GestionUsuarios::class)
+            ->call('crear')
+            ->set('name', 'Juan Gruero')
+            ->set('email', 'juan@fortetowing.com')
+            ->set('telefono', '(555) 123-4567')
+            ->set('password', 'password123')
+            ->set('rol', 'gruero')
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $creado = User::where('email', 'juan@fortetowing.com')->sole();
+
+        $this->assertSame('(555) 123-4567', $creado->telefono);
+        $this->assertTrue($creado->hasRole('gruero'));
+    }
+
+    public function test_el_telefono_es_opcional_y_vacio_se_guarda_como_null(): void
+    {
+        $admin = $this->usuarioConRol('admin');
+        $this->usuarioConRol('admin');
+
+        Livewire::actingAs($admin)
+            ->test(GestionUsuarios::class)
+            ->call('crear')
+            ->set('name', 'Sin Telefono')
+            ->set('email', 'sintel@fortetowing.com')
+            ->set('password', 'password123')
+            ->set('rol', 'mecanico')
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        // Null, no cadena vacía: así la vista no muestra un enlace tel: vacío.
+        $this->assertNull(User::where('email', 'sintel@fortetowing.com')->sole()->telefono);
+    }
+
+    public function test_al_editar_se_precarga_el_telefono_y_se_actualiza(): void
+    {
+        $admin = $this->usuarioConRol('admin');
+        $this->usuarioConRol('admin');
+
+        $gruero = $this->usuarioConRol('gruero');
+        $gruero->update(['telefono' => '555-0000']);
+
+        Livewire::actingAs($admin)
+            ->test(GestionUsuarios::class)
+            ->call('editar', $gruero->id)
+            ->assertSet('telefono', '555-0000')
+            ->set('telefono', '555-9999')
+            ->call('guardar')
+            ->assertHasNoErrors();
+
+        $this->assertSame('555-9999', $gruero->fresh()->telefono);
+    }
+
+    public function test_la_lista_muestra_el_telefono_del_usuario(): void
+    {
+        $admin = $this->usuarioConRol('admin');
+        $gruero = $this->usuarioConRol('gruero');
+        $gruero->update(['telefono' => '555-4321']);
+
+        Livewire::actingAs($admin)
+            ->test(GestionUsuarios::class)
+            ->assertSee('555-4321');
+    }
 }

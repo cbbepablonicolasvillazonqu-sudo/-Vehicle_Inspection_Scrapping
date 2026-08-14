@@ -42,6 +42,14 @@
                     </div>
 
                     <div>
+                        <x-input-label for="telefono" :value="__('Teléfono')" />
+                        <x-text-input id="telefono" type="tel" inputmode="tel" class="block w-full"
+                                      wire:model="telefono" placeholder="(555) 123-4567" autocomplete="tel" />
+                        <p class="text-xs text-slate-400 mt-1">{{ __('Opcional. Sirve para llamar con un toque desde la ficha del vehículo.') }}</p>
+                        <x-input-error :messages="$errors->get('telefono')" class="mt-2" />
+                    </div>
+
+                    <div>
                         <x-input-label for="password" :value="$usuarioId ? __('Contraseña nueva (opcional)') : __('Contraseña')" />
                         <x-text-input id="password" type="password" class="block w-full" wire:model="password" autocomplete="new-password" />
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
@@ -90,6 +98,13 @@
                                 @endif
                             </div>
                             <div class="text-sm text-slate-400 truncate">{{ $usuario->email }}</div>
+
+                        @if ($usuario->telefono)
+                            <a href="tel:{{ $usuario->telefono }}"
+                               class="text-sm font-medium text-blue-700 hover:underline inline-flex items-center gap-1 mt-0.5">
+                                <x-icono nombre="telefono" clase="w-3.5 h-3.5" />{{ $usuario->telefono }}
+                            </a>
+                        @endif
                         </div>
                     </div>
 
