@@ -31,6 +31,9 @@
         <env name="DB_COLLATION" value="utf8mb4_unicode_ci"/>
         <env name="SEED_DEMO_DATA" value="false"/>
         <env name="MAIL_MAILER" value="array"/>
+        <!-- El mailer "array" apagaría las rutas de restablecer contraseña;
+             se fuerzan encendidas para poder probar ese flujo. -->
+        <env name="RESET_PASSWORD_HABILITADO" value="true"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

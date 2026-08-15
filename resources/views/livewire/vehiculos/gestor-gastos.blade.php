@@ -56,7 +56,7 @@
                                aria-label="{{ __('Elegir fotos') }}">
                         <x-icono nombre="camara" clase="w-8 h-8 mx-auto text-slate-400" />
                         <p class="mt-2 text-sm font-semibold text-slate-700">{{ __('Toca para elegir fotos o arrástralas aquí') }}</p>
-                        <p class="text-xs text-slate-400 mt-0.5">{{ __('Máx. 10 fotos, 10 MB c/u') }}</p>
+                        <p class="text-xs text-slate-400 mt-0.5">{{ __('Máx. 5 fotos, 10 MB c/u') }}</p>
                         <p class="text-sm text-blue-700 font-medium mt-2" wire:loading wire:target="fotos">{{ __('Cargando archivos…') }}</p>
                     </div>
 

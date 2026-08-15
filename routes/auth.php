@@ -21,17 +21,28 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
+    /*
+     * Restablecer la contraseña por correo solo si hay un transporte real.
+     * Sin SMTP, el controlador escribiría el correo al log y le diría al
+     * usuario "te enviamos un enlace": esperaría un mail que nunca sale.
+     *
+     * Al no registrar las rutas, Route::has('password.request') es false y el
+     * enlace del login desaparece solo, sin tocar la vista. En ese caso el
+     * Administrador cambia las contraseñas desde la pantalla de Usuarios.
+     */
+    if (config('forte.restablecer_password')) {
+        Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+            ->name('password.request');
 
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
+        Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+            ->name('password.email');
 
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
+        Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+            ->name('password.reset');
 
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
+        Route::post('reset-password', [NewPasswordController::class, 'store'])
+            ->name('password.store');
+    }
 });
 
 Route::middleware('auth')->group(function () {
