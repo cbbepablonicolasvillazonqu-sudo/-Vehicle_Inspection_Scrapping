@@ -59,7 +59,10 @@ class GestorGastos extends Component
             'descripcion' => ['required', 'string', 'max:200'],
             'monto' => ['required', 'numeric', 'min:0.01', 'max:9999999'],
             'fecha' => ['required', 'date', 'before_or_equal:today'],
-            'fotos' => ['array', 'max:10'],
+            // 5 fotos x 12 MB (tope de Livewire) = 60 MB, por debajo del
+            // post_max_size de 64 MB. El limite de la app tiene que caber
+            // dentro del de PHP, que en hosting compartido no controlamos.
+            'fotos' => ['array', 'max:5'],
             'fotos.*' => ['image', 'max:10240'], // 10 MB por foto
         ];
     }

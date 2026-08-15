@@ -9,10 +9,14 @@ use Illuminate\Support\Facades\Hash;
 class UsuariosSeeder extends Seeder
 {
     /**
-     * Crea las 4 cuentas del equipo de Forte Towing.
+     * Crea las 4 cuentas de demostración del equipo.
      *
      * Contraseña inicial de todas: "password"
      * (cambiarlas desde Perfil o desde Usuarios al primer ingreso).
+     *
+     * ⚠️ NO EJECUTAR EN PRODUCCIÓN. Usa updateOrCreate, así que reescribe la
+     * contraseña de las 4 cuentas cada vez que corre, aunque ya las hubieran
+     * cambiado. En producción se usa ProduccionSeeder + forte:crear-admin.
      */
     public function run(): void
     {

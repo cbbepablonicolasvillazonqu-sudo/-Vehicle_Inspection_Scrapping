@@ -31,7 +31,7 @@ php scripts/verificar-traducciones.php
 
 ## Requisitos
 
-- PHP **8.2+** (probado con 8.4) con extensiones: `pdo_mysql`, `mbstring`, `zip`, `gd`, `fileinfo`, `xml`
+- PHP **8.2+** (probado con 8.4) con extensiones: `pdo_mysql`, `mbstring`, `zip`, `gd`, `fileinfo`, `xml`, `dom`, `simplexml`, `xmlreader`, `xmlwriter`, `iconv`, `ctype`, `json`, `openssl`, `tokenizer`, `zlib`
 - Composer 2
 - MariaDB / MySQL (XAMPP sirve tal cual)
 - Node 18+ **solo si vas a recompilar assets** — `public/build` ya viene compilado y versionado, así que ni XAMPP ni Hostinger necesitan Node.
@@ -75,16 +75,18 @@ Abrir <http://localhost:8000>. Para servir por Apache de XAMPP, apunta el Docume
 | Rol | Correo | Contraseña |
 |---|---|---|
 | **Admin** | `admin@fortetowing.com` | `password` |
-| **Comprador** | `compras@fortetowing.com` | `password` |
+| **Gruero** | `gruero@fortetowing.com` | `password` |
 | **Mecánico** | `taller@fortetowing.com` | `password` |
 | **Vendedor** | `ventas@fortetowing.com` | `password` |
 
-⚠️ Cambia las contraseñas en el primer uso (Perfil, o Admin → Usuarios). No hay registro público: las cuentas las crea el Admin.
+⚠️ Solo se siembran con `SEED_DEMO_DATA=true`, es decir **en local**. `UsuariosSeeder` usa `updateOrCreate`, así que reescribe estas 4 contraseñas cada vez que corre: nunca lo ejecutes en producción. Allí se usan `ProduccionSeeder` (solo roles) y `php artisan forte:crear-admin`.
+
+No hay registro público: las cuentas las crea el Admin desde **Usuarios**.
 
 ## Roles y permisos (resumen)
 
 - **Admin** — acceso total: usuarios, reportes de ganancias, exportaciones, eliminar registros, editar ventas cerradas, desguace, revertir estados finales y **fijar el precio de venta sugerido** de cada vehículo.
-- **Comprador** — registra vehículos, edita sus datos, sube fotos, registra gastos, pasa a "En reparación". Ve precios de compra.
+- **Gruero** — trabaja solo desde su panel (no entra al inventario). Ve **únicamente los vehículos que el Admin le asigna**; registra el recojo (forma de pago, dónde dejó el vehículo, titulación y monto pagado) y completa los datos del Junk car. El monto que carga alimenta el precio y la fecha de compra.
 - **Mecánico** — ve los vehículos **pendientes de revisión, en reparación y listos**; puede iniciar la revisión él mismo (Comprado → En reparación), registra reparaciones (gastos) y fotos, marca "Listo para la venta" y puede revertirlo si detecta un problema. **No ve** precios de compra ni ganancias.
 - **Vendedor** — ve listos/publicados/vendidos; publica y registra la venta (fecha, precio, comprador, teléfono, método de pago) usando como referencia el **precio de venta sugerido** que fija el Admin (sin ver compra, gastos ni margen). Al vender, el registro queda **bloqueado** para todos excepto Admin.
 
@@ -113,18 +115,30 @@ Cada ruta está protegida con middleware `role:`/`permission:` de Spatie **y** c
 
 Los iconos se regeneran con: `php scripts/generar-iconos.php`.
 
-## Despliegue en Hostinger
+## Despliegue en Hostinger (hosting compartido)
 
-1. **BD:** crea la base y el usuario MariaDB en hPanel y pon sus credenciales en `.env` (mantén `DB_COLLATION=utf8mb4_unicode_ci`).
-2. **Código:** clona el repo (Git de hPanel o SSH). `composer install --no-dev --optimize-autoloader`.
-3. **.env de producción:** `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://tudominio.com`, `SEED_DEMO_DATA=false`, y `php artisan key:generate`.
-4. **Document root** apuntando a `public/` (en planes Cloud/Business se cambia desde hPanel; en VPS, config del vhost).
-5. `php artisan migrate --seed --force` (siembra solo roles y usuarios).
-6. `php artisan storage:link` (por SSH). Si el plan no permite symlinks, mueve `storage/app/public` vía panel o usa un cron con el comando.
-7. `php artisan config:cache && php artisan route:cache && php artisan view:cache`.
-8. Activa el **SSL gratuito** (necesario para la PWA).
+Guía completa paso a paso: **[`docs/DESPLIEGUE-HOSTINGER.md`](docs/DESPLIEGUE-HOSTINGER.md)**.
 
-No hace falta Node en el servidor: `public/build` está versionado.
+Resumen del camino feliz:
+
+1. **Base de datos** en hPanel › Bases de datos MySQL. Anotá host, base, usuario y contraseña.
+2. **Artefacto** en tu PC: `composer install --no-dev --optimize-autoloader` y **borrar `bootstrap/cache/*.php`** (si no, producción arranca con proveedores de desarrollo y muere).
+3. **Subir** por SSH/Git/FTP y apuntar la **carpeta raíz del dominio a `public/`**.
+4. **`.env`**: partí de `.env.production.example`, que ya trae los valores correctos.
+5. Poner en marcha:
+   ```bash
+   php artisan key:generate --force
+   php artisan migrate --force
+   php artisan db:seed --class=ProduccionSeeder --force   # solo roles y permisos
+   php artisan forte:crear-admin admin@tudominio.com --password=...
+   php artisan storage:link
+   php artisan config:cache && php artisan route:cache && php artisan view:cache
+   ```
+6. Activar el **SSL gratuito** y recién entonces poner `FORZAR_HTTPS=true` y recachear.
+
+No hace falta Node, ni worker de colas, ni cron: `public/build` está versionado y la app no encola trabajos ni tiene tareas programadas.
+
+> ⚠️ **Nunca** corras `db:seed` sin `--class` en producción: `UsuariosSeeder` reescribe las contraseñas de las 4 cuentas de demostración.
 
 ## Pruebas
 
@@ -132,7 +146,7 @@ No hace falta Node en el servidor: `public/build` está versionado.
 php artisan test
 ```
 
-45 pruebas (autenticación, accesos por rol, flujo de vehículos, ventas/bloqueo, desguace, rentabilidad y PWA) contra una base MariaDB de testing (`forte_towing_testing`, ver `phpunit.xml`).
+111 pruebas (autenticación, accesos por rol, flujo de vehículos, recojos del gruero, ventas/bloqueo, Junk car, rentabilidad, fotos, gestión de usuarios y PWA) contra una base MariaDB de testing (`forte_towing_testing`, ver `phpunit.xml`).
 
 ## Estructura del código (lo importante)
 
