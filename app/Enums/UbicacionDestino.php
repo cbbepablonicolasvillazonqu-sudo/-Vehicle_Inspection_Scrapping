@@ -12,10 +12,10 @@ enum UbicacionDestino: string
 
     public function etiqueta(): string
     {
-        return match ($this) {
+        return __(match ($this) {
             self::Oficina1Aldi => 'OFICINA 1 ALDI',
             self::CasaHugo => 'CASA HUGO',
-        };
+        });
     }
 
     public function colorBadge(): string

@@ -21,20 +21,56 @@ Interfaz bilingüe español/inglés. El español es el idioma por defecto; cada 
 
 ### Añadir o ampliar traducciones
 
-El texto en español actúa como clave; las traducciones al inglés viven en `lang/en.json` (interfaz) y `lang/en/*.php` (validación). Para comprobar que no falte ninguna clave por traducir:
+**El texto en español es la clave.** Las traducciones al inglés viven en `lang/en.json` (interfaz) y `lang/en/*.php` (validación). Al renderizar en español no se busca nada: Laravel devuelve la clave, que ya es el texto correcto.
 
 ```bash
 php scripts/verificar-traducciones.php
 ```
 
+El verificador hace dos pasadas y devuelve `1` si algo falla, así que sirve como puerta antes de un commit:
+
+1. **Cobertura** — cada clave que el código pide traducir (`__()`, `trans_choice()`, `#[Title()]`, `->title()`) existe en `lang/en.json`.
+2. **Detección** — no queda texto en español suelto en `app/` ni en las vistas. Un literal que ya figura como clave en `en.json` nunca se marca: da igual si se traduce donde se escribe o al mostrarlo.
+
+#### Tres reglas que no son obvias
+
+- **`APP_FALLBACK_LOCALE` tiene que ser `es`.** Parece un error y es al revés: con `en`, al renderizar en español Laravel no encontraría la clave en `es.json`, iría a `en.json`, la encontraría y devolvería el inglés. La interfaz en español se llenaría de inglés.
+- **Los títulos de página van sin `__()`.** `#[Title('Panel')]` es un atributo PHP y no admite llamadas a función: el texto en español es la clave y la traducción ocurre en `layouts/app.blade.php`.
+- **Lo que se guarda en la base va en español, nunca traducido.** Las notas del historial de estados y los detalles de auditoría se escriben siempre en español (o como valor neutro del enum) y se traducen al mostrarse. Si se tradujeran al escribir, cada fila quedaría congelada en el idioma de quien hizo la acción. Para nombrar campos y valores en la auditoría están los helpers `nombreCampo()` y `valorCampo()` de `app/Support/helpers.php`, que reutilizan el bloque `attributes` de `lang/*/validation.php`.
+
+El manifiesto de la PWA está duplicado, `public/manifest.webmanifest` (español) y `public/manifest.en.webmanifest` (inglés), porque el navegador lo pide **sin cookies**: una ruta que lo generara no vería la sesión y saldría siempre en español. Si se toca uno, hay que tocar el otro y subir la versión de caché en `public/sw.js`.
+
 ---
 
 ## Requisitos
 
-- PHP **8.2+** (probado con 8.4) con extensiones: `pdo_mysql`, `mbstring`, `zip`, `gd`, `fileinfo`, `xml`, `dom`, `simplexml`, `xmlreader`, `xmlwriter`, `iconv`, `ctype`, `json`, `openssl`, `tokenizer`, `zlib`
+- PHP **8.4+** con extensiones: `pdo_mysql`, `mbstring`, `zip`, `gd`, `fileinfo`, `xml`, `dom`, `simplexml`, `xmlreader`, `xmlwriter`, `iconv`, `ctype`, `json`, `openssl`, `tokenizer`, `zlib`
 - Composer 2
 - MariaDB / MySQL (XAMPP sirve tal cual)
 - Node 18+ **solo si vas a recompilar assets** — `public/build` ya viene compilado y versionado, así que ni XAMPP ni Hostinger necesitan Node.
+
+> ### ⚠️ Por qué 8.4, si `composer.json` dice `"php": "^8.2"`
+>
+> `composer.json` declara el rango que soporta el código. **`composer.lock` congela las versiones exactas que se instalan**, y manda él: `composer install` no vuelve a resolver nada, solo verifica que lo congelado entre en el PHP actual — y si no entra, aborta.
+>
+> El lock actual trae cinco componentes de **Symfony 8.1** que exigen **PHP ≥ 8.4.1**:
+> `symfony/clock`, `symfony/css-selector`, `symfony/event-dispatcher`, `symfony/string` y `symfony/translation`.
+>
+> No los pide Laravel (él fija los suyos en `^7.2.0`). Entraron como dependencias transitivas: `symfony/console` pide `symfony/string` con `^7.2|^8.0`, `symfony/http-kernel` pide `symfony/event-dispatcher` con `^7.3|^8.0`, `nesbot/carbon` pide `symfony/clock` y `symfony/translation` con `^8.0`… Ante un rango, Composer elige la versión más alta que permita **el PHP de la máquina donde se corrió `composer update`**. Este lock se generó sobre PHP 8.4.
+>
+> Con PHP 8.2 u 8.3, `composer install` falla con:
+> `Your lock file does not contain a compatible set of packages. Please run composer update.`
+>
+> Dos salidas válidas:
+>
+> - **Instalar sobre PHP 8.4+** — es lo que corre hoy en Hostinger, y garantiza exactamente las versiones que se probaron.
+> - **Bajar el lock a 8.2 de verdad** — agregar a `composer.json`:
+>   ```json
+>   "config": { "platform": { "php": "8.2.0" } }
+>   ```
+>   y correr `composer update`. Composer resolverá como si el PHP fuera 8.2 y el lock resultante instalará de 8.2 en adelante. Cambia versiones de dependencias: hay que volver a pasar las pruebas.
+>
+> **Cada `composer update` vuelve a atar el lock al PHP de quien lo ejecuta.** Si no querés esa dependencia oculta, dejá fijado `config.platform.php` y no lo pises.
 
 ## Instalación local (XAMPP)
 
@@ -169,4 +205,4 @@ app/
 
 ## Nota de seguridad
 
-El proyecto usa **Laravel 12** (migrado desde Laravel 11), que recibe parches de seguridad activos. Mantén las dependencias al día con `composer update` periódico y revisa `composer audit`. La opción `audit.block-insecure` sigue en `false` para no bloquear instalaciones por avisos de terceros; conviene revisarla manualmente antes de cada despliegue.
+El proyecto usa **Laravel 12** (migrado desde Laravel 11), que recibe parches de seguridad activos. Mantén las dependencias al día con `composer update` periódico y revisa `composer audit`. Ten presente que cada `composer update` regenera `composer.lock` fijándolo al PHP de la máquina donde lo corres (ver **Requisitos**): si el servidor tiene una versión más baja, el despliegue siguiente fallará al instalar. La opción `audit.block-insecure` sigue en `false` para no bloquear instalaciones por avisos de terceros; conviene revisarla manualmente antes de cada despliegue.

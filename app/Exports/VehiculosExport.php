@@ -38,23 +38,26 @@ class VehiculosExport implements FromCollection, ShouldAutoSize, WithHeadings, W
 
     public function headings(): array
     {
-        $columnas = ['Marca', 'Modelo', 'Año', 'VIN', 'Millas', 'Estado', 'Título', 'Dónde está', 'Fecha de compra'];
+        $columnas = [
+            __('Marca'), __('Modelo'), __('Año'), __('VIN'), __('Millas'),
+            __('Estado'), __('Título'), __('Dónde está'), __('Fecha de compra'),
+        ];
 
         if ($this->usuario->can('ver precios compra')) {
-            $columnas[] = 'Precio de compra';
+            $columnas[] = __('Precio de compra');
         }
 
         if ($this->usuario->can('registrar gastos')) {
-            $columnas[] = 'Gastos';
+            $columnas[] = __('Gastos');
         }
 
-        $columnas[] = 'Recuperado (venta/desguace)';
+        $columnas[] = __('Recuperado (venta/desguace)');
 
         if ($this->usuario->can('ver ganancias')) {
-            $columnas[] = 'Ganancia';
+            $columnas[] = __('Ganancia');
         }
 
-        $columnas[] = 'Notas';
+        $columnas[] = __('Notas');
 
         return $columnas;
     }

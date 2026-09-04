@@ -147,7 +147,7 @@ class GestorVenta extends Component
         });
 
         $this->dispatch('vehiculo-actualizado');
-        $this->dispatch('notificar', mensaje: 'Venta registrada 🎉');
+        $this->dispatch('notificar', mensaje: __('Venta registrada').' 🎉');
     }
 
     public function editar(): void
@@ -199,7 +199,7 @@ class GestorVenta extends Component
 
         $this->editando = false;
         $this->dispatch('vehiculo-actualizado');
-        $this->dispatch('notificar', mensaje: 'Venta actualizada');
+        $this->dispatch('notificar', mensaje: __('Venta actualizada'));
     }
 
     public function cancelarEdicion(): void
@@ -244,7 +244,7 @@ class GestorVenta extends Component
         });
 
         $this->dispatch('vehiculo-actualizado');
-        $this->dispatch('notificar', mensaje: 'Venta eliminada; estado revertido');
+        $this->dispatch('notificar', mensaje: __('Venta eliminada; estado revertido'));
     }
 
     public function render()

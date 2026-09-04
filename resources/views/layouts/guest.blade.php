@@ -8,7 +8,7 @@
         <title>{{ config('app.name', 'Forte Towing') }}</title>
 
         <!-- PWA: instalable en la pantalla de inicio del celular -->
-        <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+        <link rel="manifest" href="{{ asset(app()->getLocale() === 'en' ? 'manifest.en.webmanifest' : 'manifest.webmanifest') }}">
         <meta name="theme-color" content="#0f172a">
         <link rel="icon" type="image/png" href="{{ asset('iconos/icono-192.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('iconos/apple-touch-icon.png') }}">

@@ -29,7 +29,7 @@
             <div class="sm:col-span-2 relative">
                 <x-icono nombre="buscar" clase="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input type="search"
-                       wire:model.live.debounce.400ms="busqueda"
+                       wire:model.live.debounce.250ms="busqueda"
                        placeholder="{{ __('Buscar por marca, modelo o VIN…') }}"
                        class="campo pl-10">
             </div>

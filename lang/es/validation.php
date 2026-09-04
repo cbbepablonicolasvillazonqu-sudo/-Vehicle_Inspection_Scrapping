@@ -215,6 +215,36 @@ return [
         'fotos' => 'fotos',
         'fotos.*' => 'foto',
         'nota' => 'nota',
+        // Campos del recojo y del Junk car.
+        'ubicacion_destino' => 'dónde está',
+        'ubicacion_origen_url' => 'ubicación de origen',
+        'asignado_a' => 'gruero asignado',
+        'metodo_pago_gruero' => 'forma de pago del gruero',
+        'monto_pagado' => 'monto pagado',
+        'monto_junk' => 'monto del Junk car',
+        'tiene_catalizador' => 'catalizador',
+
+        'email_comprador' => 'correo del comprador',
+        'contrato' => 'contrato',
+        'foto' => 'foto',
+
+        // Claves que además usa el panel de auditoría para nombrar cada dato.
+        'antes' => 'antes',
+        'despues' => 'después',
+        'de' => 'de',
+        'a' => 'a',
+        'precio' => 'precio',
+        'precio_compra_actualizado' => 'precio de compra actualizado',
+        'comprador' => 'comprador',
+        'archivo' => 'archivo',
+        'gasto' => 'gasto',
+        'pago' => 'pago',
+        'ubicacion' => 'ubicación',
+        'destino' => 'destino',
+        'titulacion' => 'titulación',
+        'catalizador' => 'catalizador',
+        'gruero' => 'gruero',
+        'masivo' => 'envío masivo',
     ],
 
 ];

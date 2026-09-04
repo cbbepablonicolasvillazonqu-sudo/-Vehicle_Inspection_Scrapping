@@ -21,8 +21,8 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
     public function headings(): array
     {
         return [
-            'Vehículo', 'VIN', 'Tipo', 'Fecha',
-            'Precio de compra', 'Gastos', 'Recuperado', 'Ganancia',
+            __('Vehículo'), __('VIN'), __('Tipo'), __('Fecha'),
+            __('Precio de compra'), __('Gastos'), __('Recuperado'), __('Ganancia'),
         ];
     }
 
@@ -38,7 +38,7 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
         $fila = fn (array $salida) => [
             $salida['vehiculo']->nombreCompleto(),
             $salida['vehiculo']->vin,
-            $salida['tipo'],
+            __($salida['tipo']),
             $salida['fecha']->format('d/m/Y'),
             $salida['compra'],
             $salida['gastos'],
@@ -50,7 +50,7 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
 
         if ($filas->isNotEmpty()) {
             $filas->push([
-                'TOTAL '.$inicio->translatedFormat('F Y'), '', '', '',
+                __('TOTAL :mes', ['mes' => $inicio->translatedFormat('F Y')]), '', '', '',
                 round($salidas->sum('compra'), 2),
                 round($salidas->sum('gastos'), 2),
                 round($salidas->sum('recuperado'), 2),
@@ -61,15 +61,15 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
         // Bloque aparte: no suman en el total porque les falta un dato.
         if ($pendientes->isNotEmpty()) {
             $filas->push(['', '', '', '', '', '', '', '']);
-            $filas->push(['PENDIENTES DE VALORAR (no suman)', '', '', '', '', '', '', '']);
+            $filas->push([__('PENDIENTES DE VALORAR (no suman)'), '', '', '', '', '', '', '']);
 
             foreach ($pendientes as $salida) {
                 $filas->push([
                     $salida['vehiculo']->nombreCompleto(),
                     $salida['vehiculo']->vin,
                     $salida['motivo'] === 'sin_monto_junk'
-                        ? 'Falta el monto del Junk car'
-                        : 'Falta el precio de compra',
+                        ? __('Falta el monto del Junk car')
+                        : __('Falta el precio de compra'),
                     $salida['fecha']->format('d/m/Y'),
                     $salida['compra'],
                     $salida['gastos'],

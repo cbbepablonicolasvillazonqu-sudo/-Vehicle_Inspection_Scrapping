@@ -24,7 +24,7 @@ class ExportController extends Controller
             (string) $request->query('estado', ''),
         );
 
-        $nombre = 'vehiculos-'.now()->format('Y-m-d').'.'.$formato;
+        $nombre = __('vehiculos').'-'.now()->format('Y-m-d').'.'.$formato;
 
         return Excel::download(
             $export,
@@ -46,7 +46,7 @@ class ExportController extends Controller
 
         return Excel::download(
             new GananciasExport($mes),
-            "ganancias-{$mes}.xlsx",
+            __('ganancias')."-{$mes}.xlsx",
         );
     }
 }

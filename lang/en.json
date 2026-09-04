@@ -361,5 +361,34 @@
     "← Volver al panel": "← Back to dashboard",
     "Opcional. Sirve para llamar con un toque desde la ficha del vehículo.": "Optional. Lets you call with one tap from the vehicle record.",
     "No se pudo guardar. Revisá tu conexión e intentá de nuevo.": "Couldn't save. Check your connection and try again.",
-    "No se pudo subir el archivo. Revisá tu conexión.": "Couldn't upload the file. Check your connection."
+    "No se pudo subir el archivo. Revisá tu conexión.": "Couldn't upload the file. Check your connection.",
+
+    "OFICINA 1 ALDI": "ALDI OFFICE 1",
+    "CASA HUGO": "HUGO'S HOUSE",
+
+    "Vehículo registrado correctamente.": "Vehicle registered successfully.",
+    "Vehículo eliminado.": "Vehicle deleted.",
+    "Vehículo enviado a desguace": "Vehicle sent to Junk car",
+    "Desguace actualizado": "Junk car details updated",
+    "Desguace eliminado; estado revertido": "Junk car record deleted; status reverted",
+    "Venta actualizada": "Sale updated",
+    "Venta eliminada; estado revertido": "Sale deleted; status reverted",
+    "Gasto actualizado": "Expense updated",
+    "Estado: :estado": "Status: :estado",
+    "No tienes permiso para pasar este vehículo a \":estado\".": "You don't have permission to move this vehicle to \":estado\".",
+    "Cerrar": "Close",
+    "cliente@correo.com": "customer@email.com",
+
+    "Registro inicial": "Initial record",
+    "Enviado a desguace": "Sent to Junk car",
+    "Desguace eliminado por Admin": "Junk car record deleted by Admin",
+    "Venta eliminada por Admin": "Sale deleted by Admin",
+
+    "VIN": "VIN",
+    "Estado": "Status",
+    "Recuperado (venta/desguace)": "Recovered (sale/junk car)",
+    "TOTAL :mes": "TOTAL :mes",
+    "PENDIENTES DE VALORAR (no suman)": "PENDING VALUATION (not included in totals)",
+    "vehiculos": "vehicles",
+    "ganancias": "profit"
 }

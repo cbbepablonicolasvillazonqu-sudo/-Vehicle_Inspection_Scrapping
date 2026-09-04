@@ -14,7 +14,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="sm:col-span-2 relative">
                 <x-icono nombre="buscar" clase="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input type="search" wire:model.live.debounce.400ms="buscar" class="campo w-full ps-10"
+                <input type="search" wire:model.live.debounce.250ms="buscar" class="campo w-full ps-10"
                        placeholder="{{ __('Buscar por marca, modelo o VIN…') }}">
             </div>
             <select wire:model.live="estado" class="campo w-full">
