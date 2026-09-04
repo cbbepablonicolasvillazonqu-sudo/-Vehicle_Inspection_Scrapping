@@ -174,7 +174,7 @@ class FormularioVehiculo extends Component
             $this->guardarFoto($vehiculo, $foto, $auditoria);
         }
 
-        session()->flash('ok', 'Vehículo registrado correctamente.');
+        session()->flash('ok', __('Vehículo registrado correctamente.'));
 
         return $this->redirectRoute('vehiculos.ficha', $vehiculo, navigate: false);
     }

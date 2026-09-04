@@ -5,10 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name', 'Forte Towing') }}</title>
+        <title>{{ isset($title) ? __($title).' · ' : '' }}{{ config('app.name', 'Forte Towing') }}</title>
 
-        <!-- PWA: instalable en la pantalla de inicio del celular -->
-        <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+        <!-- PWA: instalable en la pantalla de inicio del celular.
+             Hay un manifiesto por idioma porque el navegador lo pide SIN cookies:
+             una ruta que lo generara no vería la sesión y saldría siempre en español. -->
+        <link rel="manifest" href="{{ asset(app()->getLocale() === 'en' ? 'manifest.en.webmanifest' : 'manifest.webmanifest') }}">
         <meta name="theme-color" content="#1e3a8a">
         <link rel="icon" type="image/png" href="{{ asset('iconos/icono-192.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('iconos/apple-touch-icon.png') }}">
@@ -43,7 +45,7 @@
                     <div class="rounded-xl bg-green-50 border border-green-200 text-green-800 px-4 py-3 flex items-center gap-3 shadow-sm">
                         <x-icono nombre="check" clase="w-5 h-5 shrink-0 text-green-600" />
                         <span class="font-medium flex-1">{{ session('ok') }}</span>
-                        <button type="button" class="text-green-600 hover:text-green-800 font-bold px-1" @click="visible = false" aria-label="Cerrar">✕</button>
+                        <button type="button" class="text-green-600 hover:text-green-800 font-bold px-1" @click="visible = false" aria-label="{{ __('Cerrar') }}">✕</button>
                     </div>
                 </div>
             @endif

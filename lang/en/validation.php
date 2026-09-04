@@ -197,6 +197,36 @@ return [
         'fotos' => 'photos',
         'fotos.*' => 'photo',
         'nota' => 'note',
+        // Pickup and Junk car fields.
+        'ubicacion_destino' => 'where it is',
+        'ubicacion_origen_url' => 'pickup location',
+        'asignado_a' => 'assigned tow driver',
+        'metodo_pago_gruero' => 'tow driver payment method',
+        'monto_pagado' => 'amount paid',
+        'monto_junk' => 'junk car amount',
+        'tiene_catalizador' => 'catalytic converter',
+
+        'email_comprador' => 'buyer email',
+        'contrato' => 'contract',
+        'foto' => 'photo',
+
+        // Keys the audit panel also uses to name each piece of data.
+        'antes' => 'before',
+        'despues' => 'after',
+        'de' => 'from',
+        'a' => 'to',
+        'precio' => 'price',
+        'precio_compra_actualizado' => 'purchase price updated',
+        'comprador' => 'buyer',
+        'archivo' => 'file',
+        'gasto' => 'expense',
+        'pago' => 'payment',
+        'ubicacion' => 'location',
+        'destino' => 'destination',
+        'titulacion' => 'title status',
+        'catalizador' => 'catalytic converter',
+        'gruero' => 'tow driver',
+        'masivo' => 'bulk send',
     ],
 
 ];

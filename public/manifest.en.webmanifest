@@ -1,0 +1,43 @@
+{
+    "name": "Forte Towing — Vehicle inventory",
+    "short_name": "Forte Towing",
+    "description": "Forte Towing vehicle inventory management: purchases, repairs, sales and junk cars.",
+    "lang": "en",
+    "dir": "ltr",
+    "start_url": "/panel",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0f172a",
+    "theme_color": "#1e3a8a",
+    "icons": [
+        {
+            "src": "/iconos/icono-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/iconos/icono-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/iconos/icono-512-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "New vehicle",
+            "url": "/vehiculos/crear",
+            "icons": [{ "src": "/iconos/icono-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "Vehicles",
+            "url": "/vehiculos",
+            "icons": [{ "src": "/iconos/icono-192.png", "sizes": "192x192" }]
+        }
+    ]
+}

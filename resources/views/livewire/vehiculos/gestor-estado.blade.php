@@ -54,7 +54,7 @@
                             {{ $cambio->usuario?->name ?? __('Sistema') }} · {{ $cambio->created_at->format('d/m/Y H:i') }}
                         </div>
                         @if ($cambio->nota)
-                            <div class="text-slate-500 italic mt-0.5">«{{ $cambio->nota }}»</div>
+                            <div class="text-slate-500 italic mt-0.5">«{{ __($cambio->nota) }}»</div>
                         @endif
                     </div>
                 </li>

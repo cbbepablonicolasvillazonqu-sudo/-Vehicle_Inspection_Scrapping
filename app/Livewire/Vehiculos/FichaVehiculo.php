@@ -78,7 +78,7 @@ class FichaVehiculo extends Component
 
         $this->vehiculo->delete();
 
-        session()->flash('ok', 'Vehículo eliminado.');
+        session()->flash('ok', __('Vehículo eliminado.'));
 
         return $this->redirectRoute('vehiculos.index', navigate: false);
     }

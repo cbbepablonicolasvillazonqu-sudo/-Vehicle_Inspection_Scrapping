@@ -8,11 +8,12 @@
  *    caché primero con actualización en segundo plano.
  *  - Nunca intercepta /livewire (peticiones dinámicas y subidas).
  */
-const CACHE = 'forte-towing-v2';
+const CACHE = 'forte-towing-v3';
 
 const PRECACHE = [
     '/offline',
     '/manifest.webmanifest',
+    '/manifest.en.webmanifest',
     '/iconos/icono-192.png',
     '/iconos/icono-512.png',
 ];
@@ -55,7 +56,7 @@ self.addEventListener('fetch', (evento) => {
         || url.pathname.startsWith('/build/')
         || url.pathname.startsWith('/iconos/')
         || url.pathname.startsWith('/storage/')
-        || url.pathname === '/manifest.webmanifest';
+        || url.pathname.endsWith('.webmanifest');
 
     if (esAsset) {
         evento.respondWith(

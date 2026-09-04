@@ -239,10 +239,10 @@
                                 <div class="mt-1 text-xs text-slate-500 break-words">
                                     @if (isset($registro->detalles['cambios']))
                                         @foreach ($registro->detalles['cambios'] as $campo => $cambio)
-                                            <div>{{ $campo }}: <s>{{ $cambio['antes'] ?? '—' }}</s> → <span class="text-slate-700">{{ $cambio['despues'] ?? '—' }}</span></div>
+                                            <div>{{ nombreCampo($campo) }}: <s>{{ isset($cambio['antes']) ? valorCampo($campo, $cambio['antes']) : '—' }}</s> → <span class="text-slate-700">{{ isset($cambio['despues']) ? valorCampo($campo, $cambio['despues']) : '—' }}</span></div>
                                         @endforeach
                                     @else
-                                        {{ collect($registro->detalles)->map(fn ($v, $k) => is_scalar($v) ? "$k: $v" : null)->filter()->implode(' · ') }}
+                                        {{ collect($registro->detalles)->map(fn ($v, $k) => is_scalar($v) ? nombreCampo($k).': '.valorCampo($k, $v) : null)->filter()->implode(' · ') }}
                                     @endif
                                 </div>
                             @endif

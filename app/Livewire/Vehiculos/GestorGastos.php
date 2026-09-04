@@ -151,19 +151,20 @@ class GestorGastos extends Component
                 'despues' => ['monto' => $datos['monto'], 'descripcion' => $datos['descripcion']],
             ]);
 
-            $mensaje = 'Gasto actualizado';
+            $mensaje = __('Gasto actualizado');
         } else {
             abort_unless($this->puedeRegistrar(), 403);
 
             $gasto = $this->vehiculo->gastos()->create($datos + ['user_id' => auth()->id()]);
 
             $auditoria->registrar($this->vehiculo, 'gasto_registrado', [
-                'categoria' => CategoriaGasto::from($datos['categoria'])->etiqueta(),
+                // Valor neutro, no la etiqueta: se traduce al mostrar la auditoría.
+                'categoria' => $datos['categoria'],
                 'monto' => $datos['monto'],
                 'descripcion' => $datos['descripcion'],
             ]);
 
-            $mensaje = 'Gasto registrado';
+            $mensaje = __('Gasto registrado');
         }
 
         if ($fotos !== []) {
@@ -234,7 +235,7 @@ class GestorGastos extends Component
         abort_unless($this->puedeModificar($gasto), 403);
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'gasto_eliminado', [
-            'categoria' => $gasto->categoria->etiqueta(),
+            'categoria' => $gasto->categoria->value,
             'monto' => (string) $gasto->monto,
             'descripcion' => $gasto->descripcion,
         ]);
@@ -242,7 +243,7 @@ class GestorGastos extends Component
         $gasto->delete();
 
         $this->dispatch('vehiculo-actualizado');
-        $this->dispatch('notificar', mensaje: 'Gasto eliminado');
+        $this->dispatch('notificar', mensaje: __('Gasto eliminado'));
     }
 
     public function render()

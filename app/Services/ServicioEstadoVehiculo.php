@@ -82,7 +82,7 @@ class ServicioEstadoVehiculo
     ): void {
         if (! $interno && ! in_array($nuevo, $this->transicionesPermitidas($usuario, $vehiculo), true)) {
             throw ValidationException::withMessages([
-                'estado' => 'No tienes permiso para pasar este vehículo a "'.$nuevo->etiqueta().'".',
+                'estado' => __('No tienes permiso para pasar este vehículo a ":estado".', ['estado' => $nuevo->etiqueta()]),
             ]);
         }
 
@@ -99,8 +99,9 @@ class ServicioEstadoVehiculo
             ]);
 
             app(ServicioAuditoria::class)->registrar($vehiculo, 'cambio_estado', [
-                'de' => $anterior?->etiqueta(),
-                'a' => $nuevo->etiqueta(),
+                // Valores neutros: la auditoría se traduce al mostrarse.
+                'de' => $anterior?->value,
+                'a' => $nuevo->value,
                 'nota' => $nota,
             ], $usuario);
         });

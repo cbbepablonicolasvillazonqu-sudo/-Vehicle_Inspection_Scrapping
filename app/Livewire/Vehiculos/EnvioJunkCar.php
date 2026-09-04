@@ -109,7 +109,9 @@ class EnvioJunkCar extends Component
                     auth()->user(),
                     $vehiculo,
                     EstadoVehiculo::Desguace,
-                    __('Envío masivo a Junk car'),
+                    // Sin __(): la nota se guarda en la base y se traduce al mostrarla.
+                    // Traducirla aquí dejaría filas en el idioma de quien apretó el botón.
+                    'Envío masivo a Junk car',
                     interno: true,
                 );
 

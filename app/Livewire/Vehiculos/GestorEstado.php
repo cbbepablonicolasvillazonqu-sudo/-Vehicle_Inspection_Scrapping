@@ -42,7 +42,7 @@ class GestorEstado extends Component
 
         $this->nota = '';
         $this->dispatch('vehiculo-actualizado');
-        $this->dispatch('notificar', mensaje: 'Estado: '.$nuevo->etiquetaCorta());
+        $this->dispatch('notificar', mensaje: __('Estado: :estado', ['estado' => $nuevo->etiquetaCorta()]));
     }
 
     public function render()

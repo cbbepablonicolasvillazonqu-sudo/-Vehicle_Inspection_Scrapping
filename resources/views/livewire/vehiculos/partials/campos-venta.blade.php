@@ -26,7 +26,7 @@
 <div>
     <x-input-label for="email_comprador" :value="__('Correo electrónico del comprador *')" />
     <x-text-input id="email_comprador" type="email" inputmode="email" autocapitalize="none" autocorrect="off"
-                  class="mt-1 block w-full" wire:model="email_comprador" placeholder="cliente@correo.com" />
+                  class="mt-1 block w-full" wire:model="email_comprador" placeholder="{{ __('cliente@correo.com') }}" />
     <x-input-error :messages="$errors->get('email_comprador')" class="mt-2" />
 </div>
 

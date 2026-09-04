@@ -87,7 +87,7 @@ class GestorDesguace extends Component
         });
 
         $this->dispatch('vehiculo-actualizado');
-        $this->dispatch('notificar', mensaje: 'Vehículo enviado a desguace');
+        $this->dispatch('notificar', mensaje: __('Vehículo enviado a desguace'));
     }
 
     public function editar(): void
@@ -123,7 +123,7 @@ class GestorDesguace extends Component
 
         $this->editando = false;
         $this->dispatch('vehiculo-actualizado');
-        $this->dispatch('notificar', mensaje: 'Desguace actualizado');
+        $this->dispatch('notificar', mensaje: __('Desguace actualizado'));
     }
 
     public function cancelarEdicion(): void
@@ -162,7 +162,7 @@ class GestorDesguace extends Component
         });
 
         $this->dispatch('vehiculo-actualizado');
-        $this->dispatch('notificar', mensaje: 'Desguace eliminado; estado revertido');
+        $this->dispatch('notificar', mensaje: __('Desguace eliminado; estado revertido'));
     }
 
     public function render()
