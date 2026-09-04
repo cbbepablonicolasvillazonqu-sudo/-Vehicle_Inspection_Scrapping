@@ -49,6 +49,12 @@ if (! function_exists('valorCampo')) {
             return $valor ? __('Sí') : __('No');
         }
 
+        // Las notas del sistema se guardan en español y son su propia clave;
+        // las que escribió una persona no coinciden con ninguna y salen tal cual.
+        if ($campo === 'nota' && is_string($valor)) {
+            return __($valor);
+        }
+
         $enums = [
             'categoria' => App\Enums\CategoriaGasto::class,
             'de' => App\Enums\EstadoVehiculo::class,

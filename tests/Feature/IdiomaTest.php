@@ -160,6 +160,15 @@ class IdiomaTest extends TestCase
             'pago' => 'efectivo',
         ], $admin);
 
+        // La nota del sistema es su propia clave; la que escribe una persona no.
+        app(ServicioAuditoria::class)->registrar($vehiculo, 'cambio_estado', [
+            'nota' => 'Enviado a desguace',
+        ], $admin);
+
+        app(ServicioAuditoria::class)->registrar($vehiculo, 'cambio_estado', [
+            'nota' => 'se rompió el capot',
+        ], $admin);
+
         $this->actingAs($admin)->get("/vehiculos/{$vehiculo->id}")
             ->assertOk()
             ->assertSee('purchase price')
@@ -168,6 +177,9 @@ class IdiomaTest extends TestCase
             // El valor crudo ya no se imprime como texto. No se comprueba
             // 'casa_hugo' porque Livewire lo incluye en su snapshot del modelo,
             // que no es texto visible.
+            ->assertSee('Sent to Junk car')
+            ->assertSee('se rompió el capot')
+            ->assertDontSee('Enviado a desguace')
             ->assertDontSee('precio_compra');
     }
 
