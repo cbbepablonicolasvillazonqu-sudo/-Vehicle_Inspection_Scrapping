@@ -148,20 +148,49 @@ class Vehicle extends Model
         return $query;
     }
 
-    /** Búsqueda por marca, modelo o VIN. */
+    /**
+     * Búsqueda por marca, modelo, VIN o año.
+     *
+     * El término se parte en palabras y cada una tiene que aparecer en algún
+     * lado: Y entre palabras, O entre columnas. Antes se comparaba la frase
+     * entera contra cada columna por separado, así que "toyota corolla" no
+     * encontraba nada aunque el auto estuviera ahí.
+     */
     public function scopeBuscar(Builder $query, string $termino): Builder
     {
-        $termino = trim($termino);
+        $palabras = preg_split('/\s+/', trim($termino), -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
-        if ($termino === '') {
+        if ($palabras === []) {
             return $query;
         }
 
-        return $query->where(function (Builder $q) use ($termino) {
-            $q->where('marca', 'like', "%{$termino}%")
-                ->orWhere('modelo', 'like', "%{$termino}%")
-                ->orWhere('vin', 'like', "%{$termino}%");
-        });
+        foreach ($palabras as $palabra) {
+            $query->where(function (Builder $q) use ($palabra) {
+                $patron = '%'.self::escaparComodines($palabra).'%';
+
+                $q->where('marca', 'like', $patron)
+                    ->orWhere('modelo', 'like', $patron)
+                    ->orWhere('vin', 'like', $patron);
+
+                // La tarjeta muestra "2019 Honda Civic": si el año no fuera
+                // buscable, copiar ese texto no encontraría nada.
+                if (preg_match('/^\d{4}$/', $palabra)) {
+                    $q->orWhere('anio', (int) $palabra);
+                }
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Escapa los comodines de LIKE que escriba el usuario.
+     * Sin esto, teclear un solo "%" devuelve el inventario completo, que es
+     * exactamente lo contrario de filtrar.
+     */
+    private static function escaparComodines(string $valor): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $valor);
     }
 
     /* ------------------------------ Ayudantes ------------------------------ */
@@ -197,7 +226,10 @@ class Vehicle extends Model
      */
     public function montoRecuperado(): ?float
     {
-        if ($this->estado === EstadoVehiculo::Vendido && $this->venta) {
+        // Se comprueba el PRECIO, no solo que exista la venta: con una venta
+        // sin precio, (float) null daria 0.0 y el vehiculo figuraria como
+        // perdida total. Es el mismo cuidado que la rama del Junk car.
+        if ($this->estado === EstadoVehiculo::Vendido && $this->venta?->precio_venta !== null) {
             return (float) $this->venta->precio_venta;
         }
 

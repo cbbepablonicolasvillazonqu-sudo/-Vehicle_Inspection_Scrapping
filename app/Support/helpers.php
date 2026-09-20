@@ -77,3 +77,29 @@ if (! function_exists('valorCampo')) {
         return (string) $valor;
     }
 }
+
+if (! function_exists('motivoPendiente')) {
+    /**
+     * Por qué una salida del inventario todavía no se puede valorar.
+     *
+     * Vive acá para que el reporte en pantalla y el Excel digan siempre lo
+     * mismo: antes el Excel le decía "falta el monto del Junk car" a una fila
+     * que era una venta.
+     */
+    function motivoPendiente(?string $motivo): string
+    {
+        return match ($motivo) {
+            'sin_precio_venta' => __('Falta el precio de venta'),
+            'sin_monto_junk' => __('Falta el monto del Junk car'),
+            default => __('Falta el precio de compra'),
+        };
+    }
+}
+
+if (! function_exists('fecha')) {
+    /** Fecha en formato corto, o un guion si todavía no se cargó. */
+    function fecha(?\Carbon\CarbonInterface $valor): string
+    {
+        return $valor?->format('d/m/Y') ?? '—';
+    }
+}

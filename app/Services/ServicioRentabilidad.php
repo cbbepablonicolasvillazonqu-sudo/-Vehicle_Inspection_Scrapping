@@ -74,14 +74,16 @@ class ServicioRentabilidad
      * Arma una fila de salida marcando si se puede valorar o no.
      * Los importes nulos se conservan como null (nunca se degradan a 0).
      */
-    private function fila(string $tipo, Vehicle $vehiculo, CarbonInterface $fecha, mixed $compra, mixed $recuperado): array
+    private function fila(string $tipo, Vehicle $vehiculo, ?CarbonInterface $fecha, mixed $compra, mixed $recuperado): array
     {
         $gastos = (float) ($vehiculo->gastos_total ?? 0);
         $compra = $compra === null ? null : (float) $compra;
         $recuperado = $recuperado === null ? null : (float) $recuperado;
 
+        // El motivo distingue venta de Junk car: si no, el reporte le dice al
+        // Admin "falta el monto del Junk car" en una fila que es una venta.
         $motivo = match (true) {
-            $recuperado === null => 'sin_monto_junk',
+            $recuperado === null => $tipo === 'Venta' ? 'sin_precio_venta' : 'sin_monto_junk',
             $compra === null => 'sin_precio_compra',
             default => null,
         };
@@ -105,10 +107,25 @@ class ServicioRentabilidad
         return $this->salidas($desde, $hasta)->reject(fn (array $s) => $s['pendiente'])->values();
     }
 
-    /** Salidas a las que les falta el monto del Junk car o el precio de compra. */
+    /**
+     * Salidas a las que todavía les falta un dato para poder valorarlas.
+     *
+     * Las que no tienen fecha van siempre, aunque se pida un mes: no pertenecen
+     * a ninguno, así que filtrarlas por rango las dejaría invisibles en todos y
+     * el Admin vería el aviso del panel sin poder encontrar cuál completar.
+     */
     public function salidasPendientes(?CarbonInterface $desde = null, ?CarbonInterface $hasta = null): Collection
     {
-        return $this->salidas($desde, $hasta)->filter(fn (array $s) => $s['pendiente'])->values();
+        $pendiente = fn (array $s) => $s['pendiente'];
+        $delPeriodo = $this->salidas($desde, $hasta)->filter($pendiente);
+
+        if ($desde === null && $hasta === null) {
+            return $delPeriodo->values();
+        }
+
+        $sinFecha = $this->salidas()->filter(fn (array $s) => $pendiente($s) && $s['fecha'] === null);
+
+        return $delPeriodo->concat($sinFecha)->values();
     }
 
     /** Cuántas salidas quedan sin valorar en toda la historia. */

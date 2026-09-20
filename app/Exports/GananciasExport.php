@@ -39,7 +39,7 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
             $salida['vehiculo']->nombreCompleto(),
             $salida['vehiculo']->vin,
             __($salida['tipo']),
-            $salida['fecha']->format('d/m/Y'),
+            fecha($salida['fecha']),
             $salida['compra'],
             $salida['gastos'],
             $salida['recuperado'],
@@ -70,7 +70,7 @@ class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
                     $salida['motivo'] === 'sin_monto_junk'
                         ? __('Falta el monto del Junk car')
                         : __('Falta el precio de compra'),
-                    $salida['fecha']->format('d/m/Y'),
+                    fecha($salida['fecha']),
                     $salida['compra'],
                     $salida['gastos'],
                     null,

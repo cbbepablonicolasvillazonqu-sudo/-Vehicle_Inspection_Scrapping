@@ -390,5 +390,19 @@
     "TOTAL :mes": "TOTAL :mes",
     "PENDIENTES DE VALORAR (no suman)": "PENDING VALUATION (not included in totals)",
     "vehiculos": "vehicles",
-    "ganancias": "profit"
+    "ganancias": "profit",
+
+    "Fecha de venta": "Sale date",
+    "Precio de venta (USD)": "Sale price (USD)",
+    "Nombre del comprador": "Buyer name",
+    "Teléfono del comprador": "Buyer phone",
+    "Correo electrónico del comprador": "Buyer's email address",
+    "Sin precio": "No price",
+    "Falta el precio de venta": "Sale price missing",
+    "Completá al menos un dato para registrar la venta": "Fill in at least one field to register the sale",
+
+    "Buscar por marca, modelo, VIN o año…": "Search by make, model, VIN or year…",
+    "Buscando…": "Searching…",
+    "{1} ¿Enviar :n vehículo a Junk car? Quedará bloqueado y no se puede deshacer.|[2,*] ¿Enviar :n vehículos a Junk car? Quedarán bloqueados y no se puede deshacer.": "{1} Send :n vehicle to Junk car? It will be locked and this cannot be undone.|[2,*] Send :n vehicles to Junk car? They will be locked and this cannot be undone.",
+    "{1} :n no se ve con el filtro actual y también se enviará|[2,*] :n no se ven con el filtro actual y también se enviarán": "{1} :n is hidden by the current filter and will be sent too|[2,*] :n are hidden by the current filter and will be sent too"
 }

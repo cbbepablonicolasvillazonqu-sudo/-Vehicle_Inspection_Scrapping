@@ -25,23 +25,32 @@
                 <dl class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4 text-sm">
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Precio de venta') }}</dt>
-                        <dd class="font-bold text-slate-900 text-lg tabular">{{ dinero($venta->precio_venta) }}</dd>
+                        <dd class="font-bold text-lg tabular {{ $venta->precio_venta === null ? 'text-amber-600' : 'text-slate-900' }}">
+                            {{-- Sin precio no se muestra $0.00: seria mentir sobre la venta. --}}
+                            {{ $venta->precio_venta === null ? __('Sin precio') : dinero($venta->precio_venta) }}
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Fecha') }}</dt>
-                        <dd class="font-semibold text-slate-900">{{ $venta->fecha_venta->format('d/m/Y') }}</dd>
+                        <dd class="font-semibold text-slate-900">{{ fecha($venta->fecha_venta) }}</dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Método de pago') }}</dt>
-                        <dd class="font-semibold text-slate-900">{{ $venta->metodo_pago->etiqueta() }}</dd>
+                        <dd class="font-semibold text-slate-900">{{ $venta->metodo_pago?->etiqueta() ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Comprador') }}</dt>
-                        <dd class="font-semibold text-slate-900">{{ $venta->nombre_comprador }}</dd>
+                        <dd class="font-semibold text-slate-900">{{ $venta->nombre_comprador ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Teléfono') }}</dt>
-                        <dd><a href="tel:{{ $venta->telefono_comprador }}" class="font-semibold text-blue-700 hover:underline inline-flex items-center gap-1">{{ $venta->telefono_comprador }}</a></dd>
+                        <dd>
+                            @if ($venta->telefono_comprador)
+                                <a href="tel:{{ $venta->telefono_comprador }}" class="font-semibold text-blue-700 hover:underline inline-flex items-center gap-1">{{ $venta->telefono_comprador }}</a>
+                            @else
+                                <span class="text-slate-300">—</span>
+                            @endif
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-slate-400 text-xs">{{ __('Correo electrónico') }}</dt>
