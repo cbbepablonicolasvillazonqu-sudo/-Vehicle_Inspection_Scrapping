@@ -35,7 +35,7 @@
                                         {{ $s['vehiculo']->nombreCompleto() }}
                                     </a>
                                     <span class="text-amber-700">
-                                        · {{ $s['motivo'] === 'sin_monto_junk' ? __('Falta el monto del Junk car') : __('Falta el precio de compra') }}
+                                        · {{ motivoPendiente($s['motivo']) }}
                                     </span>
                                 </li>
                             @endforeach
@@ -81,7 +81,7 @@
                             <span class="font-bold tabular {{ $salida['ganancia'] >= 0 ? 'text-green-700' : 'text-red-700' }}">{{ dinero($salida['ganancia']) }}</span>
                         </div>
                         <div class="text-xs text-slate-400 mt-1 tabular">
-                            {{ __($salida['tipo']) }} · {{ $salida['fecha']->format('d/m/Y') }} ·
+                            {{ __($salida['tipo']) }} · {{ fecha($salida['fecha']) }} ·
                             {{ __('compra') }} {{ dinero($salida['compra']) }} · {{ __('gastos') }} {{ dinero($salida['gastos']) }} · {{ __('recibido') }} {{ dinero($salida['recuperado']) }}
                         </div>
                     </a>
@@ -118,7 +118,7 @@
                                         {{ __($salida['tipo']) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 tabular">{{ $salida['fecha']->format('d/m/Y') }}</td>
+                                <td class="px-4 py-3 tabular">{{ fecha($salida['fecha']) }}</td>
                                 <td class="px-4 py-3 text-right tabular">{{ dinero($salida['compra']) }}</td>
                                 <td class="px-4 py-3 text-right tabular">{{ dinero($salida['gastos']) }}</td>
                                 <td class="px-4 py-3 text-right tabular">{{ dinero($salida['recuperado']) }}</td>

@@ -128,12 +128,29 @@ class EnvioJunkCar extends Component
             : __(':n vehículos enviados a Junk car', ['n' => $enviados]));
     }
 
+    /**
+     * Seleccionados que el filtro actual no muestra.
+     *
+     * La selección sobrevive a los cambios de búsqueda a propósito: borrarla
+     * sería tirar el trabajo del usuario. Pero enviar a Junk car es
+     * irreversible, así que hay que decirle cuántos se irían sin que los vea.
+     */
+    private function fueraDelFiltro(): int
+    {
+        if ($this->seleccion === []) {
+            return 0;
+        }
+
+        return count($this->seleccion) - $this->consulta()->whereIn('id', $this->seleccion)->count();
+    }
+
     public function render()
     {
         $vehiculos = $this->consulta()->paginate(15);
 
         return view('livewire.vehiculos.envio-junk-car', [
             'vehiculos' => $vehiculos,
+            'fueraDelFiltro' => $this->fueraDelFiltro(),
             'idsPagina' => $vehiculos->pluck('id')->all(),
             'estados' => collect(EstadoVehiculo::cases())
                 ->reject(fn ($e) => $e->esFinal())

@@ -14,8 +14,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="sm:col-span-2 relative">
                 <x-icono nombre="buscar" clase="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input type="search" wire:model.live.debounce.250ms="buscar" class="campo w-full ps-10"
-                       placeholder="{{ __('Buscar por marca, modelo o VIN…') }}">
+                <input type="search" wire:model.live.debounce.250ms="buscar" class="campo w-full ps-10 pe-10"
+                       placeholder="{{ __('Buscar por marca, modelo, VIN o año…') }}">
+                <span wire:loading wire:target="buscar"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-blue-700">
+                    {{ __('Buscando…') }}
+                </span>
             </div>
             <select wire:model.live="estado" class="campo w-full">
                 <option value="">{{ __('Todos los estados') }}</option>
@@ -29,15 +33,24 @@
     {{-- Barra de selección --}}
     @if (count($seleccion))
         <div class="sticky top-16 z-20 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-800 text-white px-4 py-3 shadow-lg">
-            <span class="font-semibold text-sm">
-                {{ trans_choice('{1} :n vehículo seleccionado|[2,*] :n vehículos seleccionados', count($seleccion), ['n' => count($seleccion)]) }}
-            </span>
+            <div class="text-sm">
+                <span class="font-semibold">
+                    {{ trans_choice('{1} :n vehículo seleccionado|[2,*] :n vehículos seleccionados', count($seleccion), ['n' => count($seleccion)]) }}
+                </span>
+                {{-- Enviar a Junk car no se puede deshacer: si hay
+                     seleccionados que el filtro oculta, hay que decirlo. --}}
+                @if ($fueraDelFiltro > 0)
+                    <span class="block mt-0.5 text-amber-300 font-medium">
+                        ⚠ {{ trans_choice('{1} :n no se ve con el filtro actual y también se enviará|[2,*] :n no se ven con el filtro actual y también se enviarán', $fueraDelFiltro, ['n' => $fueraDelFiltro]) }}
+                    </span>
+                @endif
+            </div>
             <div class="flex gap-2">
                 <button type="button" wire:click="limpiarSeleccion" class="btn-sm bg-slate-600 hover:bg-slate-500 text-white rounded-xl px-3 py-2">
                     {{ __('Quitar selección') }}
                 </button>
                 <button type="button" wire:click="enviar"
-                        wire:confirm="{{ __('¿Enviar los vehículos seleccionados a Junk car? Quedarán bloqueados.') }}"
+                        wire:confirm="{{ trans_choice('{1} ¿Enviar :n vehículo a Junk car? Quedará bloqueado y no se puede deshacer.|[2,*] ¿Enviar :n vehículos a Junk car? Quedarán bloqueados y no se puede deshacer.', count($seleccion), ['n' => count($seleccion)]) }}"
                         class="btn-sm bg-slate-200 hover:bg-white text-slate-900 font-bold rounded-xl px-3 py-2"
                         wire:loading.attr="disabled" wire:target="enviar">
                     <span wire:loading.remove wire:target="enviar">{{ __('Enviar a Junk car') }}</span>

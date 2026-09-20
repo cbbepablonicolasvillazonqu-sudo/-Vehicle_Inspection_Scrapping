@@ -67,10 +67,11 @@ class VehiculosExport implements FromCollection, ShouldAutoSize, WithHeadings, W
     {
         $gastos = (float) ($vehiculo->gastos_total ?? 0);
 
-        // Un Junk car sin monto cargado queda vacío, nunca en 0: valorarlo en 0
-        // lo convertiría en una pérdida ficticia.
+        // Una salida sin monto cargado queda vacía, nunca en 0: valorarla en 0
+        // la convertiría en una pérdida ficticia. Vale tanto para el Junk car
+        // sin monto como para la venta sin precio.
         $recuperado = match (true) {
-            $vehiculo->venta !== null => (float) $vehiculo->venta->precio_venta,
+            $vehiculo->venta?->precio_venta !== null => (float) $vehiculo->venta->precio_venta,
             $vehiculo->desguace?->monto_recibido !== null => (float) $vehiculo->desguace->monto_recibido,
             default => null,
         };

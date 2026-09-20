@@ -30,8 +30,14 @@
                 <x-icono nombre="buscar" clase="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input type="search"
                        wire:model.live.debounce.250ms="busqueda"
-                       placeholder="{{ __('Buscar por marca, modelo o VIN…') }}"
-                       class="campo pl-10">
+                       placeholder="{{ __('Buscar por marca, modelo, VIN o año…') }}"
+                       class="campo pl-10 pr-10">
+                {{-- Entre el retardo y el viaje al servidor la pantalla se
+                     quedaba quieta y parecia que el buscador no respondia. --}}
+                <span wire:loading wire:target="busqueda"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-blue-700">
+                    {{ __('Buscando…') }}
+                </span>
             </div>
             <div>
                 <select wire:model.live="filtroEstado" class="campo">
