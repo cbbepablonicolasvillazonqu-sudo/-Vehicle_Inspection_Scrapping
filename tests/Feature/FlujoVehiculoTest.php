@@ -10,6 +10,7 @@ use App\Models\Vehicle;
 use App\Services\ServicioEstadoVehiculo;
 use Database\Seeders\RolesYPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -83,6 +84,103 @@ class FlujoVehiculoTest extends TestCase
             ->set('estado_titulo', 'rebuild')
             ->call('guardar')
             ->assertHasErrors(['vin']);
+    }
+
+    /**
+     * Un vehiculo borrado sigue ocupando su VIN: el indice unico de la base no
+     * sabe de borrado logico. Antes la validacion lo daba por libre y el INSERT
+     * reventaba con un 500, asi que el usuario apretaba Guardar y no pasaba nada.
+     */
+    public function test_el_vin_de_un_vehiculo_borrado_sigue_ocupado(): void
+    {
+        $borrado = Vehicle::factory()->create(['vin' => '1HJHJHJHHJJHJHJHJ']);
+        $borrado->delete();
+
+        $this->assertSoftDeleted('vehicles', ['id' => $borrado->id]);
+
+        Livewire::actingAs($this->usuarioConRol('admin'))
+            ->test(FormularioVehiculo::class)
+            ->set('marca', 'Ford')
+            ->set('modelo', 'Focus')
+            ->set('anio', '2012')
+            ->set('vin', '1HJHJHJHHJJHJHJHJ')
+            ->set('millas', '90000')
+            ->set('precio_compra', '1800')
+            ->set('fecha_compra', now()->format('Y-m-d'))
+            ->set('ubicacion_destino', 'casa_hugo')
+            ->set('estado_titulo', 'rebuild')
+            ->call('guardar')
+            ->assertHasErrors(['vin']);
+
+        // Error de validacion, no excepcion: no se creo nada.
+        $this->assertSame(0, Vehicle::count());
+        $this->assertSame(1, Vehicle::withTrashed()->count());
+    }
+
+    public function test_el_mensaje_del_vin_duplicado_menciona_los_eliminados(): void
+    {
+        $borrado = Vehicle::factory()->create(['vin' => '1HJHJHJHHJJHJHJHJ']);
+        $borrado->delete();
+
+        // El usuario no ve los vehiculos borrados en ningun listado: si el
+        // mensaje solo dijera "ya existe", no tendria como entenderlo.
+        Livewire::actingAs($this->usuarioConRol('admin'))
+            ->test(FormularioVehiculo::class)
+            ->set('marca', 'Ford')
+            ->set('modelo', 'Focus')
+            ->set('anio', '2012')
+            ->set('vin', '1HJHJHJHHJJHJHJHJ')
+            ->set('millas', '90000')
+            ->set('precio_compra', '1800')
+            ->set('fecha_compra', now()->format('Y-m-d'))
+            ->set('ubicacion_destino', 'casa_hugo')
+            ->set('estado_titulo', 'rebuild')
+            ->call('guardar')
+            ->assertHasErrors(['vin' => [__('validation.custom.vin.unique')]]);
+    }
+
+    /**
+     * La red de seguridad: entre validar y escribir queda una ventana. Si otra
+     * persona guarda el mismo VIN en ese instante, el choque contra el indice
+     * tiene que salir como error de validacion, nunca como un 500.
+     */
+    public function test_una_carrera_por_el_mismo_vin_no_devuelve_un_error_500(): void
+    {
+        $vin = 'JH4KA7561PC008269';
+
+        // Se simula al otro usuario insertando la fila justo antes del INSERT
+        // propio, cuando la validacion ya dio el visto bueno.
+        Vehicle::creating(function () use ($vin) {
+            static $yaCorrio = false;
+
+            if ($yaCorrio) {
+                return;
+            }
+
+            $yaCorrio = true;
+
+            DB::table('vehicles')->insert([
+                'marca' => 'Otro', 'modelo' => 'Usuario', 'anio' => 2015, 'vin' => $vin,
+                'estado' => 'comprado', 'created_at' => now(), 'updated_at' => now(),
+            ]);
+        });
+
+        Livewire::actingAs($this->usuarioConRol('admin'))
+            ->test(FormularioVehiculo::class)
+            ->set('marca', 'Honda')
+            ->set('modelo', 'Accord')
+            ->set('anio', '1993')
+            ->set('vin', $vin)
+            ->set('millas', '150000')
+            ->set('precio_compra', '1200')
+            ->set('fecha_compra', now()->format('Y-m-d'))
+            ->set('ubicacion_destino', 'casa_hugo')
+            ->set('estado_titulo', 'clean')
+            ->call('guardar')
+            ->assertHasErrors(['vin' => [__('validation.custom.vin.unique')]]);
+
+        // Solo quedo el del "otro usuario".
+        $this->assertSame(1, Vehicle::where('vin', $vin)->count());
     }
 
     public function test_vendedor_y_mecanico_no_pueden_abrir_el_formulario(): void

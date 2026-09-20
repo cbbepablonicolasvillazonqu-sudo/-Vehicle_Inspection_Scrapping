@@ -8,9 +8,11 @@ use App\Models\Vehicle;
 use App\Models\VehiclePhoto;
 use App\Services\ServicioAuditoria;
 use App\Services\ServicioEstadoVehiculo;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -78,7 +80,11 @@ class FormularioVehiculo extends Component
             'anio' => ['required', 'integer', 'between:1950,'.(now()->year + 1)],
             'vin' => [
                 'required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/',
-                Rule::unique('vehicles', 'vin')->ignore($this->vehiculo?->id)->withoutTrashed(),
+                // Sin withoutTrashed(): el índice único de la base no sabe de
+                // borrado lógico, así que una fila con deleted_at sigue
+                // ocupando el VIN. Ignorar las borradas hacía que la
+                // validación dijera "libre" y el INSERT reventara con un 500.
+                Rule::unique('vehicles', 'vin')->ignore($this->vehiculo?->id),
             ],
             'millas' => ['required', 'integer', 'min:0', 'max:2000000'],
             'precio_compra' => ['required', 'numeric', 'min:0', 'max:9999999'],
@@ -149,7 +155,7 @@ class FormularioVehiculo extends Component
                 ];
             }
 
-            $this->vehiculo->save();
+            $this->sinChocarConElVin(fn () => $this->vehiculo->save());
 
             if ($cambios !== []) {
                 $auditoria->registrar($this->vehiculo, 'vehiculo_editado', ['cambios' => $cambios]);
@@ -162,10 +168,10 @@ class FormularioVehiculo extends Component
             return $this->redirectRoute('vehiculos.ficha', $this->vehiculo, navigate: false);
         }
 
-        $vehiculo = Vehicle::create($datos + [
+        $vehiculo = $this->sinChocarConElVin(fn () => Vehicle::create($datos + [
             'created_by' => auth()->id(),
             'estado' => \App\Enums\EstadoVehiculo::Comprado,
-        ]);
+        ]));
 
         app(ServicioEstadoVehiculo::class)->registrarEstadoInicial(auth()->user(), $vehiculo);
         $auditoria->registrar($vehiculo, 'vehiculo_creado', ['vin' => $vehiculo->vin]);
@@ -177,6 +183,37 @@ class FormularioVehiculo extends Component
         session()->flash('ok', __('Vehículo registrado correctamente.'));
 
         return $this->redirectRoute('vehiculos.ficha', $vehiculo, navigate: false);
+    }
+
+    /**
+     * Convierte el choque contra el índice único del VIN en un error de
+     * validación, en vez de dejar que suba como un 500.
+     *
+     * La regla de validación ya cubre el caso normal, pero queda una ventana
+     * entre validar y escribir: si dos personas guardan el mismo VIN a la vez,
+     * la segunda pasa la validación y choca contra el índice. El usuario tiene
+     * que ver el mismo mensaje en los dos casos, nunca una pantalla de error.
+     */
+    private function sinChocarConElVin(callable $guardar): mixed
+    {
+        try {
+            return $guardar();
+        } catch (QueryException $e) {
+            if (! $this->esVinDuplicado($e)) {
+                throw $e;
+            }
+
+            throw ValidationException::withMessages([
+                'vin' => __('validation.custom.vin.unique'),
+            ]);
+        }
+    }
+
+    /** ¿La excepción es la violación del índice único del VIN, y no otra cosa? */
+    private function esVinDuplicado(QueryException $e): bool
+    {
+        return (string) $e->getCode() === '23000'
+            && str_contains($e->getMessage(), 'vehicles_vin_unique');
     }
 
     /**
