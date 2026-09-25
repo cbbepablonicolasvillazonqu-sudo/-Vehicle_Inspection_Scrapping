@@ -108,7 +108,7 @@ class Dashboard extends Component
             ['clave' => 'inventario', 'txt' => __('En inventario'), 'icono' => 'archivo', 'color' => 'slate', 'estado' => null],
             ['clave' => 'reparacion', 'txt' => __('En reparación'), 'icono' => 'llave-inglesa', 'color' => 'yellow', 'estado' => 'en_reparacion'],
             ['clave' => 'listos', 'txt' => __('Listos'), 'icono' => 'check', 'color' => 'green', 'estado' => 'listo'],
-            ['clave' => 'publicados', 'txt' => __('Publicados'), 'icono' => 'etiqueta', 'color' => 'sky', 'estado' => 'publicado'],
+            ['clave' => 'publicados', 'txt' => __('Vendidos'), 'icono' => 'etiqueta', 'color' => 'sky', 'estado' => 'publicado'],
             ['clave' => 'vendidosMes', 'txt' => __('Vendidos este mes'), 'icono' => 'dinero', 'color' => 'blue', 'estado' => 'vendido'],
             ['clave' => 'desguace', 'txt' => __('Junk car'), 'icono' => 'engranaje', 'color' => 'gray', 'estado' => 'desguace'],
         ])
