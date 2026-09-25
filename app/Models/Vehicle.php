@@ -257,6 +257,21 @@ class Vehicle extends Model
     }
 
     /** Versión por-modelo del scope visiblePara (para policies). */
+    /**
+     * ¿Este usuario puede registrar la venta de este vehículo ahora?
+     *
+     * Vive acá porque la usan dos pantallas que tienen que coincidir siempre:
+     * el formulario de venta (que aparece cuando esto es cierto) y el botón
+     * "Vendido" de los estados (que lleva a ese formulario). Si se
+     * desincronizaran, quedaría un botón que no abre nada.
+     */
+    public function admiteRegistrarVenta(User $usuario): bool
+    {
+        return $usuario->can('registrar ventas')
+            && $this->venta === null
+            && in_array($this->estado, [EstadoVehiculo::Listo, EstadoVehiculo::Publicado], true);
+    }
+
     public function esVisiblePara(User $usuario): bool
     {
         if ($usuario->hasRole('gruero')) {

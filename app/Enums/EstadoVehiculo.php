@@ -23,7 +23,11 @@ enum EstadoVehiculo: string
             self::Comprado => 'Comprado / pendiente de revisión',
             self::EnReparacion => 'En reparación',
             self::Listo => 'Listo para la venta',
-            self::Publicado => 'Publicado / en venta',
+            // Pedido del cliente: se muestra como "Vendido", igual que el estado
+            // final. El valor interno sigue siendo 'publicado', así que no hay
+            // que tocar ningún dato. Su botón ya no cambia el estado: lleva al
+            // formulario de venta (ver gestor-estado.blade.php).
+            self::Publicado => 'Vendido',
             self::Vendido => 'Vendido',
             self::Desguace => 'Junk car',
         });
@@ -35,7 +39,7 @@ enum EstadoVehiculo: string
             self::Comprado => 'Comprado',
             self::EnReparacion => 'En reparación',
             self::Listo => 'Listo',
-            self::Publicado => 'Publicado',
+            self::Publicado => 'Vendido',
             self::Vendido => 'Vendido',
             self::Desguace => 'Junk car',
         });

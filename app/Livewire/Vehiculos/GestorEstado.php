@@ -50,6 +50,8 @@ class GestorEstado extends Component
         return view('livewire.vehiculos.gestor-estado', [
             'transiciones' => app(ServicioEstadoVehiculo::class)
                 ->transicionesPermitidas(auth()->user(), $this->vehiculo),
+            // El botón "Vendido" solo aparece si hay formulario de venta al que llevar.
+            'puedeVender' => $this->vehiculo->admiteRegistrarVenta(auth()->user()),
             'historial' => $this->vehiculo->historialEstados()
                 ->with('usuario')
                 ->latest()
