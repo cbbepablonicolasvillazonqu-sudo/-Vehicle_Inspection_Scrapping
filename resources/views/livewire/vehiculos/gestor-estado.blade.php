@@ -3,17 +3,35 @@
         <x-icono nombre="engranaje" clase="w-5 h-5 text-slate-400" /> {{ __('Estado del vehículo') }}
     </h3>
 
-    @if (count($transiciones))
+    @php
+        // "Publicado" se muestra como "Vendido" (pedido del cliente) y su botón
+        // no cambia el estado: lleva al formulario de venta, y el estado pasa al
+        // Vendido real recién al registrar la venta. Sin formulario en esta
+        // pantalla no hay a dónde llevar, así que ese botón no se ofrece.
+        $botones = collect($transiciones)->reject(
+            fn ($destino) => $destino === \App\Enums\EstadoVehiculo::Publicado && ! $puedeVender
+        );
+    @endphp
+
+    @if ($botones->isNotEmpty())
         <p class="mt-2 text-sm text-slate-500">{{ __('Mover a:') }}</p>
 
         <div class="mt-3 flex flex-wrap gap-3">
-            @foreach ($transiciones as $destino)
-                <button wire:click="cambiarEstado('{{ $destino->value }}')"
-                        wire:confirm="{{ __('¿Cambiar el estado a «:estado»?', ['estado' => $destino->etiqueta()]) }}"
-                        wire:loading.attr="disabled"
-                        class="btn text-white shadow-sm px-5 py-3 {{ $destino->colorBoton() }}">
-                    {{ $destino->etiqueta() }}
-                </button>
+            @foreach ($botones as $destino)
+                @if ($destino === \App\Enums\EstadoVehiculo::Publicado)
+                    <button type="button" data-lleva-a="formulario-venta"
+                            x-on:click="const f = document.getElementById('formulario-venta'); if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => f.querySelector('input, select')?.focus({ preventScroll: true }), 450); }"
+                            class="btn text-white shadow-sm px-5 py-3 {{ $destino->colorBoton() }}">
+                        {{ $destino->etiqueta() }}
+                    </button>
+                @else
+                    <button wire:click="cambiarEstado('{{ $destino->value }}')"
+                            wire:confirm="{{ __('¿Cambiar el estado a «:estado»?', ['estado' => $destino->etiqueta()]) }}"
+                            wire:loading.attr="disabled"
+                            class="btn text-white shadow-sm px-5 py-3 {{ $destino->colorBoton() }}">
+                        {{ $destino->etiqueta() }}
+                    </button>
+                @endif
             @endforeach
         </div>
 

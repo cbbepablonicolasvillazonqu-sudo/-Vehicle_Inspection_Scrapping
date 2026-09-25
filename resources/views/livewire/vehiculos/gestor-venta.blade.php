@@ -114,8 +114,11 @@
             @endif
         </div>
     @elseif ($this->puedeVender())
-        {{-- Formulario de venta --}}
-        <div class="tarjeta p-4 sm:p-6 border-t-4 border-t-blue-600">
+        {{-- Formulario de venta. El id es el destino del botón "Vendido" de
+             la sección de estados (gestor-estado.blade.php). El margen va en
+             línea y no como clase de Tailwind para no tener que recompilar
+             los estilos: deja espacio a la barra superior fija al desplazar. --}}
+        <div id="formulario-venta" class="tarjeta p-4 sm:p-6 border-t-4 border-t-blue-600" style="scroll-margin-top: 5rem">
             <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                 <x-icono nombre="dinero" clase="w-5 h-5 text-blue-600" /> {{ __('Registrar venta') }}
             </h3>

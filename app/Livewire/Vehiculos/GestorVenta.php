@@ -138,9 +138,7 @@ class GestorVenta extends Component
     /** ¿Puede registrar una venta nueva? */
     public function puedeVender(): bool
     {
-        return auth()->user()->can('registrar ventas')
-            && $this->vehiculo->venta === null
-            && in_array($this->vehiculo->estado, [EstadoVehiculo::Listo, EstadoVehiculo::Publicado], true);
+        return $this->vehiculo->admiteRegistrarVenta(auth()->user());
     }
 
     /** ¿Puede editar/eliminar la venta cerrada? Solo Admin. */
