@@ -195,6 +195,11 @@
             </div>
         </div>
 
+        {{-- Fotos, VIN y documentos: todos los roles, sobre los vehículos que ven --}}
+        @can('completar datos del vehiculo')
+            <livewire:vehiculos.gestor-fotos-documentos :vehiculo="$vehiculo" :key="'fotos-docs-'.$vehiculo->id" />
+        @endcan
+
         {{-- Recojo: ubicación de origen, pago, destino, catalizador y monto --}}
         @if ($vehiculo->ubicacion_origen_url || $vehiculo->asignado_a || auth()->user()->hasRole(['admin', 'gruero']))
             <livewire:vehiculos.gestor-recojo :vehiculo="$vehiculo" :key="'recojo-'.$vehiculo->id" />
@@ -212,7 +217,7 @@
         {{-- Catalizador y monto del Junk car (Admin o el Gruero asignado) --}}
         <livewire:vehiculos.gestor-junk-car :vehiculo="$vehiculo" :key="'junk-'.$vehiculo->id" />
 
-        {{-- Gastos, con sus fotos (Admin y Mecánico). Único módulo con fotos. --}}
+        {{-- Gastos, con sus fotos de comprobantes (Admin y Mecánico) --}}
         @can('registrar gastos')
             <livewire:vehiculos.gestor-gastos :vehiculo="$vehiculo" :key="'gastos-'.$vehiculo->id" />
         @endcan

@@ -186,10 +186,13 @@ class MatrizAccesoTest extends TestCase
     public function test_los_permisos_de_cada_rol_son_exactamente_los_acordados(): void
     {
         $esperado = [
+            // 'completar datos del vehiculo': fotos, VIN y documentos desde la
+            // ficha. Pedido del cliente: lo tienen todos los roles.
             'gruero' => [
                 'ver vehiculos',
                 'registrar recojo',
                 'completar junk',
+                'completar datos del vehiculo',
             ],
             'mecanico' => [
                 'ver vehiculos',
@@ -197,6 +200,7 @@ class MatrizAccesoTest extends TestCase
                 'cambiar estado',
                 'registrar gastos',
                 'subir fotos',
+                'completar datos del vehiculo',
             ],
             'vendedor' => [
                 'ver vehiculos',
@@ -204,6 +208,7 @@ class MatrizAccesoTest extends TestCase
                 'cambiar estado',
                 'registrar ventas',
                 'exportar datos',
+                'completar datos del vehiculo',
             ],
         ];
 

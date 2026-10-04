@@ -46,6 +46,9 @@ class RolesYPermisosSeeder extends Seeder
             'enviar a junk',
             // Completar los datos del Junk car (catalizador y monto pagado).
             'completar junk',
+            // Fotos, VIN y documentos del vehículo desde la ficha. Lo tienen
+            // todos los roles: cada uno sobre los vehículos que puede ver.
+            'completar datos del vehiculo',
         ];
 
         foreach ($permisos as $permiso) {
@@ -63,6 +66,7 @@ class RolesYPermisosSeeder extends Seeder
             'ver vehiculos',
             'registrar recojo',
             'completar junk',
+            'completar datos del vehiculo',
         ]);
 
         // Mecánico: vehículos comprados/en reparación/listos; registra gastos
@@ -73,15 +77,18 @@ class RolesYPermisosSeeder extends Seeder
             'cambiar estado',
             'registrar gastos',
             'subir fotos',
+            'completar datos del vehiculo',
         ]);
 
-        // Vendedor: vehículos listos/publicados; registra ventas. Sin fotos.
+        // Vendedor: vehículos listos/publicados; registra ventas. Sin fotos de
+        // gastos (las fotos del vehículo van por 'completar datos del vehiculo').
         Role::findOrCreate('vendedor', 'web')->syncPermissions([
             'ver vehiculos',
             'ver inventario',
             'cambiar estado',
             'registrar ventas',
             'exportar datos',
+            'completar datos del vehiculo',
         ]);
 
         // El rol "comprador" fue reemplazado por "gruero": se retira si existe.

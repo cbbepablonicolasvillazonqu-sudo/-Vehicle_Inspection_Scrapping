@@ -12,6 +12,7 @@ class VehiclePhoto extends Model
         'vehicle_id',
         'expense_id',
         'etapa',
+        'es_portada',
         'ruta',
         'nombre_original',
         'user_id',
@@ -21,6 +22,7 @@ class VehiclePhoto extends Model
     {
         return [
             'etapa' => EtapaFoto::class,
+            'es_portada' => 'boolean',
         ];
     }
 
