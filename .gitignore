@@ -18,3 +18,8 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Graphify: el corpus y el grafo del código que genera. Son salida de una
+# herramienta local, no parte de la app, y no deben entrar a git.
+/graphify-corpus/
+/graphify-out/
