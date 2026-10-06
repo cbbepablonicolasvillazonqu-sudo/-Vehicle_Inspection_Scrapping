@@ -13,6 +13,18 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /**
+     * Segundo límite, por correo y sin importar la IP.
+     *
+     * El de Breeze cuenta por correo + IP, y la IP sale de X-Forwarded-For
+     * porque se confía en el proxy (CDN de Hostinger, túnel de Cloudflare).
+     * Quien llegue al servidor sin pasar por ellos puede inventar una IP
+     * distinta en cada intento y ese contador nunca se llena. Este sí.
+     */
+    private const INTENTOS_POR_CORREO = 10;
+
+    private const BLOQUEO_POR_CORREO_SEGUNDOS = 15 * 60;
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -44,6 +56,7 @@ class LoginRequest extends FormRequest
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+            RateLimiter::hit($this->throttleKeyCorreo(), self::BLOQUEO_POR_CORREO_SEGUNDOS);
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
@@ -51,6 +64,7 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+        RateLimiter::clear($this->throttleKeyCorreo());
     }
 
     /**
@@ -60,13 +74,19 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        $clave = match (true) {
+            RateLimiter::tooManyAttempts($this->throttleKey(), 5) => $this->throttleKey(),
+            RateLimiter::tooManyAttempts($this->throttleKeyCorreo(), self::INTENTOS_POR_CORREO) => $this->throttleKeyCorreo(),
+            default => null,
+        };
+
+        if ($clave === null) {
             return;
         }
 
         event(new Lockout($this));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        $seconds = RateLimiter::availableIn($clave);
 
         throw ValidationException::withMessages([
             'email' => trans('auth.throttle', [
@@ -82,5 +102,11 @@ class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+    }
+
+    /** Clave del límite por correo, sin la IP. */
+    private function throttleKeyCorreo(): string
+    {
+        return 'login-correo|'.Str::transliterate(Str::lower($this->string('email')));
     }
 }

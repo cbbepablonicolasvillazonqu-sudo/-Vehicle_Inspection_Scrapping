@@ -56,6 +56,10 @@ class AuditLog extends Model
             'enviado_a_junk' => 'Enviado a Junk car',
             'junk_car_completado' => 'Junk car completado',
             'foto_vehiculo_actualizada' => 'Foto del vehículo actualizada',
+            // Fotos y documentos desde la ficha (todos los roles).
+            'portada_cambiada' => 'Portada cambiada',
+            'documento_subido' => 'Documento subido',
+            'documento_eliminado' => 'Documento eliminado',
             default => ucfirst(str_replace('_', ' ', $this->accion)),
         });
     }

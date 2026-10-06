@@ -6,7 +6,8 @@
 @endphp
 
 @if ($mensajes)
-    <ul {{ $attributes->merge(['class' => 'text-sm text-red-600 space-y-1 mt-1']) }}>
+    {{-- role="alert": el lector de pantalla anuncia el error apenas aparece. --}}
+    <ul {{ $attributes->merge(['class' => 'text-sm text-red-600 space-y-1 mt-1', 'role' => 'alert']) }}>
         @foreach ($mensajes as $message)
             <li class="flex items-start gap-1"><span aria-hidden="true">⚠</span><span>{{ $message }}</span></li>
         @endforeach

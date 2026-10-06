@@ -5,8 +5,8 @@ namespace App\Livewire\Vehiculos;
 use App\Enums\CategoriaGasto;
 use App\Models\Expense;
 use App\Models\Vehicle;
+use App\Services\ServicioArchivos;
 use App\Services\ServicioAuditoria;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -179,13 +179,13 @@ class GestorGastos extends Component
         $this->dispatch('notificar', mensaje: $mensaje);
     }
 
-    /** Guarda las fotos del gasto en storage/app/public/vehiculos/{id}/gasto/. */
+    /** Guarda las fotos del gasto en vehiculos/{id}/gasto/ del disco privado. */
     private function guardarFotos(Expense $gasto, array $fotos, ServicioAuditoria $auditoria): void
     {
         abort_unless($this->puedeSubirFotos(), 403);
 
         foreach ($fotos as $foto) {
-            $ruta = $foto->store("vehiculos/{$this->vehiculo->id}/gasto", 'public');
+            $ruta = app(ServicioArchivos::class)->guardar($foto, "vehiculos/{$this->vehiculo->id}/gasto");
 
             $this->vehiculo->fotos()->create([
                 'expense_id' => $gasto->id,
@@ -212,7 +212,7 @@ class GestorGastos extends Component
 
         abort_unless($puede, 403);
 
-        Storage::disk('public')->delete($foto->ruta);
+        app(ServicioArchivos::class)->borrar($foto->ruta);
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'foto_eliminada', [
             'archivo' => $foto->nombre_original,

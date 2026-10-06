@@ -230,7 +230,7 @@ class FlujoVentaTest extends TestCase
 
     public function test_venta_guarda_el_contrato_en_pdf_y_rechaza_otros_archivos(): void
     {
-        Storage::fake('public');
+        Storage::fake('privado');
 
         $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Publicado)->create();
         $vendedor = $this->usuarioConRol('vendedor');
@@ -267,12 +267,12 @@ class FlujoVentaTest extends TestCase
         $this->assertSame('contrato.pdf', $venta->contrato_nombre);
         $this->assertTrue($venta->contratoEsPdf());
         $this->assertNotNull($venta->contratoUrl());
-        Storage::disk('public')->assertExists($venta->contrato_ruta);
+        Storage::disk('privado')->assertExists($venta->contrato_ruta);
     }
 
     public function test_la_venta_acepta_una_foto_como_contrato(): void
     {
-        Storage::fake('public');
+        Storage::fake('privado');
 
         $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Publicado)->create();
 
@@ -291,7 +291,7 @@ class FlujoVentaTest extends TestCase
         $venta = $vehiculo->fresh()->venta;
 
         $this->assertFalse($venta->contratoEsPdf());
-        Storage::disk('public')->assertExists($venta->contrato_ruta);
+        Storage::disk('privado')->assertExists($venta->contrato_ruta);
     }
 
     public function test_email_del_comprador_debe_ser_valido(): void

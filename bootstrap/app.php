@@ -12,8 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         // Confía en los encabezados X-Forwarded-* del proxy que tenga delante
-        // (túnel de Cloudflare en demos, balanceador de Hostinger en prod).
+        // (túnel de Cloudflare en demos, CDN de Hostinger en prod).
         // Sin esto, detrás de HTTPS Laravel generaría URLs http:// (contenido mixto).
+        //
+        // No es una lista de IP a propósito: Hostinger no publica las de su
+        // CDN, y una lista equivocada deja la app sin detectar el HTTPS (y sin
+        // HSTS). Lo que esto permite falsear es la IP del cliente, que solo se
+        // usa en el límite de intentos del login, y ese límite tiene además un
+        // tope por correo que no depende de la IP (LoginRequest).
         $middleware->trustProxies(at: '*');
 
         // Como se confía en todos los proxies, hay que acotar qué host se

@@ -4,15 +4,14 @@ namespace App\Livewire\Vehiculos;
 
 use App\Enums\EstadoTitulo;
 use App\Enums\UbicacionDestino;
+use App\Livewire\Concerns\ProtegeVinDuplicado;
 use App\Models\Vehicle;
 use App\Models\VehiclePhoto;
+use App\Services\ServicioArchivos;
 use App\Services\ServicioAuditoria;
 use App\Services\ServicioEstadoVehiculo;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -23,7 +22,7 @@ use Livewire\WithFileUploads;
 #[Layout('layouts.app')]
 class FormularioVehiculo extends Component
 {
-    use AuthorizesRequests, WithFileUploads;
+    use AuthorizesRequests, ProtegeVinDuplicado, WithFileUploads;
 
     public ?Vehicle $vehiculo = null;
 
@@ -78,14 +77,8 @@ class FormularioVehiculo extends Component
             'marca' => ['required', 'string', 'max:60'],
             'modelo' => ['required', 'string', 'max:60'],
             'anio' => ['required', 'integer', 'between:1950,'.(now()->year + 1)],
-            'vin' => [
-                'required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/',
-                // Sin withoutTrashed(): el índice único de la base no sabe de
-                // borrado lógico, así que una fila con deleted_at sigue
-                // ocupando el VIN. Ignorar las borradas hacía que la
-                // validación dijera "libre" y el INSERT reventara con un 500.
-                Rule::unique('vehicles', 'vin')->ignore($this->vehiculo?->id),
-            ],
+            // Compartidas con la ficha; ver Vehicle::reglasVin().
+            'vin' => Vehicle::reglasVin($this->vehiculo?->id),
             'millas' => ['required', 'integer', 'min:0', 'max:2000000'],
             'precio_compra' => ['required', 'numeric', 'min:0', 'max:9999999'],
             'fecha_compra' => ['required', 'date', 'before_or_equal:today'],
@@ -104,10 +97,10 @@ class FormularioVehiculo extends Component
         ];
     }
 
-    /** Foto principal ya guardada (para mostrarla al editar). */
+    /** La portada actual (para mostrarla al editar). */
     public function fotoActual(): ?VehiclePhoto
     {
-        return $this->vehiculo?->fotos()->whereNull('expense_id')->latest('id')->first();
+        return $this->vehiculo?->fotoPortada;
     }
 
     /**
@@ -186,57 +179,25 @@ class FormularioVehiculo extends Component
     }
 
     /**
-     * Convierte el choque contra el índice único del VIN en un error de
-     * validación, en vez de dejar que suba como un 500.
+     * Guarda la foto del vehículo y la deja como portada.
      *
-     * La regla de validación ya cubre el caso normal, pero queda una ventana
-     * entre validar y escribir: si dos personas guardan el mismo VIN a la vez,
-     * la segunda pasa la validación y choca contra el índice. El usuario tiene
-     * que ver el mismo mensaje en los dos casos, nunca una pantalla de error.
-     */
-    private function sinChocarConElVin(callable $guardar): mixed
-    {
-        try {
-            return $guardar();
-        } catch (QueryException $e) {
-            if (! $this->esVinDuplicado($e)) {
-                throw $e;
-            }
-
-            throw ValidationException::withMessages([
-                'vin' => __('validation.custom.vin.unique'),
-            ]);
-        }
-    }
-
-    /** ¿La excepción es la violación del índice único del VIN, y no otra cosa? */
-    private function esVinDuplicado(QueryException $e): bool
-    {
-        return (string) $e->getCode() === '23000'
-            && str_contains($e->getMessage(), 'vehicles_vin_unique');
-    }
-
-    /**
-     * Guarda la foto principal del vehículo. Es una sola: si ya había otra,
-     * se reemplaza (así la de alta y la de edición son siempre la misma).
+     * Antes había una sola foto y esto borraba la anterior. Ahora las fotos son
+     * una galería que completan todos los usuarios desde la ficha: borrarlas se
+     * llevaría el trabajo de los demás. La foto se suma a la galería y pasa a
+     * ser la portada, que es lo que el Admin espera al "cambiar la foto".
      */
     private function guardarFoto(Vehicle $vehiculo, $foto, ServicioAuditoria $auditoria): void
     {
-        $anteriores = $vehiculo->fotos()->whereNull('expense_id')->get();
+        $ruta = app(ServicioArchivos::class)->guardar($foto, "vehiculos/{$vehiculo->id}/vehiculo");
 
-        $ruta = $foto->store("vehiculos/{$vehiculo->id}/vehiculo", 'public');
-
-        $vehiculo->fotos()->create([
+        $nueva = $vehiculo->fotos()->create([
             'etapa' => 'vehiculo',
             'ruta' => $ruta,
             'nombre_original' => $foto->getClientOriginalName(),
             'user_id' => auth()->id(),
         ]);
 
-        foreach ($anteriores as $vieja) {
-            Storage::disk('public')->delete($vieja->ruta);
-            $vieja->delete();
-        }
+        $vehiculo->marcarPortada($nueva);
 
         $auditoria->registrar($vehiculo, 'foto_vehiculo_actualizada', [
             'archivo' => $foto->getClientOriginalName(),

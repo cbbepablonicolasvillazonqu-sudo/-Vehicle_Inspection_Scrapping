@@ -12,6 +12,7 @@ class VehiclePhoto extends Model
         'vehicle_id',
         'expense_id',
         'etapa',
+        'es_portada',
         'ruta',
         'nombre_original',
         'user_id',
@@ -21,6 +22,7 @@ class VehiclePhoto extends Model
     {
         return [
             'etapa' => EtapaFoto::class,
+            'es_portada' => 'boolean',
         ];
     }
 
@@ -41,15 +43,14 @@ class VehiclePhoto extends Model
     }
 
     /**
-     * URL pública de la imagen (requiere `php artisan storage:link`).
+     * URL de la imagen, que solo responde con sesión y permiso
+     * (ArchivoController). Antes era /storage/..., abierta a cualquiera.
      *
-     * Usa asset() —no Storage::url()— para que la URL apunte al host real de
-     * la petición (localhost, túnel de Cloudflare o dominio en producción) y no
-     * al APP_URL fijo. Así una persona externa que entra por el túnel también
-     * ve las fotos. Con trustProxies=* la petición conserva host/esquema reales.
+     * Relativa a propósito: así sirve igual en localhost, en el túnel de
+     * Cloudflare y en el dominio de producción, sin depender del APP_URL.
      */
     public function url(): string
     {
-        return asset('storage/'.ltrim($this->ruta, '/'));
+        return route('archivos.foto', $this, absolute: false);
     }
 }

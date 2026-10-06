@@ -25,7 +25,7 @@ class FotosTest extends TestCase
         parent::setUp();
 
         $this->seed(RolesYPermisosSeeder::class);
-        Storage::fake('public');
+        Storage::fake('privado');
     }
 
     private function usuarioConRol(string $rol): User
@@ -73,7 +73,7 @@ class FotosTest extends TestCase
         foreach ($fotos as $foto) {
             $this->assertSame('gasto', $foto->etapa->value);
             $this->assertSame($gasto->id, $foto->expense_id);
-            Storage::disk('public')->assertExists($foto->ruta);
+            Storage::disk('privado')->assertExists($foto->ruta);
         }
     }
 
@@ -135,7 +135,7 @@ class FotosTest extends TestCase
         $this->assertSame(1, $vendido->fotos()->count());
     }
 
-    public function test_admin_sube_la_foto_del_vehiculo_al_crearlo_y_la_reemplaza_al_editar(): void
+    public function test_admin_sube_la_foto_al_crearlo_y_al_editar_la_nueva_pasa_a_portada_sin_borrar_la_galeria(): void
     {
         $admin = $this->usuarioConRol('admin');
 
@@ -159,10 +159,12 @@ class FotosTest extends TestCase
 
         $this->assertSame('frente.jpg', $foto->nombre_original);
         $this->assertSame('vehiculo', $foto->etapa->value);
-        Storage::disk('public')->assertExists($foto->ruta);
+        Storage::disk('privado')->assertExists($foto->ruta);
         $rutaVieja = $foto->ruta;
 
-        // Al editar se ve la misma foto y, si se sube otra, reemplaza a la anterior.
+        // Al editar, la foto nueva pasa a ser la portada. Antes reemplazaba (y
+        // borraba) a la anterior; ahora las fotos son una galería que completan
+        // todos los usuarios, y borrarla se llevaría el trabajo de los demás.
         Livewire::actingAs($admin)
             ->test(\App\Livewire\Vehiculos\FormularioVehiculo::class, ['vehiculo' => $vehiculo])
             ->assertSet('marca', 'Toyota')
@@ -171,11 +173,11 @@ class FotosTest extends TestCase
             ->assertHasNoErrors();
 
         $vehiculo->refresh();
-        $fotos = $vehiculo->fotos()->whereNull('expense_id')->get();
+        $fotos = $vehiculo->fotosVehiculo()->orderBy('id')->get();
 
-        $this->assertCount(1, $fotos);
-        $this->assertSame('nueva.jpg', $fotos->first()->nombre_original);
-        Storage::disk('public')->assertMissing($rutaVieja);
+        $this->assertCount(2, $fotos);
+        $this->assertSame('nueva.jpg', $vehiculo->fotoPortada->nombre_original);
+        Storage::disk('privado')->assertExists($rutaVieja);
     }
 
     public function test_la_portada_ignora_las_fotos_de_los_gastos(): void

@@ -75,19 +75,42 @@ class Vehicle extends Model
     }
 
     /**
-     * Foto de portada para miniaturas en listas y encabezados: solo la foto
-     * del vehículo (la que carga el Admin en el formulario). Las de gastos
-     * quedan excluidas, si no una foto de un repuesto sería la portada.
+     * Foto de portada para miniaturas en listas y encabezados: la foto del
+     * vehículo marcada como portada, y si no hay ninguna marcada, la primera
+     * que se subió. Las de gastos quedan excluidas, si no una foto de un
+     * repuesto sería la portada.
+     *
+     * Antes era "la más reciente", cuando había una sola foto. Con la galería
+     * eso dejaría de portada la última foto subida, aunque fuera de un rayón.
      */
     public function fotoPortada(): HasOne
     {
         // El filtro va dentro de ofMany() para que también acote la subconsulta
-        // que elige "la más reciente"; si no, elegiría la foto de un gasto y
-        // luego la descartaría, dejando el vehículo sin portada.
+        // que elige la foto; si no, elegiría la foto de un gasto y luego la
+        // descartaría, dejando el vehículo sin portada.
         return $this->hasOne(VehiclePhoto::class)->ofMany(
-            ['id' => 'max'],
+            ['es_portada' => 'max', 'id' => 'min'],
             fn ($query) => $query->whereNull('expense_id'),
         );
+    }
+
+    /** Galería: las fotos del vehículo, sin las de los gastos. */
+    public function fotosVehiculo(): HasMany
+    {
+        return $this->hasMany(VehiclePhoto::class)->whereNull('expense_id');
+    }
+
+    /** Marca una foto de la galería como portada y desmarca las demás. */
+    public function marcarPortada(VehiclePhoto $foto): void
+    {
+        $this->fotosVehiculo()->whereKeyNot($foto->id)->update(['es_portada' => false]);
+        $foto->forceFill(['es_portada' => true])->save();
+    }
+
+    /** Documentos del vehículo (título, registro, etc.), como foto o PDF. */
+    public function documentos(): HasMany
+    {
+        return $this->hasMany(VehicleDocument::class);
     }
 
     public function historialEstados(): HasMany
@@ -256,7 +279,26 @@ class Vehicle extends Model
         return round($recuperado - $this->inversionTotal(), 2);
     }
 
-    /** Versión por-modelo del scope visiblePara (para policies). */
+    /**
+     * Reglas de validación del VIN, en un solo lugar.
+     *
+     * Las usan el formulario del Admin y la sección de fotos y documentos de
+     * la ficha. Si cada uno tuviera su copia, el día que se cambiara una la
+     * otra quedaría desactualizada.
+     *
+     * Sin withoutTrashed() a propósito: el índice único de la base no sabe de
+     * borrado lógico, así que un vehículo borrado sigue ocupando su VIN.
+     * Ignorar los borrados hacía que la validación dijera "libre" y el INSERT
+     * reventara con un 500.
+     */
+    public static function reglasVin(?int $ignorarId = null): array
+    {
+        return [
+            'required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/',
+            \Illuminate\Validation\Rule::unique('vehicles', 'vin')->ignore($ignorarId),
+        ];
+    }
+
     /**
      * ¿Este usuario puede registrar la venta de este vehículo ahora?
      *
@@ -272,6 +314,7 @@ class Vehicle extends Model
             && in_array($this->estado, [EstadoVehiculo::Listo, EstadoVehiculo::Publicado], true);
     }
 
+    /** Versión por-modelo del scope visiblePara (para policies). */
     public function esVisiblePara(User $usuario): bool
     {
         if ($usuario->hasRole('gruero')) {

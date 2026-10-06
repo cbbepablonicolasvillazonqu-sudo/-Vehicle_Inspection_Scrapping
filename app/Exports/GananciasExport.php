@@ -2,11 +2,13 @@
 
 namespace App\Exports;
 
+use App\Exports\Concerns\SinFormulas;
 use App\Services\ServicioRentabilidad;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
 /**
@@ -14,8 +16,10 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
  * la ganancia calculada, más una fila de totales. Las salidas que aún no se
  * pueden valorar van en un bloque aparte para que no falseen el total.
  */
-class GananciasExport implements FromCollection, ShouldAutoSize, WithHeadings
+class GananciasExport implements FromCollection, ShouldAutoSize, WithCustomValueBinder, WithHeadings
 {
+    use SinFormulas;
+
     public function __construct(private string $mes) {}
 
     public function headings(): array

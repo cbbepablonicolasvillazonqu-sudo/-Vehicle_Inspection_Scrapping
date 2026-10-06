@@ -36,10 +36,13 @@ class Sale extends Model
         return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 
-    /** URL pública del contrato (imagen o PDF), si se cargó uno. */
+    /**
+     * URL del contrato (imagen o PDF), si se cargó uno. Solo responde con
+     * sesión y permiso: puede tener los datos del comprador.
+     */
     public function contratoUrl(): ?string
     {
-        return $this->contrato_ruta ? asset('storage/'.ltrim($this->contrato_ruta, '/')) : null;
+        return $this->contrato_ruta ? route('archivos.contrato', $this, absolute: false) : null;
     }
 
     /** ¿El contrato es un PDF? (para mostrar icono en vez de miniatura). */
