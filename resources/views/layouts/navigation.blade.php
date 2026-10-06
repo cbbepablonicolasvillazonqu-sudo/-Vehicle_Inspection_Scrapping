@@ -43,7 +43,7 @@
 
                 <x-dropdown align="right" width="52">
                     <x-slot name="trigger">
-                        <button class="flex items-center gap-2 rounded-full pl-1 pr-2.5 py-1 hover:bg-slate-100 transition">
+                        <button aria-label="{{ __('Menú de usuario') }}" class="flex items-center gap-2 rounded-full pl-1 pr-2.5 py-1 hover:bg-slate-100 transition">
                             <span class="grid place-items-center w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 text-white text-sm font-bold">
                                 {{ mb_substr(Auth::user()->name, 0, 1) }}
                             </span>
@@ -82,7 +82,7 @@
                 <x-selector-idioma />
                 <x-dropdown align="right" width="52">
                     <x-slot name="trigger">
-                        <button class="grid place-items-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 text-white text-sm font-bold shadow-sm">
+                        <button aria-label="{{ __('Menú de usuario') }}" class="grid place-items-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 text-white text-sm font-bold shadow-sm">
                             {{ mb_substr(Auth::user()->name, 0, 1) }}
                         </button>
                     </x-slot>

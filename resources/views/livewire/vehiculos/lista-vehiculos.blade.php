@@ -31,6 +31,7 @@
                 <input type="search"
                        wire:model.live.debounce.250ms="busqueda"
                        placeholder="{{ __('Buscar por marca, modelo, VIN o año…') }}"
+                       aria-label="{{ __('Buscar por marca, modelo, VIN o año…') }}"
                        class="campo pl-10 pr-10">
                 {{-- Entre el retardo y el viaje al servidor la pantalla se
                      quedaba quieta y parecia que el buscador no respondia. --}}
