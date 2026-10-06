@@ -150,8 +150,6 @@ Los iconos se regeneran con: `php scripts/generar-iconos.php`.
 
 ## Despliegue en Hostinger (hosting compartido)
 
-Guía completa paso a paso: **[`docs/DESPLIEGUE-HOSTINGER.md`](docs/DESPLIEGUE-HOSTINGER.md)**.
-
 Resumen del camino feliz:
 
 1. **Base de datos** en hPanel › Bases de datos MySQL. Anotá host, base, usuario y contraseña.
