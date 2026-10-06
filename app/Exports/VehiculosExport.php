@@ -2,11 +2,13 @@
 
 namespace App\Exports;
 
+use App\Exports\Concerns\SinFormulas;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
@@ -16,13 +18,21 @@ use Maatwebsite\Excel\Concerns\WithMapping;
  * Respeta los permisos del usuario: el alcance por rol (visiblePara) y
  * las columnas sensibles (precio de compra, gastos y ganancia).
  */
-class VehiculosExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping
+class VehiculosExport implements FromCollection, ShouldAutoSize, WithCustomValueBinder, WithHeadings, WithMapping
 {
+    use SinFormulas;
+
     public function __construct(
         private User $usuario,
         private string $busqueda = '',
         private string $estado = '',
+        private string $formato = 'xlsx',
     ) {}
+
+    protected function prefijoContraFormulas(): string
+    {
+        return $this->formato === 'csv' ? "'" : '';
+    }
 
     public function collection(): Collection
     {

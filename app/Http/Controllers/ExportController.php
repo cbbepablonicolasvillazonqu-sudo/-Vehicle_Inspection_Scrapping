@@ -22,6 +22,7 @@ class ExportController extends Controller
             $request->user(),
             (string) $request->query('buscar', ''),
             (string) $request->query('estado', ''),
+            $formato,
         );
 
         $nombre = __('vehiculos').'-'.now()->format('Y-m-d').'.'.$formato;
