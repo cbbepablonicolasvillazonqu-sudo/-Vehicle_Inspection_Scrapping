@@ -44,6 +44,15 @@ return [
             'throw' => false,
         ],
 
+        // Lo que suben los usuarios: fotos, documentos, fotos de gastos y
+        // contratos. Fuera de public, así que el servidor web no lo entrega:
+        // solo sale por ArchivoController, con sesión y permiso.
+        'privado' => [
+            'driver' => 'local',
+            'root' => storage_path('app/privado'),
+            'throw' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

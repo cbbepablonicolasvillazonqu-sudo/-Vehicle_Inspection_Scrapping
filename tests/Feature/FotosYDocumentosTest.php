@@ -33,7 +33,7 @@ class FotosYDocumentosTest extends TestCase
         parent::setUp();
 
         $this->seed(RolesYPermisosSeeder::class);
-        Storage::fake('public');
+        Storage::fake('privado');
     }
 
     private function usuarioConRol(string $rol): User
@@ -256,7 +256,7 @@ class FotosYDocumentosTest extends TestCase
         $this->assertFalse($documentos[1]->esPdf());
 
         foreach ($documentos as $documento) {
-            Storage::disk('public')->assertExists($documento->ruta);
+            Storage::disk('privado')->assertExists($documento->ruta);
             $this->assertStringStartsWith("vehiculos/{$vehiculo->id}/documentos/", $documento->ruta);
         }
     }
@@ -327,7 +327,7 @@ class FotosYDocumentosTest extends TestCase
 
         $gestor->call('eliminarFoto', $buena->id);
         $this->assertSame('primera.jpg', $vehiculo->fresh()->fotoPortada->nombre_original);
-        Storage::disk('public')->assertMissing($buena->ruta);
+        Storage::disk('privado')->assertMissing($buena->ruta);
     }
 
     public function test_los_documentos_y_las_fotos_de_gastos_no_son_portada(): void

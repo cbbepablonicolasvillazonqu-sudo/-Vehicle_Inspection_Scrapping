@@ -25,7 +25,7 @@ class FotosTest extends TestCase
         parent::setUp();
 
         $this->seed(RolesYPermisosSeeder::class);
-        Storage::fake('public');
+        Storage::fake('privado');
     }
 
     private function usuarioConRol(string $rol): User
@@ -73,7 +73,7 @@ class FotosTest extends TestCase
         foreach ($fotos as $foto) {
             $this->assertSame('gasto', $foto->etapa->value);
             $this->assertSame($gasto->id, $foto->expense_id);
-            Storage::disk('public')->assertExists($foto->ruta);
+            Storage::disk('privado')->assertExists($foto->ruta);
         }
     }
 
@@ -159,7 +159,7 @@ class FotosTest extends TestCase
 
         $this->assertSame('frente.jpg', $foto->nombre_original);
         $this->assertSame('vehiculo', $foto->etapa->value);
-        Storage::disk('public')->assertExists($foto->ruta);
+        Storage::disk('privado')->assertExists($foto->ruta);
         $rutaVieja = $foto->ruta;
 
         // Al editar, la foto nueva pasa a ser la portada. Antes reemplazaba (y
@@ -177,7 +177,7 @@ class FotosTest extends TestCase
 
         $this->assertCount(2, $fotos);
         $this->assertSame('nueva.jpg', $vehiculo->fotoPortada->nombre_original);
-        Storage::disk('public')->assertExists($rutaVieja);
+        Storage::disk('privado')->assertExists($rutaVieja);
     }
 
     public function test_la_portada_ignora_las_fotos_de_los_gastos(): void

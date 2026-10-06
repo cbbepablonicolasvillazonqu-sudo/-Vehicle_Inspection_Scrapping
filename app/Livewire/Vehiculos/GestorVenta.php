@@ -5,10 +5,10 @@ namespace App\Livewire\Vehiculos;
 use App\Enums\EstadoVehiculo;
 use App\Enums\MetodoPago;
 use App\Models\Vehicle;
+use App\Services\ServicioArchivos;
 use App\Services\ServicioAuditoria;
 use App\Services\ServicioEstadoVehiculo;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -130,7 +130,7 @@ class GestorVenta extends Component
     private function guardarContrato($archivo): array
     {
         return [
-            'contrato_ruta' => $archivo->store("ventas/{$this->vehiculo->id}", 'public'),
+            'contrato_ruta' => app(ServicioArchivos::class)->guardar($archivo, "ventas/{$this->vehiculo->id}"),
             'contrato_nombre' => $archivo->getClientOriginalName(),
         ];
     }
@@ -228,9 +228,7 @@ class GestorVenta extends Component
             $rutaVieja = $venta->contrato_ruta;
             $datos += $this->guardarContrato($archivo);
 
-            if ($rutaVieja) {
-                Storage::disk('public')->delete($rutaVieja);
-            }
+            app(ServicioArchivos::class)->borrar($rutaVieja);
         }
 
         $venta->update($datos);
@@ -271,9 +269,7 @@ class GestorVenta extends Component
                 'comprador' => $venta->nombre_comprador,
             ]);
 
-            if ($venta->contrato_ruta) {
-                Storage::disk('public')->delete($venta->contrato_ruta);
-            }
+            app(ServicioArchivos::class)->borrar($venta->contrato_ruta);
 
             $venta->delete();
 

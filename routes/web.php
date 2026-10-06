@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArchivoController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Admin\GestionUsuarios;
@@ -63,6 +64,14 @@ Route::middleware(['auth', 'permission:ver vehiculos'])->group(function () {
     });
 
     Route::get('/vehiculos/{vehiculo}', FichaVehiculo::class)->name('vehiculos.ficha');
+});
+
+// Archivos que suben los usuarios (fotos, documentos y contratos): solo con
+// sesión. El controlador vuelve a pedir el permiso de la sección donde se ven.
+Route::middleware('auth')->prefix('archivos')->name('archivos.')->group(function () {
+    Route::get('/fotos/{foto}', [ArchivoController::class, 'foto'])->whereNumber('foto')->name('foto');
+    Route::get('/documentos/{documento}', [ArchivoController::class, 'documento'])->whereNumber('documento')->name('documento');
+    Route::get('/contratos/{venta}', [ArchivoController::class, 'contrato'])->whereNumber('venta')->name('contrato');
 });
 
 // Asignación de recojo al Gruero (solo Admin).

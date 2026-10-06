@@ -4,11 +4,17 @@
  * Estrategia:
  *  - Navegaciones: red primero; si no hay conexión → página /offline.
  *    (No se cachean páginas autenticadas por privacidad.)
- *  - Assets estáticos (build de Vite, iconos, fotos de /storage):
+ *  - Assets estáticos (build de Vite, iconos, manifiestos):
  *    caché primero con actualización en segundo plano.
  *  - Nunca intercepta /livewire (peticiones dinámicas y subidas).
+ *  - Nunca guarda los archivos de los usuarios (/archivos, y /storage de
+ *    antes): son privados y en un celular compartido seguirían ahí después
+ *    de cerrar sesión.
+ *
+ * La v4 existe para borrar la v3, que guardaba fotos de /storage: al
+ * activarse, este SW elimina toda caché con otro nombre.
  */
-const CACHE = 'forte-towing-v3';
+const CACHE = 'forte-towing-v4';
 
 const PRECACHE = [
     '/offline',
@@ -41,6 +47,13 @@ self.addEventListener('fetch', (evento) => {
         return;
     }
 
+    // Archivos de los usuarios: directo a la red, sin caché. Va antes que la
+    // regla de assets porque una foto pedida por <img> es de tipo "image" y
+    // si no la guardaría igual. El navegador ya la revalida con el servidor.
+    if (url.pathname.startsWith('/archivos/') || url.pathname.startsWith('/storage/')) {
+        return;
+    }
+
     // Navegaciones: red primero, respaldo offline.
     if (peticion.mode === 'navigate') {
         evento.respondWith(
@@ -55,7 +68,6 @@ self.addEventListener('fetch', (evento) => {
     const esAsset = ['style', 'script', 'image', 'font'].includes(peticion.destination)
         || url.pathname.startsWith('/build/')
         || url.pathname.startsWith('/iconos/')
-        || url.pathname.startsWith('/storage/')
         || url.pathname.endsWith('.webmanifest');
 
     if (esAsset) {

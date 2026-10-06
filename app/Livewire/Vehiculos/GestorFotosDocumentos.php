@@ -4,8 +4,8 @@ namespace App\Livewire\Vehiculos;
 
 use App\Livewire\Concerns\ProtegeVinDuplicado;
 use App\Models\Vehicle;
+use App\Services\ServicioArchivos;
 use App\Services\ServicioAuditoria;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -168,11 +168,12 @@ class GestorFotosDocumentos extends Component
         $this->validate($this->reglasFotos());
 
         $auditoria = app(ServicioAuditoria::class);
+        $archivos = app(ServicioArchivos::class);
 
         foreach ($this->nuevasFotos as $foto) {
             $this->vehiculo->fotos()->create([
                 'etapa' => 'vehiculo',
-                'ruta' => $foto->store("vehiculos/{$this->vehiculo->id}/vehiculo", 'public'),
+                'ruta' => $archivos->guardar($foto, "vehiculos/{$this->vehiculo->id}/vehiculo"),
                 'nombre_original' => $foto->getClientOriginalName(),
                 'user_id' => auth()->id(),
             ]);
@@ -212,7 +213,7 @@ class GestorFotosDocumentos extends Component
         $foto = $this->vehiculo->fotosVehiculo()->findOrFail($id);
         abort_unless($this->puedeBorrar($foto->user_id), 403);
 
-        Storage::disk('public')->delete($foto->ruta);
+        app(ServicioArchivos::class)->borrar($foto->ruta);
         $foto->delete();
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'foto_eliminada', [
@@ -233,10 +234,11 @@ class GestorFotosDocumentos extends Component
         $this->validate($this->reglasDocumentos());
 
         $auditoria = app(ServicioAuditoria::class);
+        $archivos = app(ServicioArchivos::class);
 
         foreach ($this->nuevosDocumentos as $archivo) {
             $this->vehiculo->documentos()->create([
-                'ruta' => $archivo->store("vehiculos/{$this->vehiculo->id}/documentos", 'public'),
+                'ruta' => $archivos->guardar($archivo, "vehiculos/{$this->vehiculo->id}/documentos"),
                 'nombre_original' => $archivo->getClientOriginalName(),
                 'user_id' => auth()->id(),
             ]);
@@ -259,7 +261,7 @@ class GestorFotosDocumentos extends Component
         $documento = $this->vehiculo->documentos()->findOrFail($id);
         abort_unless($this->puedeBorrar($documento->user_id), 403);
 
-        Storage::disk('public')->delete($documento->ruta);
+        app(ServicioArchivos::class)->borrar($documento->ruta);
         $documento->delete();
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'documento_eliminado', [

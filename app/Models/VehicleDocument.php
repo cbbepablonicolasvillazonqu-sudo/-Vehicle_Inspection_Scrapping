@@ -27,10 +27,10 @@ class VehicleDocument extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /** URL pública. Usa asset() por el mismo motivo que VehiclePhoto::url(). */
+    /** URL con sesión y permiso; relativa por el mismo motivo que VehiclePhoto::url(). */
     public function url(): string
     {
-        return asset('storage/'.ltrim($this->ruta, '/'));
+        return route('archivos.documento', $this, absolute: false);
     }
 
     public function esPdf(): bool

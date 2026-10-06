@@ -12,7 +12,7 @@ Aplicación web (con soporte **PWA**, instalable en el celular) para gestionar e
 | Base de datos | **MariaDB** (driver `mysql`) |
 | Autenticación | **Laravel Breeze** (sin registro público) |
 | Roles/permisos | **Spatie Laravel-Permission** |
-| Fotos | Storage local (`storage/app/public`, organizado por vehículo y etapa) |
+| Fotos y documentos | Storage local privado (`storage/app/privado`, organizado por vehículo), servidos solo con sesión y permiso |
 | Exportaciones | **Maatwebsite/Excel** (XLSX y CSV) |
 | PWA | `manifest.webmanifest` + service worker + página offline |
 | Idiomas | **Español (predeterminado)** e **Inglés**, con selector en la barra superior |
@@ -93,10 +93,7 @@ php artisan key:generate
 # 5. Migrar y sembrar (roles + usuarios + vehículos de demostración)
 php artisan migrate --seed
 
-# 6. Enlace público para las fotos
-php artisan storage:link
-
-# 7. Arrancar
+# 6. Arrancar
 php artisan serve
 ```
 
@@ -167,7 +164,6 @@ Resumen del camino feliz:
    php artisan migrate --force
    php artisan db:seed --class=ProduccionSeeder --force   # solo roles y permisos
    php artisan forte:crear-admin admin@tudominio.com --password=...
-   php artisan storage:link
    php artisan config:cache && php artisan route:cache && php artisan view:cache
    ```
 6. Activar el **SSL gratuito** y recién entonces poner `FORZAR_HTTPS=true` y recachear.
