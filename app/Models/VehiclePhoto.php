@@ -14,6 +14,7 @@ class VehiclePhoto extends Model
         'etapa',
         'es_portada',
         'ruta',
+        'ruta_miniatura',
         'nombre_original',
         'user_id',
     ];
@@ -52,5 +53,17 @@ class VehiclePhoto extends Model
     public function url(): string
     {
         return route('archivos.foto', $this, absolute: false);
+    }
+
+    /**
+     * La versión chica, para listas y galerías: unos 20 KB en vez de la foto
+     * entera. Pasa por la misma ruta y los mismos permisos que url(). Si la
+     * foto todavía no tiene miniatura, es la foto entera, como antes.
+     */
+    public function urlMiniatura(): string
+    {
+        return $this->ruta_miniatura
+            ? route('archivos.foto', ['foto' => $this, 'tam' => 'mini'], absolute: false)
+            : $this->url();
     }
 }

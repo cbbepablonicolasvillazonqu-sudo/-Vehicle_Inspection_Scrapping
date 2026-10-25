@@ -6,6 +6,7 @@ use App\Livewire\Concerns\ProtegeVinDuplicado;
 use App\Models\Vehicle;
 use App\Services\ServicioArchivos;
 use App\Services\ServicioAuditoria;
+use App\Services\ServicioFotos;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -168,12 +169,12 @@ class GestorFotosDocumentos extends Component
         $this->validate($this->reglasFotos());
 
         $auditoria = app(ServicioAuditoria::class);
-        $archivos = app(ServicioArchivos::class);
+        $servicioFotos = app(ServicioFotos::class);
 
         foreach ($this->nuevasFotos as $foto) {
             $this->vehiculo->fotos()->create([
                 'etapa' => 'vehiculo',
-                'ruta' => $archivos->guardar($foto, "vehiculos/{$this->vehiculo->id}/vehiculo"),
+                ...$servicioFotos->guardar($foto, "vehiculos/{$this->vehiculo->id}/vehiculo"),
                 'nombre_original' => $foto->getClientOriginalName(),
                 'user_id' => auth()->id(),
             ]);
@@ -213,7 +214,7 @@ class GestorFotosDocumentos extends Component
         $foto = $this->vehiculo->fotosVehiculo()->findOrFail($id);
         abort_unless($this->puedeBorrar($foto->user_id), 403);
 
-        app(ServicioArchivos::class)->borrar($foto->ruta);
+        app(ServicioFotos::class)->borrar($foto);
         $foto->delete();
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'foto_eliminada', [

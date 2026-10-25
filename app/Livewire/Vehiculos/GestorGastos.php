@@ -5,8 +5,8 @@ namespace App\Livewire\Vehiculos;
 use App\Enums\CategoriaGasto;
 use App\Models\Expense;
 use App\Models\Vehicle;
-use App\Services\ServicioArchivos;
 use App\Services\ServicioAuditoria;
+use App\Services\ServicioFotos;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -185,12 +185,10 @@ class GestorGastos extends Component
         abort_unless($this->puedeSubirFotos(), 403);
 
         foreach ($fotos as $foto) {
-            $ruta = app(ServicioArchivos::class)->guardar($foto, "vehiculos/{$this->vehiculo->id}/gasto");
-
             $this->vehiculo->fotos()->create([
                 'expense_id' => $gasto->id,
                 'etapa' => 'gasto',
-                'ruta' => $ruta,
+                ...app(ServicioFotos::class)->guardar($foto, "vehiculos/{$this->vehiculo->id}/gasto"),
                 'nombre_original' => $foto->getClientOriginalName(),
                 'user_id' => auth()->id(),
             ]);
@@ -212,7 +210,7 @@ class GestorGastos extends Component
 
         abort_unless($puede, 403);
 
-        app(ServicioArchivos::class)->borrar($foto->ruta);
+        app(ServicioFotos::class)->borrar($foto);
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'foto_eliminada', [
             'archivo' => $foto->nombre_original,

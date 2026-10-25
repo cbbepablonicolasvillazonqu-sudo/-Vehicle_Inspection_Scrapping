@@ -48,8 +48,8 @@
                     <div class="relative rounded-xl overflow-hidden aspect-square bg-slate-100 ring-1 ring-slate-200"
                          wire:key="galeria-{{ $foto->id }}">
                         <a href="{{ $foto->url() }}" target="_blank" rel="noopener">
-                            <img src="{{ $foto->url() }}" alt="{{ $foto->nombre_original ?? __('Foto del vehículo') }}"
-                                 loading="lazy" class="w-full h-full object-cover">
+                            <img src="{{ $foto->urlMiniatura() }}" alt="{{ $foto->nombre_original ?? __('Foto del vehículo') }}"
+                                 loading="lazy" decoding="async" class="w-full h-full object-cover">
                         </a>
 
                         @if ($foto->id === $portadaId)
