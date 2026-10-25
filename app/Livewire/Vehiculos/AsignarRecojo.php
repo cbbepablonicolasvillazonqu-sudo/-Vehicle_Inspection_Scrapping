@@ -45,10 +45,8 @@ class AsignarRecojo extends Component
             'marca' => ['required', 'string', 'max:60'],
             'modelo' => ['required', 'string', 'max:60'],
             'anio' => ['required', 'integer', 'between:1950,'.(now()->year + 1)],
-            'vin' => [
-                'required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/',
-                Rule::unique('vehicles', 'vin')->withoutTrashed(),
-            ],
+            // Las mismas que el formulario y la ficha; ver Vehicle::reglasVin().
+            'vin' => Vehicle::reglasVin(),
             // Solo enlaces de Google Maps, para evitar URLs arbitrarias.
             'ubicacion_origen_url' => [
                 'required', 'url', 'max:2048',
@@ -104,6 +102,7 @@ class AsignarRecojo extends Component
     {
         return view('livewire.vehiculos.asignar-recojo', [
             'grueros' => User::role('gruero')->orderBy('name')->get(['id', 'name']),
+            'vinRepetido' => Vehicle::conMismoVin($this->vin, auth()->user()),
         ]);
     }
 }

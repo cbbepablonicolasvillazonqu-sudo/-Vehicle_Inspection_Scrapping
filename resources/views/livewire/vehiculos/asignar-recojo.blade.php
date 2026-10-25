@@ -33,6 +33,7 @@
                     <x-text-input id="vin" wire:model.blur="vin" class="block w-full uppercase font-mono"
                                   maxlength="17" autocapitalize="characters" autocomplete="off" required />
                     <x-input-error :messages="$errors->get('vin')" />
+                    @include('livewire.vehiculos.partials.aviso-vin-repetido', ['repetido' => $vinRepetido])
                 </div>
             </div>
         </div>

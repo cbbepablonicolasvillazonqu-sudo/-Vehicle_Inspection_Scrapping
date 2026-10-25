@@ -9,8 +9,9 @@
         <form wire:submit="guardarVin" class="mt-4 flex flex-wrap items-end gap-3">
             <div class="flex-1 min-w-[200px]">
                 <x-input-label for="vin-ficha" :value="__('VIN (17 caracteres)')" />
+                {{-- .blur: el aviso de VIN repetido aparece al salir del campo, antes de guardar. --}}
                 <x-text-input id="vin-ficha" type="text" maxlength="17" class="block w-full uppercase font-mono"
-                              wire:model="vin" placeholder="1HGBH41JXMN109186" />
+                              wire:model.blur="vin" placeholder="1HGBH41JXMN109186" />
             </div>
             <button type="submit" class="btn-primario btn-sm" wire:loading.attr="disabled" wire:target="guardarVin">
                 <x-icono nombre="check" clase="w-4 h-4" /> {{ __('Guardar VIN') }}
@@ -18,6 +19,9 @@
             <x-input-error :messages="$errors->get('vin')" class="w-full" />
         </form>
     @endif
+
+    {{-- Fuera del @if: quien no puede corregir el VIN igual tiene que saber que está repetido. --}}
+    @include('livewire.vehiculos.partials.aviso-vin-repetido', ['repetido' => $vinRepetido, 'clase' => 'mt-3'])
 
     {{-- Fotos del vehículo. Dos botones a propósito: "Tomar foto" abre la
          cámara trasera directo (capture); el otro, la galería. --}}

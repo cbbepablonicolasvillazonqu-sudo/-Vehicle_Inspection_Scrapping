@@ -11,7 +11,6 @@ use Database\Factories\VehicleFactory;
 use Database\Seeders\RolesYPermisosSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -150,16 +149,11 @@ class FotosYDocumentosTest extends TestCase
     {
         $vendedor = $this->usuarioConRol('vendedor');
         $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Listo)->create();
-        $otro = Vehicle::factory()->create();
-        $borrado = Vehicle::factory()->create();
-        $borrado->delete();
 
+        // Solo el formato: un VIN repetido se acepta con aviso (VinRepetidoTest).
         foreach ([
             '1HGBH41JXMN10918' => '16 caracteres',
             '1HGBH41JXMN1O9186' => 'tiene la letra O',
-            $otro->vin => 'es de otro vehículo',
-            // El arreglo de agosto: un vehículo borrado sigue ocupando su VIN.
-            $borrado->vin => 'es de un vehículo borrado',
         ] as $vin => $motivo) {
             $this->gestor($vendedor, $vehiculo)
                 ->set('vin', $vin)
@@ -168,24 +162,6 @@ class FotosYDocumentosTest extends TestCase
 
             $this->assertNotSame($vin, $vehiculo->fresh()->vin, "Se aceptó un VIN que {$motivo}");
         }
-    }
-
-    /**
-     * La regla en sí, sin la red de seguridad. La prueba de arriba pasaría
-     * igual si alguien volviera a poner withoutTrashed(): el choque contra la
-     * base terminaría en el mismo mensaje. Esta fija que la regla no se rompa.
-     */
-    public function test_la_regla_del_vin_cuenta_los_vehiculos_borrados(): void
-    {
-        $borrado = Vehicle::factory()->create();
-        $borrado->delete();
-
-        $validador = \Illuminate\Support\Facades\Validator::make(
-            ['vin' => $borrado->vin],
-            ['vin' => Vehicle::reglasVin()],
-        );
-
-        $this->assertTrue($validador->fails(), 'La regla dejó pasar el VIN de un vehículo borrado.');
     }
 
     public function test_el_cambio_de_vin_queda_en_la_auditoria(): void
@@ -205,33 +181,6 @@ class FotosYDocumentosTest extends TestCase
 
         $this->assertSame($gruero->id, $registro->user_id);
         $this->assertSame(['antes' => $anterior, 'despues' => $nuevo], $registro->detalles['cambios']['vin']);
-    }
-
-    public function test_una_carrera_por_el_mismo_vin_no_devuelve_un_500(): void
-    {
-        $vendedor = $this->usuarioConRol('vendedor');
-        $vehiculo = Vehicle::factory()->enEstado(EstadoVehiculo::Listo)->create();
-        $vin = VehicleFactory::vinAleatorio();
-
-        // Otra persona guarda el mismo VIN justo entre la validación y el UPDATE.
-        $yaCorrio = false;
-        Vehicle::updating(function () use (&$yaCorrio, $vin) {
-            if ($yaCorrio) {
-                return;
-            }
-
-            $yaCorrio = true;
-
-            DB::table('vehicles')->insert([
-                'marca' => 'Otro', 'modelo' => 'Usuario', 'anio' => 2015, 'vin' => $vin,
-                'estado' => 'comprado', 'created_at' => now(), 'updated_at' => now(),
-            ]);
-        });
-
-        $this->gestor($vendedor, $vehiculo)
-            ->set('vin', $vin)
-            ->call('guardarVin')
-            ->assertHasErrors(['vin' => [__('validation.custom.vin.unique')]]);
     }
 
     /* ------------------------------- Archivos ------------------------------ */
