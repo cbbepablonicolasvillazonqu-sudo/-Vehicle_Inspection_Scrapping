@@ -128,6 +128,80 @@ class BuscadorTest extends TestCase
             ->assertDontSee('Civic');
     }
 
+    /**
+     * Publicado se muestra como "Vendido", igual que Vendido. Con una opción
+     * por estado, el desplegable del filtro mostraba "Vendido" dos veces.
+     */
+    public function test_el_filtro_de_estado_muestra_vendido_una_sola_vez(): void
+    {
+        foreach (['es' => 'Vendido', 'en' => 'Sold'] as $idioma => $etiqueta) {
+            $usuario = User::factory()->create(['locale' => $idioma])->assignRole('admin');
+
+            $html = $this->actingAs($usuario)->get('/vehiculos')->assertOk()->getContent();
+
+            $this->assertSame(1, substr_count($html, ">{$etiqueta}</option>"), "Idioma: {$idioma}");
+            $this->assertStringNotContainsString('<option value="publicado"', $html);
+        }
+    }
+
+    public function test_el_filtro_vendido_trae_tambien_los_publicados(): void
+    {
+        $this->vehiculo('Honda', 'Civic', 2019, EstadoVehiculo::Publicado);
+        $this->vehiculo('Toyota', 'Corolla', 2014, EstadoVehiculo::Vendido);
+        $this->vehiculo('Ford', 'Focus', 2006, EstadoVehiculo::Listo);
+
+        Livewire::actingAs(User::factory()->create()->assignRole('admin'))
+            ->test(ListaVehiculos::class)
+            ->set('filtroEstado', EstadoVehiculo::Vendido->value)
+            ->assertSee('Civic')
+            ->assertSee('Corolla')
+            ->assertDontSee('Focus');
+    }
+
+    /**
+     * La tarjeta del panel y los enlaces viejos llegan con ?estado=publicado.
+     * Esa opción ya no existe: el desplegable tiene que mostrar el filtro que
+     * se aplicó, no "Todos los estados" con la lista filtrada.
+     */
+    public function test_un_enlace_con_estado_publicado_abre_el_filtro_vendido(): void
+    {
+        $this->vehiculo('Honda', 'Civic', 2019, EstadoVehiculo::Publicado);
+        $this->vehiculo('Ford', 'Focus', 2006, EstadoVehiculo::Listo);
+
+        Livewire::withQueryParams(['estado' => EstadoVehiculo::Publicado->value])
+            ->actingAs(User::factory()->create()->assignRole('admin'))
+            ->test(ListaVehiculos::class)
+            ->assertSet('filtroEstado', EstadoVehiculo::Vendido->value)
+            ->assertSee('Civic')
+            ->assertDontSee('Focus');
+    }
+
+    /** El Excel y el CSV salen de la misma consulta que la pantalla. */
+    public function test_la_exportacion_con_filtro_vendido_trae_tambien_los_publicados(): void
+    {
+        $this->vehiculo('Honda', 'Civic', 2019, EstadoVehiculo::Publicado);
+        $this->vehiculo('Toyota', 'Corolla', 2014, EstadoVehiculo::Vendido);
+        $this->vehiculo('Ford', 'Focus', 2006, EstadoVehiculo::Listo);
+
+        $respuesta = $this->actingAs(User::factory()->create()->assignRole('admin'))
+            ->get('/exportar/vehiculos/csv?estado='.EstadoVehiculo::Vendido->value)
+            ->assertOk();
+
+        $lineas = array_map('str_getcsv', preg_split('/\R/', trim($respuesta->baseResponse->getFile()->getContent())));
+        $modelos = array_column(array_slice($lineas, 1), 1);
+        sort($modelos);
+
+        $this->assertSame(['Civic', 'Corolla'], $modelos);
+    }
+
+    public function test_un_estado_desconocido_no_trae_nada(): void
+    {
+        $this->vehiculo('Honda', 'Civic', 2019);
+
+        // Igual que antes: un valor inventado en la URL no puede devolver todo.
+        $this->assertSame([], Vehicle::query()->conEstado('inventado')->pluck('modelo')->all());
+    }
+
     public function test_al_buscar_se_vuelve_a_la_primera_pagina(): void
     {
         Vehicle::factory()->count(20)->create(['marca' => 'Nissan']);

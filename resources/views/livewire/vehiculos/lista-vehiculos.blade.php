@@ -43,8 +43,8 @@
             <div>
                 <select wire:model.live="filtroEstado" class="campo">
                     <option value="">{{ __('Todos los estados') }}</option>
-                    @foreach ($estados as $estado)
-                        <option value="{{ $estado->value }}">{{ $estado->etiqueta() }}</option>
+                    @foreach ($estados as $valor => $etiqueta)
+                        <option value="{{ $valor }}">{{ $etiqueta }}</option>
                     @endforeach
                 </select>
             </div>

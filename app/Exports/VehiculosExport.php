@@ -39,7 +39,7 @@ class VehiculosExport implements FromCollection, ShouldAutoSize, WithCustomValue
         return Vehicle::query()
             ->visiblePara($this->usuario)
             ->buscar($this->busqueda)
-            ->when($this->estado !== '', fn ($q) => $q->where('estado', $this->estado))
+            ->conEstado($this->estado)
             ->withSum('gastos as gastos_total', 'monto')
             ->with(['venta', 'desguace'])
             ->latest()

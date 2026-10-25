@@ -207,6 +207,22 @@ class Vehicle extends Model
     }
 
     /**
+     * Filtro por estado del buscador. Vacío no filtra; "Vendido" trae también
+     * los Publicado, que se muestran con la misma etiqueta.
+     *
+     * Lo usan la lista, la exportación y el envío a Junk car: si cada uno
+     * filtrara por su cuenta, el Excel podría traer otra cosa que la pantalla.
+     */
+    public function scopeConEstado(Builder $query, string $valor): Builder
+    {
+        if ($valor === '') {
+            return $query;
+        }
+
+        return $query->whereIn('estado', EstadoVehiculo::delFiltro($valor));
+    }
+
+    /**
      * Escapa los comodines de LIKE que escriba el usuario.
      * Sin esto, teclear un solo "%" devuelve el inventario completo, que es
      * exactamente lo contrario de filtrar.
