@@ -40,7 +40,15 @@ class ArchivoController extends Controller
     {
         $this->autorizar($request, $foto->vehiculo, $foto->expense_id ? 'registrar gastos' : null);
 
-        return $this->entregar($request, $foto->ruta, $foto->nombre_original);
+        // ?tam=mini: la misma foto, más chica, con los mismos permisos. Si la
+        // miniatura falta en el disco se entrega la foto: mejor pesada que rota.
+        $ruta = $request->query('tam') === 'mini'
+            && filled($foto->ruta_miniatura)
+            && app(ServicioArchivos::class)->discoDe($foto->ruta_miniatura)
+                ? $foto->ruta_miniatura
+                : $foto->ruta;
+
+        return $this->entregar($request, $ruta, $foto->nombre_original);
     }
 
     /** Documento del vehículo: la sección "Fotos, VIN y documentos". */
@@ -102,12 +110,26 @@ class ArchivoController extends Controller
         return $respuesta;
     }
 
-    /** El nombre con que se subió; sin barras, que el encabezado no admite. */
+    /**
+     * El nombre con que se subió, sin barras (el encabezado no las admite) y
+     * con la extensión del archivo que se entrega: la foto subida como
+     * "IMG_1234.jpg" se guarda en WebP, y descargada con .jpg no abriría.
+     */
     private function nombreDescarga(?string $nombre, string $ruta): string
     {
         $nombre = trim(str_replace(['/', '\\'], '-', (string) $nombre));
 
-        return $nombre !== '' ? $nombre : basename($ruta);
+        if ($nombre === '') {
+            return basename($ruta);
+        }
+
+        $extension = strtolower(pathinfo($ruta, PATHINFO_EXTENSION));
+
+        if ($extension !== '' && strtolower(pathinfo($nombre, PATHINFO_EXTENSION)) !== $extension) {
+            $nombre = pathinfo($nombre, PATHINFO_FILENAME).'.'.$extension;
+        }
+
+        return $nombre;
     }
 
     /** Versión ASCII del nombre, para navegadores viejos. */

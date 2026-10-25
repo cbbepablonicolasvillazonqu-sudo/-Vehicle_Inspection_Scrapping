@@ -7,9 +7,9 @@ use App\Enums\UbicacionDestino;
 use App\Livewire\Concerns\ProtegeVinDuplicado;
 use App\Models\Vehicle;
 use App\Models\VehiclePhoto;
-use App\Services\ServicioArchivos;
 use App\Services\ServicioAuditoria;
 use App\Services\ServicioEstadoVehiculo;
+use App\Services\ServicioFotos;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -188,11 +188,9 @@ class FormularioVehiculo extends Component
      */
     private function guardarFoto(Vehicle $vehiculo, $foto, ServicioAuditoria $auditoria): void
     {
-        $ruta = app(ServicioArchivos::class)->guardar($foto, "vehiculos/{$vehiculo->id}/vehiculo");
-
         $nueva = $vehiculo->fotos()->create([
             'etapa' => 'vehiculo',
-            'ruta' => $ruta,
+            ...app(ServicioFotos::class)->guardar($foto, "vehiculos/{$vehiculo->id}/vehiculo"),
             'nombre_original' => $foto->getClientOriginalName(),
             'user_id' => auth()->id(),
         ]);

@@ -95,7 +95,7 @@
                         @if ($urlPrevia || $foto || $fotoActual)
                             <div class="relative w-40 h-28 rounded-xl overflow-hidden bg-slate-100 ring-1 ring-slate-200 shrink-0">
                                 @if ($urlPrevia || (! $foto && $fotoActual))
-                                    <img src="{{ $urlPrevia ?? $fotoActual->url() }}" alt="{{ __('Foto del vehículo') }}"
+                                    <img src="{{ $urlPrevia ?? $fotoActual->urlMiniatura() }}" alt="{{ __('Foto del vehículo') }}"
                                          class="w-full h-full object-cover">
                                 @else
                                     <div class="grid place-items-center w-full h-full text-slate-400 px-2 text-center">

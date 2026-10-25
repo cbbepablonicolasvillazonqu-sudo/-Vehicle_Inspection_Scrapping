@@ -138,8 +138,8 @@
                         <div class="relative group rounded-lg overflow-hidden bg-slate-100 aspect-square ring-1 ring-slate-200"
                              wire:key="foto-{{ $foto->id }}">
                             <a href="{{ $foto->url() }}" target="_blank" rel="noopener">
-                                <img src="{{ $foto->url() }}" alt="{{ $foto->nombre_original ?? __('Foto del gasto') }}"
-                                     loading="lazy" class="w-full h-full object-cover transition group-hover:scale-105">
+                                <img src="{{ $foto->urlMiniatura() }}" alt="{{ $foto->nombre_original ?? __('Foto del gasto') }}"
+                                     loading="lazy" decoding="async" class="w-full h-full object-cover transition group-hover:scale-105">
                             </a>
                             @if (auth()->user()->hasRole('admin') || ($foto->user_id === auth()->id() && $this->puedeSubirFotos()))
                                 <button wire:click="eliminarFoto({{ $foto->id }})"

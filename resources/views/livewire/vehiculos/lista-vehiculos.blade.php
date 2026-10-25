@@ -60,8 +60,8 @@
                     {{-- Miniatura o placeholder --}}
                     <div class="relative w-28 shrink-0 bg-slate-100">
                         @if ($vehiculo->fotoPortada)
-                            <img src="{{ $vehiculo->fotoPortada->url() }}" alt="{{ $vehiculo->nombreCompleto() }}"
-                                 loading="lazy" class="absolute inset-0 w-full h-full object-cover">
+                            <img src="{{ $vehiculo->fotoPortada->urlMiniatura() }}" alt="{{ $vehiculo->nombreCompleto() }}"
+                                 loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover">
                         @else
                             <div class="absolute inset-0 grid place-items-center text-slate-300">
                                 <x-icono nombre="sin-foto" clase="w-9 h-9" />
