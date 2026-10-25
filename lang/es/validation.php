@@ -166,9 +166,7 @@ return [
         'vin' => [
             'size' => 'El VIN debe tener exactamente 17 caracteres.',
             'regex' => 'El VIN solo admite letras (sin I, O ni Q) y números.',
-            // Menciona los eliminados a propósito: el usuario no los ve en
-            // ningún listado, así que un "ya existe" a secas lo deja perdido.
-            'unique' => 'Ese VIN ya está registrado, incluso si el vehículo fue eliminado.',
+            // Sin 'unique': el VIN puede repetirse; las pantallas avisan en vez de bloquear.
         ],
     ],
 

@@ -154,7 +154,6 @@ return [
         'vin' => [
             'size' => 'The VIN must be exactly 17 characters.',
             'regex' => 'The VIN may only contain letters (except I, O, Q) and numbers.',
-            'unique' => 'That VIN is already registered, even if the vehicle was deleted.',
         ],
     ],
 

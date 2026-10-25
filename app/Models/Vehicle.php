@@ -298,21 +298,47 @@ class Vehicle extends Model
     /**
      * Reglas de validación del VIN, en un solo lugar.
      *
-     * Las usan el formulario del Admin y la sección de fotos y documentos de
-     * la ficha. Si cada uno tuviera su copia, el día que se cambiara una la
-     * otra quedaría desactualizada.
+     * Las usan el formulario del Admin, Asignar recojo y la sección de fotos y
+     * documentos de la ficha. Si cada uno tuviera su copia, el día que se
+     * cambiara una las otras quedarían desactualizadas.
      *
-     * Sin withoutTrashed() a propósito: el índice único de la base no sabe de
-     * borrado lógico, así que un vehículo borrado sigue ocupando su VIN.
-     * Ignorar los borrados hacía que la validación dijera "libre" y el INSERT
-     * reventara con un 500.
+     * Solo el formato: el VIN se puede repetir, porque el mismo auto puede
+     * volver a entrar. En vez de bloquear, las pantallas avisan con
+     * conMismoVin().
      */
-    public static function reglasVin(?int $ignorarId = null): array
+    public static function reglasVin(): array
     {
-        return [
-            'required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/',
-            \Illuminate\Validation\Rule::unique('vehicles', 'vin')->ignore($ignorarId),
-        ];
+        return ['required', 'string', 'size:17', 'regex:/^[A-HJ-NPR-Z0-9]{17}$/'];
+    }
+
+    /**
+     * Los otros vehículos que tienen este VIN, para avisar sin bloquear: casi
+     * siempre es un error de tipeo o el mismo auto cargado dos veces.
+     *
+     * Solo se nombran los que el usuario puede ver; de los demás se dice
+     * cuántos son, sin dar datos. Los eliminados no cuentan: no aparecen en
+     * ningún lado y su ficha da 404.
+     *
+     * @return array{visibles: \Illuminate\Support\Collection<int, self>, ocultos: int}
+     */
+    public static function conMismoVin(string $vin, User $usuario, ?int $excepto = null): array
+    {
+        $vin = strtoupper(trim($vin));
+
+        // Con menos de 17 caracteres todavía se está escribiendo.
+        if (strlen($vin) !== 17) {
+            return ['visibles' => collect(), 'ocultos' => 0];
+        }
+
+        $todos = self::query()
+            ->where('vin', $vin)
+            ->when($excepto, fn (Builder $q) => $q->whereKeyNot($excepto))
+            ->oldest('id')
+            ->get();
+
+        $visibles = $todos->filter(fn (self $otro) => $otro->esVisiblePara($usuario))->values();
+
+        return ['visibles' => $visibles, 'ocultos' => $todos->count() - $visibles->count()];
     }
 
     /**

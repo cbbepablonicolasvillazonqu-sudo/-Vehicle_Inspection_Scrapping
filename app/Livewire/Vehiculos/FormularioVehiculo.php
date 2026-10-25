@@ -4,7 +4,6 @@ namespace App\Livewire\Vehiculos;
 
 use App\Enums\EstadoTitulo;
 use App\Enums\UbicacionDestino;
-use App\Livewire\Concerns\ProtegeVinDuplicado;
 use App\Models\Vehicle;
 use App\Models\VehiclePhoto;
 use App\Services\ServicioAuditoria;
@@ -22,7 +21,7 @@ use Livewire\WithFileUploads;
 #[Layout('layouts.app')]
 class FormularioVehiculo extends Component
 {
-    use AuthorizesRequests, ProtegeVinDuplicado, WithFileUploads;
+    use AuthorizesRequests, WithFileUploads;
 
     public ?Vehicle $vehiculo = null;
 
@@ -78,7 +77,7 @@ class FormularioVehiculo extends Component
             'modelo' => ['required', 'string', 'max:60'],
             'anio' => ['required', 'integer', 'between:1950,'.(now()->year + 1)],
             // Compartidas con la ficha; ver Vehicle::reglasVin().
-            'vin' => Vehicle::reglasVin($this->vehiculo?->id),
+            'vin' => Vehicle::reglasVin(),
             'millas' => ['required', 'integer', 'min:0', 'max:2000000'],
             'precio_compra' => ['required', 'numeric', 'min:0', 'max:9999999'],
             'fecha_compra' => ['required', 'date', 'before_or_equal:today'],
@@ -148,7 +147,7 @@ class FormularioVehiculo extends Component
                 ];
             }
 
-            $this->sinChocarConElVin(fn () => $this->vehiculo->save());
+            $this->vehiculo->save();
 
             if ($cambios !== []) {
                 $auditoria->registrar($this->vehiculo, 'vehiculo_editado', ['cambios' => $cambios]);
@@ -161,10 +160,10 @@ class FormularioVehiculo extends Component
             return $this->redirectRoute('vehiculos.ficha', $this->vehiculo, navigate: false);
         }
 
-        $vehiculo = $this->sinChocarConElVin(fn () => Vehicle::create($datos + [
+        $vehiculo = Vehicle::create($datos + [
             'created_by' => auth()->id(),
             'estado' => \App\Enums\EstadoVehiculo::Comprado,
-        ]));
+        ]);
 
         app(ServicioEstadoVehiculo::class)->registrarEstadoInicial(auth()->user(), $vehiculo);
         $auditoria->registrar($vehiculo, 'vehiculo_creado', ['vin' => $vehiculo->vin]);
@@ -221,6 +220,7 @@ class FormularioVehiculo extends Component
             'ubicaciones' => UbicacionDestino::opciones(),
             'titulos' => EstadoTitulo::opciones(),
             'fotoActual' => $this->fotoActual(),
+            'vinRepetido' => Vehicle::conMismoVin($this->vin, auth()->user(), $this->vehiculo?->id),
         ])->title($this->vehiculo ? 'Editar vehículo' : 'Nuevo vehículo');
     }
 }

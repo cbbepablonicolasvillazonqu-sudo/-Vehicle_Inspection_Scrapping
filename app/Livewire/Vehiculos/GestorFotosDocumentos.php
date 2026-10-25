@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Vehiculos;
 
-use App\Livewire\Concerns\ProtegeVinDuplicado;
 use App\Models\Vehicle;
 use App\Services\ServicioArchivos;
 use App\Services\ServicioAuditoria;
@@ -27,7 +26,7 @@ use Livewire\WithFileUploads;
  */
 class GestorFotosDocumentos extends Component
 {
-    use ProtegeVinDuplicado, WithFileUploads;
+    use WithFileUploads;
 
     public Vehicle $vehiculo;
 
@@ -140,7 +139,7 @@ class GestorFotosDocumentos extends Component
         abort_unless($this->puedeModificar(), 403);
 
         $this->vin = strtoupper(trim($this->vin));
-        $this->validate(['vin' => Vehicle::reglasVin($this->vehiculo->id)]);
+        $this->validate(['vin' => Vehicle::reglasVin()]);
 
         $anterior = $this->vehiculo->vin;
 
@@ -149,7 +148,7 @@ class GestorFotosDocumentos extends Component
         }
 
         $this->vehiculo->vin = $this->vin;
-        $this->sinChocarConElVin(fn () => $this->vehiculo->save());
+        $this->vehiculo->save();
 
         app(ServicioAuditoria::class)->registrar($this->vehiculo, 'vehiculo_editado', [
             'cambios' => ['vin' => ['antes' => $anterior, 'despues' => $this->vin]],
@@ -278,6 +277,7 @@ class GestorFotosDocumentos extends Component
             'galeria' => $this->vehiculo->fotosVehiculo()->with('usuario')->orderBy('id')->get(),
             'portadaId' => $this->vehiculo->fotoPortada()->first()?->id,
             'archivos' => $this->vehiculo->documentos()->with('usuario')->latest('id')->get(),
+            'vinRepetido' => Vehicle::conMismoVin($this->vin, auth()->user(), $this->vehiculo->id),
         ]);
     }
 }
