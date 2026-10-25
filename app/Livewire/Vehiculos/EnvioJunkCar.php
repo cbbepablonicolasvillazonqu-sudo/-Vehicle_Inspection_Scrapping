@@ -56,7 +56,7 @@ class EnvioJunkCar extends Component
         return Vehicle::query()
             ->visiblePara(auth()->user())
             ->buscar($this->buscar)
-            ->when($this->estado !== '', fn ($q) => $q->where('estado', $this->estado))
+            ->conEstado($this->estado)
             ->whereNotIn('estado', [EstadoVehiculo::Vendido, EstadoVehiculo::Desguace])
             ->latest();
     }

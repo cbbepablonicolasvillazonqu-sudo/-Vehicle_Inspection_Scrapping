@@ -33,6 +33,13 @@ class ListaVehiculos extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', Vehicle::class);
+
+        // La tarjeta del panel y los enlaces viejos llegan con ?estado=publicado,
+        // que ya no es una opción del filtro: sin esto el desplegable diría
+        // "Todos los estados" con la lista filtrada.
+        if ($this->filtroEstado === EstadoVehiculo::Publicado->value) {
+            $this->filtroEstado = EstadoVehiculo::Vendido->value;
+        }
     }
 
     public function updatedBusqueda(): void
@@ -50,7 +57,7 @@ class ListaVehiculos extends Component
         $vehiculos = Vehicle::query()
             ->visiblePara(auth()->user())
             ->buscar($this->busqueda)
-            ->when($this->filtroEstado !== '', fn ($q) => $q->where('estado', $this->filtroEstado))
+            ->conEstado($this->filtroEstado)
             ->withCount('fotos')
             ->with('fotoPortada')
             ->latest()
@@ -58,7 +65,7 @@ class ListaVehiculos extends Component
 
         return view('livewire.vehiculos.lista-vehiculos', [
             'vehiculos' => $vehiculos,
-            'estados' => EstadoVehiculo::cases(),
+            'estados' => EstadoVehiculo::opcionesFiltro(),
         ]);
     }
 }

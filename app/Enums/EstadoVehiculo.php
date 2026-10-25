@@ -97,4 +97,39 @@ enum EstadoVehiculo: string
             ->mapWithKeys(fn (self $estado) => [$estado->value => $estado->etiqueta()])
             ->all();
     }
+
+    /**
+     * Opciones del filtro por estado: valor => etiqueta.
+     *
+     * Publicado y Vendido se muestran los dos como "Vendido", así que en el
+     * filtro van juntos bajo una sola opción. Con una opción por estado, el
+     * desplegable mostraba "Vendido" dos veces y no había forma de saber cuál
+     * era cuál.
+     *
+     * @return array<string, string>
+     */
+    public static function opcionesFiltro(): array
+    {
+        return collect(self::cases())
+            ->reject(fn (self $estado) => $estado === self::Publicado)
+            ->mapWithKeys(fn (self $estado) => [$estado->value => $estado->etiqueta()])
+            ->all();
+    }
+
+    /**
+     * Estados que trae una opción del filtro: "Vendido" trae también los
+     * Publicado (ver opcionesFiltro). Un valor desconocido no trae ninguno.
+     *
+     * @return list<self>
+     */
+    public static function delFiltro(string $valor): array
+    {
+        $estado = self::tryFrom($valor);
+
+        return match ($estado) {
+            null => [],
+            self::Publicado, self::Vendido => [self::Publicado, self::Vendido],
+            default => [$estado],
+        };
+    }
 }
